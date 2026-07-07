@@ -1,7 +1,7 @@
 {
-  "name": "skeleton-align",
+  "name": "motionbricks-practical",
   "version": "0.1.0",
-  "description": "Rig-agnostic humanoid animation pipeline (align → bake → integrate): canonical role resolution, two-skeleton position-based retargeting, and a probe-pose certification battery with absolute gates and round-trip metrics",
+  "description": "Practical game-animation pipeline on top of NVIDIA MotionBricks (align → bake → integrate): rig certification with absolute gates, keyframe-driven motion generation with QA gates, and engine-agnostic runtime integration",
   "type": "module",
   "main": "align.js",
   "exports": {
@@ -11,7 +11,7 @@
     "./glbskel": "./glbskel.mjs"
   },
   "bin": {
-    "skeleton-align-certify": "./certify.mjs"
+    "motionbricks-certify": "./certify.mjs"
   },
   "scripts": {
     "test": "node selftest.mjs"
@@ -23,7 +23,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/htdt/skeleton-align.git"
+    "url": "https://github.com/htdt/motionbricks-practical.git"
   },
   "files": [
     "align.js",

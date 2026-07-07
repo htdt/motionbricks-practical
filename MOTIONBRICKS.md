@@ -74,9 +74,9 @@ The generation tools run **from inside** `GR00T-WholeBodyControl/motionbricks/`
 checkpoint/asset paths). Copy them in:
 
 ```bash
-git clone https://github.com/htdt/skeleton-align.git
-cp skeleton-align/motionbricks/*.py \
-   skeleton-align/motionbricks/*.json \
+git clone https://github.com/htdt/motionbricks-practical.git
+cp motionbricks-practical/motionbricks/*.py \
+   motionbricks-practical/motionbricks/*.json \
    GR00T-WholeBodyControl/motionbricks/
 ```
 

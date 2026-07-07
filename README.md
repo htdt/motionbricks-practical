@@ -1,8 +1,9 @@
-# skeleton-align — animate any humanoid character, in any engine
+# motionbricks-practical — MotionBricks → game animations, end to end
 
-A manual (plus the alignment scripts it is built around) for implementing
-character animation as a **bake pipeline**: motion is authored or generated
-once on a canonical skeleton, quality-gated, retargeted onto a **certified**
+A practical extension of [NVIDIA MotionBricks](https://nvlabs.github.io/motionbricks/):
+the manual and tooling for turning its generated motion into shipped game
+animations for **any humanoid character, in any engine**. Motion is generated
+once on the canonical skeleton, quality-gated, retargeted onto a **certified**
 character rig, and shipped as ordinary baked clips. The game runtime contains
 zero neural code and zero hand-tuned motion constants.
 
