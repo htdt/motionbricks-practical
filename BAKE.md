@@ -124,6 +124,9 @@ knockback), heading change `turn` in degrees. Move-level `loop: true` means
 Move-level fields for the world-space gates (§4): `"min_airborne": 6` rejects
 any seed without at least that many consecutive frames of BOTH ankles above
 `"airborne_z"` (default 0.12 m) — this is how a jump is made to actually fly.
+`"trim": [A, B]` cuts the baked clip to that frame range (§5) — a messy
+recovery segment is dropped the same way on every rebake instead of by a
+hand edit that goes stale.
 
 ### 3a. Declarative post-generation edits
 
@@ -219,7 +222,16 @@ than debugging through the retargeter.
 
 Canonicalize (§1), compute per-clip metadata, write clips + `manifest.json`
 (`bake_moves.py` — output goes straight into `certify.mjs --clips` and the
-Stage 3 runtime).
+Stage 3 runtime). The manifest carries each move's file, frame count, fps,
+`loop` flag (from the spec) and frame data — runtimes and the pre-bake tool
+consume it as-is and never re-derive which clips loop.
+
+Trim at bake time, declaratively: the spec's `"trim": [A, B]` (§3) or
+`bake_moves.py --trim move=A:B` keeps that half-open frame range (blank/null
+end = to the clip's end). The cut happens BEFORE canonicalization — frame 0
+of the trimmed clip is the canonical origin — and startup/active/recovery
+shift with it. The field lesson behind this: hand-editing a baked JSON plus
+the manifest is redone (and half-forgotten) on every rebake.
 Keep the baked clips character-agnostic; retargeting happens at load/run time
 through the certified retargeter (or, equivalently, pre-bake per-character
 engine-native clips — glTF animations, engine `AnimationClip`s — by running
