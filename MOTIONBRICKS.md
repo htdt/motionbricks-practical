@@ -184,9 +184,30 @@ and BAKE.md §2d.
 
 **New moves** (BAKE.md §3): add entries to your spec JSON. `"type":
 "keyframes"` chains library poses (`tokens` = chunk length in 4-frame tokens,
-6–16; `dxy` = root displacement in meters, forward/left; always bookend with
-`stance`). `"type": "mode"` rolls out a native locomotion skill — run
-`probe_api.py` to list available modes (`walk`, `run`, styles).
+6–16; `dxy` = root displacement in meters, forward/left; bookend every move
+in one shared contact pose — BAKE.md §3). `"type": "mode"` rolls out a native
+clip-holder skill — the mode list is **checkpoint-dependent**, and
+`probe_api.py` (its `CLIPS:` line) is the source of truth. The shipped
+checkpoint carries walk variants only (`idle`, `slow_walk`, `walk`,
+`walk_left/right`, stealth/injured/zombie/... walks) — there is **no `run`
+mode**.
+
+**Missing locomotion verbs** (a run cycle, a sprint) are generated as
+keyframe moves from mined poses instead — the recipe that produced a genuine
+2.9 m/s run cycle in the field: mine the two contact poses of a LAFAN1 sprint
+(`sprint1_subject2.csv`), then chain them with per-step displacement matching
+the real stride:
+
+```jsonc
+{"name": "run_loop", "type": "keyframes", "start": "run_A", "loop": true,
+ "steps": [{"pose": "run_B", "tokens": 6, "dxy": [1.6, 0.0]},
+           {"pose": "run_A", "tokens": 6, "dxy": [1.6, 0.0]},
+           {"pose": "run_B", "tokens": 6, "dxy": [1.6, 0.0]},
+           {"pose": "run_A", "tokens": 6, "dxy": [1.6, 0.0]}]}
+```
+
+`dxy` is what sets the true speed (1.6 m per 6-token step ≈ 2.9 m/s at
+30 fps) — the prior alone will not run; it needs the keyframes to pull it.
 
 **Different canonical skeleton entirely**: everything in ALIGN.md/BAKE.md/
 INTEGRATE.md is stated as data contracts, so another source works — but you

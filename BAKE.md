@@ -108,7 +108,7 @@ reference). Two move types:
    "steps": [                      // each step = one generation chunk
      {"pose": "crouch_deep", "tokens": 6},   // chunk length in 4-frame tokens
      {"pose": "strike_rising", "tokens": 6},
-     {"pose": "stance", "tokens": 6}         // ALWAYS return to stance
+     {"pose": "stance", "tokens": 6}         // ALWAYS return to the bookend pose
    ]},
   // native-skill rollout (locomotion — the model's own prior is the source)
   {"name": "walk_fwd", "type": "mode", "mode": "walk", "dir": "fwd",
@@ -163,9 +163,13 @@ is still a pose-library edit and a regenerate (§7).
 
 Design rules that survived a full move-set in production:
 
-- **Bookend every move with the same stance pose.** Start from it, end on it.
+- **Bookend every move with the same pose.** Start from it, end on it.
   This is what lets clips chain and crossfade in-game with a single short
-  blend.
+  blend. *Which* pose is arbitrary — pick your game's natural contact pose,
+  not this repo's `stance` (a fighting stance, right for the combat starter
+  set only). The field endless-runner bookended every move in a mined
+  run-contact pose (`run_A`) and chained/crossfaded cleanly; set it per move
+  with `"start"` and end the step list on it.
 - **One action per step.** `stance → kick → stance`, never
   `stance → kick_and_recover`. Use an intermediate held pose (a deep crouch
   inside an uppercut) to shape the path.

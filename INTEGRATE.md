@@ -123,8 +123,9 @@ States = clip names. Three shapes cover everything:
 **Crossfade** on every state change: snapshot all bone local quaternions +
 hips position, then for ~5 frames blend snapshot → newly-applied pose with
 smoothstep (`slerpQuaternions`). Because every clip bookends in the same
-stance (BAKE.md rule), ~5 frames is enough *everywhere* — walks cut
-mid-stride, hits interrupt attacks, all covered by one mechanism.
+pose (BAKE.md rule — whatever contact pose fits the game), ~5 frames is
+enough *everywhere* — walks cut mid-stride, hits interrupt attacks, all
+covered by one mechanism.
 
 ## 6. Gameplay from frame data — no hand-authored numbers
 
@@ -200,7 +201,7 @@ to engine-native animation assets (glTF animations → `AnimationPlayer` /
 `AnimationClip` / `AnimationGroup`) instead of retargeting at runtime, keep
 the identical entity/state/gameplay layers, and let the engine's animation
 system do the crossfades (e.g. an `AnimationTree` crossfade replaces §5's
-snapshot blend — same ~5-frame duration, same stance-bookend assumption).
+snapshot blend — same ~5-frame duration, same shared-bookend assumption).
 Frame-data JSON and the derived-reach formula port unchanged. The runtime
 cost is identical to hand-authored animation — that is the point of the
 design.
