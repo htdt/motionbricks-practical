@@ -505,8 +505,12 @@ def main():
         if min_air:
             meta["min_airborne"] = min_air
         if move["type"] == "keyframes" and bounds and not move.get("loop"):
+            # contact = the keyframe arrival: the authored apex IS the impact
+            # frame here. Games sync damage/sfx to it, not to active[0]
+            # (BAKE.md §6, INTEGRATE.md §6).
             meta["frame_data"] = {"startup": bounds[1] - 4,
                                   "active": [bounds[1] - 4, bounds[1]],
+                                  "contact": bounds[1],
                                   "recovery": len(best_q) - bounds[1]}
         with open(os.path.join(a.out_dir, f"{name}.json"), "w") as fp:
             json.dump(meta, fp, indent=1)

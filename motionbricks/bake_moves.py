@@ -67,14 +67,18 @@ def parse_trim(pairs):
 
 
 def shift_frame_data(fd, t0, frames):
-    """Re-express startup/active/recovery after dropping t0 head frames and
-    clamping to the trimmed length."""
+    """Re-express frame data after dropping t0 head frames and clamping to
+    the trimmed length. Keys beyond the timing triple (contact, strike_tip,
+    …) pass through — contact shifted like the window it sits in."""
     if not fd:
         return fd
     a0 = max(0, min(frames, fd["active"][0] - t0))
     a1 = max(a0, min(frames, fd["active"][1] - t0))
-    return {"startup": max(0, min(frames, fd["startup"] - t0)),
-            "active": [a0, a1], "recovery": frames - a1}
+    out = {**fd, "startup": max(0, min(frames, fd["startup"] - t0)),
+           "active": [a0, a1], "recovery": frames - a1}
+    if fd.get("contact") is not None:
+        out["contact"] = max(a0, min(a1, fd["contact"] - t0))
+    return out
 
 
 def canonicalize(qpos):
