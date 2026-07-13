@@ -1,7 +1,7 @@
 {
-  "name": "motionbricks-practical",
-  "version": "0.1.0",
-  "description": "Practical game-animation pipeline on top of NVIDIA MotionBricks (align → bake → integrate): rig certification with absolute gates, keyframe-driven motion generation with QA gates, and engine-agnostic runtime integration",
+  "name": "kimodo-practical",
+  "version": "0.2.0",
+  "description": "Practical game-animation pipeline on top of NVIDIA Kimodo (align → bake → integrate): rig certification with absolute gates, text-prompted motion generation with QA gates, and engine-agnostic runtime integration",
   "type": "module",
   "main": "align.js",
   "exports": {
@@ -12,7 +12,7 @@
     "./prebake": "./prebake.mjs"
   },
   "bin": {
-    "motionbricks-certify": "./certify.mjs"
+    "kimodo-certify": "./certify.mjs"
   },
   "scripts": {
     "test": "node selftest.mjs"
@@ -24,7 +24,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/htdt/motionbricks-practical.git"
+    "url": "https://github.com/htdt/kimodo-practical.git"
   },
   "files": [
     "align.js",
@@ -33,12 +33,13 @@
     "glbskel.mjs",
     "certify.mjs",
     "prebake.mjs",
+    "qa_endeffectors.mjs",
     "selftest.mjs",
     "README.md",
     "ALIGN.md",
     "BAKE.md",
-    "MOTIONBRICKS.md",
+    "KIMODO.md",
     "INTEGRATE.md",
-    "motionbricks/"
+    "kimodo/"
   ]
 }

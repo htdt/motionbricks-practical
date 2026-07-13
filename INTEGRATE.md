@@ -75,14 +75,13 @@ knock back by their baked recoil. Movement constants cease to exist as code.
 Clamp the entity to the arena and enforce separation/collision at the entity
 layer — pushing, cornering, and shoving emerge from the same integration.
 
-**Vertical amplification.** If the source prior under-jumps (the G1 robot
-prior does; human-skeleton sources like Kimodo jump for real — leave
-`yLift = 1`), scale the vertical: `rt.yLift = k` multiplies root displacement
-above the source's **rest height** — note, rest height, *not* a lowered
-stance height; computing k from the stance gives ~40% less lift than
-expected. Set it per-clip, only on clips that should be amplified (a victory
-pose also sits above rest height and must not be). A clean way to branch:
-key it off the clip's `srcMap` presence, which identifies the source family.
+**Vertical amplification.** Kimodo clips jump for real — leave `yLift = 1`.
+The knob exists for motion sources whose prior under-jumps: `rt.yLift = k`
+multiplies root displacement above the source's **rest height** — note, rest
+height, *not* a lowered stance height; computing k from the stance gives
+~40% less lift than expected. If ever used, set it per-clip, only on clips
+that should be amplified (a victory pose also sits above rest height and
+must not be).
 
 ## 4. Playback speed & the continuity-guard trap
 

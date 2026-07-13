@@ -1,6 +1,6 @@
 """kimogen — MK move-set generation on NVIDIA Kimodo (SOMA skeleton).
 
-Replaces MotionBricks' movegen.py (DESIGN.md Stages C-D): each move is
+The Stage 2 generation step (BAKE.md §3-4): each move is
 text-prompted (combat is in Kimodo's training distribution), optionally
 bookended with a fighting-stance fullbody keyframe constraint at both ends
 (so clips chain/crossfade in-game), generated as a best-of-N batch, and

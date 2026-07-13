@@ -1,17 +1,17 @@
 import * as THREE from 'three';
 import { resolveRig } from './rigmap.js';
-import { Retargeter, buildBoneOrder, G1_SRC } from './retarget.js';
+import { Retargeter, buildBoneOrder, SOMA_SRC } from './retarget.js';
 
 // Skeleton ALIGNMENT & CERTIFICATION (pipeline Stage 1, see ALIGN.md).
 //
 // Aligns two arbitrary humanoid skeletons: a SOURCE described by motion data
-// (per-frame world joint positions + optional world quats — the G1 canonical
-// skeleton from MotionBricks, or any GLB rig sampled through its own animation)
+// (per-frame world joint positions + optional world quats — the SOMA canonical
+// skeleton from Kimodo, or any GLB rig sampled through its own animation)
 // and a TARGET GLB rig resolved by rigmap. The forward map is the position-based
 // Retargeter; this module adds what certification needs on top:
 //
 //  - srcMapFromRig / snapshotMotion: make ANY resolved rig usable as a source,
-//    so alignment is genuinely skeleton↔skeleton, not G1→character only.
+//    so alignment is genuinely skeleton↔skeleton, not SOMA→character only.
 //  - mineProbeFrames: a deterministic probe-pose battery pulled from real clips
 //    (kick apex, crouch, jump top, max reach, max torso twist, rest, …).
 //  - recoverCanonicalPose: the INVERSE map — reconstruct source-skeleton joint
@@ -145,7 +145,7 @@ export function snapshotMotion(orderedBones, poseFrame, numFrames, fps = 30, mod
 // most articulated moments. Returns probe motion data (same shape as clip data,
 // so it feeds a Retargeter directly) + tags. Frame 0 is always the source REST
 // pose (the closest thing to a T-pose probe the source skeleton defines).
-export function mineProbeFrames(clips, srcMap = G1_SRC) {
+export function mineProbeFrames(clips, srcMap = SOMA_SRC) {
   const first = clips[0];
   const idx = {}; first.names.forEach((n, i) => { idx[n] = i; });
   const S = srcMap;

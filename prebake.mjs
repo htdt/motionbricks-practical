@@ -20,7 +20,7 @@ import { pathToFileURL } from 'node:url';
 import { NodeIO } from '@gltf-transform/core';
 import { loadGLBBones } from './glbskel.mjs';
 import { rigFromBones, resetBindPose } from './align.js';
-import { Retargeter, G1_SRC } from './retarget.js';
+import { Retargeter, SOMA_SRC } from './retarget.js';
 
 export async function prebake({ glb, manifest, out, rootmotion, ylift = {}, log = console.log }) {
   const outPath = out ?? glb.replace(/\.glb$/, '_anim.glb');
@@ -42,7 +42,7 @@ export async function prebake({ glb, manifest, out, rootmotion, ylift = {}, log 
     const name = mv.name ?? mv.move;
     const file = mv.file ?? `${name}.json`;
     const data = JSON.parse(fs.readFileSync(path.join(bakedDir, file), 'utf8'));
-    const srcMap = data.srcMap ?? G1_SRC;
+    const srcMap = data.srcMap ?? SOMA_SRC;
     const N = data.numFrames ?? data.pos.length;
     const fps = data.fps ?? 30;
 

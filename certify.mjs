@@ -3,7 +3,7 @@
 // Clips are motion JSONs in the format documented in ALIGN.md; probe poses are
 // mined from them deterministically. The source role map is taken from
 // --srcmap, else from a `srcMap` field on the first clip, else defaults to the
-// Unitree G1 skeleton (G1_SRC). Writes <char.glb>.retarget_certificate.json
+// SOMA skeleton (SOMA_SRC). Writes <char.glb>.retarget_certificate.json
 // next to the GLB unless --out is given.
 // Exit code 0 = certified, 1 = gate failure, 2 = rig resolution failure.
 import fs from 'node:fs';

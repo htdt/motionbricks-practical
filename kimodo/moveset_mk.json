@@ -1,70 +1,163 @@
 {
-  "comment": "MK move-set spec for Kimodo-SOMA-RP-v1.1 (replaces motionbricks/moves_mk.json). Combat is in Kimodo's training distribution, so moves are text-prompted; 'stance_bookend' moves get fullbody keyframe constraints at both ends once out/stance_pose.json exists (extracted from idle_stance). travel: expected net root X after canonicalization — 'fwd'/'back' gated on sign, 'in_place' on magnitude, null = don't gate.",
-  "fps": 30,
-  "moves": [
-    {"name": "idle_stance", "prompt": "A person stands in a fighting stance with fists raised, shifting their weight lightly, ready to fight.",
-     "duration": 4.0, "loop": true, "travel": "in_place"},
-
-    {"name": "walk_fwd", "prompt": "A person in a fighting stance with fists raised walks forward cautiously toward their opponent.",
-     "duration": 4.0, "loop": true, "travel": "fwd"},
-
-    {"name": "walk_back", "prompt": "A person in a fighting stance with fists raised carefully steps backward away from their opponent.",
-     "duration": 4.0, "loop": true, "travel": "back"},
-
-    {"name": "jump_up", "prompt": "A person crouches down and jumps straight up into the air, then lands on their feet.",
-     "duration": 2.5, "travel": "in_place", "stance_bookend": true,
-     "apex": {"kind": "root_rise", "min": 0.25}},
-
-    {"name": "crouch", "prompt": "A person in a fighting stance crouches down low into a defensive squat, holds it, then stands back up into the fighting stance.",
-     "duration": 3.0, "travel": "in_place", "stance_bookend": true,
-     "apex": {"kind": "root_dip", "min": 0.25}},
-
-    {"name": "block_high", "prompt": "A person in a fighting stance raises both forearms up in front of their face to block an incoming attack, holds the guard, then lowers back to the fighting stance.",
-     "duration": 2.5, "travel": "in_place", "stance_bookend": true},
-
-    {"name": "jab", "prompt": "A person in a fighting stance throws one quick sharp jab punch, then snaps back to the fighting stance.",
-     "duration": 2.0, "travel": "in_place", "stance_bookend": true,
-     "strike": "hand", "height": "high"},
-
-    {"name": "punch_heavy", "prompt": "A person throws a single powerful cross punch, stepping into it with their whole body, then returns to the fighting stance.",
-     "duration": 2.5, "travel": null, "stance_bookend": true,
-     "strike": "hand", "height": "mid"},
-
-    {"name": "uppercut", "prompt": "A person in a fighting stance dips down and throws a rising uppercut punch, then returns to the fighting stance.",
-     "duration": 2.5, "travel": "in_place", "stance_bookend": true,
-     "strike": "hand", "height": "high"},
-
-    {"name": "kick_front", "prompt": "A person in a fighting stance throws a quick front kick with their leg, then returns to the fighting stance.",
-     "duration": 2.5, "travel": "in_place", "stance_bookend": true,
-     "strike": "foot", "height": "mid",
-     "apex": {"kind": "ankle_height", "min": 0.7}},
-
-    {"name": "kick_high", "prompt": "A person in a fighting stance throws a high roundhouse kick at head height, then returns to the fighting stance.",
-     "duration": 2.5, "travel": "in_place", "stance_bookend": true,
-     "strike": "foot", "height": "high",
-     "apex": {"kind": "ankle_height", "min": 1.1}},
-
-    {"name": "kick_side", "prompt": "A person in a fighting stance throws a powerful side kick, driving their heel into the opponent, then returns to the fighting stance.",
-     "duration": 2.5, "travel": null, "stance_bookend": true,
-     "strike": "foot", "height": "mid",
-     "apex": {"kind": "ankle_height", "min": 0.7}},
-
-    {"name": "sweep", "prompt": "A person in a fighting stance crouches down and performs a low spinning leg sweep along the ground, then rises back into the fighting stance.",
-     "duration": 3.0, "travel": "in_place", "stance_bookend": true,
-     "strike": "foot", "height": "low",
-     "apex": {"kind": "root_dip", "min": 0.2}},
-
-    {"name": "hit_head", "prompt": "A person gets punched in the face, their head snapping back as they stagger a step backward, then they recover into a fighting stance.",
-     "duration": 2.0, "travel": "back"},
-
-    {"name": "hit_heavy", "prompt": "A person gets hit hard in the body, doubling over and stumbling backward, then recovers into a fighting stance.",
-     "duration": 2.5, "travel": "back"},
-
-    {"name": "knockdown", "prompt": "A person gets knocked down and falls backward flat onto the ground, then rolls over and gets back up onto their feet into a fighting stance.",
-     "duration": 4.5, "travel": "back",
-     "apex": {"kind": "root_floor", "max": 0.35}},
-
-    {"name": "victory", "prompt": "A person raises both fists over their head and celebrates a triumphant victory, flexing with pride.",
-     "duration": 3.0, "travel": "in_place"}
-  ]
+ "comment": "MK move-set spec for Kimodo-SOMA-RP-v1.1. Combat is in Kimodo's training distribution, so moves are text-prompted; 'stance_bookend' moves get fullbody keyframe constraints at both ends once out/stance_pose.json exists (extracted from idle_stance). travel: expected net root X after canonicalization \u2014 'fwd'/'back' gated on sign, 'in_place' on magnitude, null = don't gate.",
+ "fps": 30,
+ "moves": [
+  {
+   "name": "idle_stance",
+   "prompt": "A person stands in a fighting stance with fists raised, shifting their weight lightly, ready to fight.",
+   "duration": 4.0,
+   "loop": true,
+   "travel": "in_place"
+  },
+  {
+   "name": "walk_fwd",
+   "prompt": "A person in a fighting stance with fists raised walks forward cautiously toward their opponent.",
+   "duration": 4.0,
+   "loop": true,
+   "travel": "fwd"
+  },
+  {
+   "name": "walk_back",
+   "prompt": "A person in a fighting stance with fists raised carefully steps backward away from their opponent.",
+   "duration": 4.0,
+   "loop": true,
+   "travel": "back"
+  },
+  {
+   "name": "jump_up",
+   "prompt": "A person crouches down and jumps straight up into the air, then lands on their feet.",
+   "duration": 2.5,
+   "travel": "in_place",
+   "stance_bookend": true,
+   "apex": {
+    "kind": "root_rise",
+    "min": 0.25
+   }
+  },
+  {
+   "name": "crouch",
+   "prompt": "A person in a fighting stance crouches down low into a defensive squat, holds it, then stands back up into the fighting stance.",
+   "duration": 3.0,
+   "travel": "in_place",
+   "stance_bookend": true,
+   "apex": {
+    "kind": "root_dip",
+    "min": 0.25
+   }
+  },
+  {
+   "name": "block_high",
+   "prompt": "A person in a fighting stance raises both forearms up in front of their face to block an incoming attack, holds the guard, then lowers back to the fighting stance.",
+   "duration": 2.5,
+   "travel": "in_place",
+   "stance_bookend": true
+  },
+  {
+   "name": "jab",
+   "prompt": "A person in a fighting stance throws one quick sharp jab punch, then snaps back to the fighting stance.",
+   "duration": 2.0,
+   "travel": "in_place",
+   "stance_bookend": true,
+   "strike": "hand",
+   "height": "high"
+  },
+  {
+   "name": "punch_heavy",
+   "prompt": "A person throws a single powerful cross punch, stepping into it with their whole body, then returns to the fighting stance.",
+   "duration": 2.5,
+   "travel": null,
+   "stance_bookend": true,
+   "strike": "hand",
+   "height": "mid"
+  },
+  {
+   "name": "uppercut",
+   "prompt": "A person in a fighting stance dips down and throws a rising uppercut punch, then returns to the fighting stance.",
+   "duration": 2.5,
+   "travel": "in_place",
+   "stance_bookend": true,
+   "strike": "hand",
+   "height": "high"
+  },
+  {
+   "name": "kick_front",
+   "prompt": "A person in a fighting stance throws a quick front kick with their leg, then returns to the fighting stance.",
+   "duration": 2.5,
+   "travel": "in_place",
+   "stance_bookend": true,
+   "strike": "foot",
+   "height": "mid",
+   "apex": {
+    "kind": "ankle_height",
+    "min": 0.7
+   }
+  },
+  {
+   "name": "kick_high",
+   "prompt": "A person in a fighting stance throws a high roundhouse kick at head height, then returns to the fighting stance.",
+   "duration": 2.5,
+   "travel": "in_place",
+   "stance_bookend": true,
+   "strike": "foot",
+   "height": "high",
+   "apex": {
+    "kind": "ankle_height",
+    "min": 1.1
+   }
+  },
+  {
+   "name": "kick_side",
+   "prompt": "A person in a fighting stance throws a powerful side kick, driving their heel into the opponent, then returns to the fighting stance.",
+   "duration": 2.5,
+   "travel": null,
+   "stance_bookend": true,
+   "strike": "foot",
+   "height": "mid",
+   "apex": {
+    "kind": "ankle_height",
+    "min": 0.7
+   }
+  },
+  {
+   "name": "sweep",
+   "prompt": "A person in a fighting stance crouches down and performs a low spinning leg sweep along the ground, then rises back into the fighting stance.",
+   "duration": 3.0,
+   "travel": "in_place",
+   "stance_bookend": true,
+   "strike": "foot",
+   "height": "low",
+   "apex": {
+    "kind": "root_dip",
+    "min": 0.2
+   }
+  },
+  {
+   "name": "hit_head",
+   "prompt": "A person gets punched in the face, their head snapping back as they stagger a step backward, then they recover into a fighting stance.",
+   "duration": 2.0,
+   "travel": "back"
+  },
+  {
+   "name": "hit_heavy",
+   "prompt": "A person gets hit hard in the body, doubling over and stumbling backward, then recovers into a fighting stance.",
+   "duration": 2.5,
+   "travel": "back"
+  },
+  {
+   "name": "knockdown",
+   "prompt": "A person gets knocked down and falls backward flat onto the ground, then rolls over and gets back up onto their feet into a fighting stance.",
+   "duration": 4.5,
+   "travel": "back",
+   "apex": {
+    "kind": "root_floor",
+    "max": 0.35
+   }
+  },
+  {
+   "name": "victory",
+   "prompt": "A person raises both fists over their head and celebrates a triumphant victory, flexing with pride.",
+   "duration": 3.0,
+   "travel": "in_place"
+  }
+ ]
 }

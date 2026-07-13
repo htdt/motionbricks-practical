@@ -3,16 +3,11 @@
 // bind facings, different proportions, one with a 0.01-scaled armature),
 // procedurally animates the source, and runs the full alignment certification
 // source→target, plus a mirrored-map sabotage that must FAIL. A prebake leg
-// (INTEGRATE.md §9) round-trips the target through a generated GLB. Ends with
-// the Stage 2 qpos-ops battery (motionbricks/qposops.py — ground/air gates +
-// post-edit ops, with its own sabotage cases) when a python3 with numpy is on
-// PATH; skipped with a note otherwise.
+// (INTEGRATE.md §9) round-trips the target through a generated GLB.
 // Usage: node selftest.mjs   (needs only node_modules: three + @gltf-transform/core)
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { spawnSync } from 'node:child_process';
-import { fileURLToPath } from 'node:url';
 import * as THREE from 'three';
 import { Document, NodeIO } from '@gltf-transform/core';
 import {
@@ -277,22 +272,6 @@ resetBindPose(tgtT);
       clip.loop === true && clip.frameData?.startup === 10);
   } finally {
     fs.rmSync(dir, { recursive: true, force: true });
-  }
-}
-
-// ------------------------------------------------------------ python leg
-// Stage 2 qpos ops (ground/air gates, post-edit block) are pure numpy and
-// carry their own sabotage battery — run it when the environment allows.
-{
-  const probe = spawnSync('python3', ['-c', 'import numpy'], { stdio: 'ignore' });
-  if (probe.status === 0) {
-    const qposops = fileURLToPath(new URL('./motionbricks/qposops.py', import.meta.url));
-    const r = spawnSync('python3', [qposops], { encoding: 'utf8' });
-    process.stdout.write(r.stdout ?? '');
-    check('python qposops battery (ground/air gates + post ops)', r.status === 0,
-      r.stderr || `exit ${r.status}`);
-  } else {
-    console.log('skip python qposops battery (no python3 with numpy on PATH)');
   }
 }
 

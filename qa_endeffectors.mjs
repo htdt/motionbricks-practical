@@ -3,11 +3,10 @@
 // The Retargeter anchors its full-orientation transfers at the SOURCE REST
 // pose (feet: FULLQ pelvis-relative; hands: ride-the-forearm + rest-anchored
 // wrist delta). That is only correct if the rest pose is semantically neutral
-// — feet FLAT, hands STRAIGHT along the forearm. The G1 rest satisfied this
-// by luck; the SOMA standard T-pose does NOT (toes ~14° down, hands ~18°
-// forward), which shipped as toes-up feet and bent "skewed" fists until this
-// gate existed. bake_kimodo.py now normalizes the rest; this script PROVES
-// it on the character, per clip, headless:
+// — feet FLAT, hands STRAIGHT along the forearm. The SOMA standard T-pose is
+// NOT (toes ~14° down, hands ~18° forward), which shipped as toes-up feet and
+// bent "skewed" fists until this gate existed. bake_kimodo.py now normalizes
+// the rest; this script PROVES it on the character, per clip, headless:
 //
 //   foot pitch  — character toe-segment angle vs horizontal on frames where
 //                 the SOURCE foot is grounded & still (flat by definition).
@@ -72,7 +71,7 @@ const rows = [];
 for (const mv of manifest.moves) {
   const motion = JSON.parse(fs.readFileSync(path.join(movesDir, mv.file), 'utf8'));
   const S = motion.srcMap;
-  if (!S) { console.log(`[skip] ${mv.name}: no srcMap (G1-era clip; source has no hand geometry)`); continue; }
+  if (!S) { console.log(`[skip] ${mv.name}: clip carries no srcMap`); continue; }
   const idx = {}; motion.names.forEach((n, i) => idx[n] = i);
 
   // fresh skeleton state per clip: reset to bind, then construct (constructor

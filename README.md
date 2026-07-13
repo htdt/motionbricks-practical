@@ -1,6 +1,6 @@
-# motionbricks-practical — MotionBricks → game animations, end to end
+# kimodo-practical — Kimodo → game animations, end to end
 
-A practical extension of [NVIDIA MotionBricks](https://nvlabs.github.io/motionbricks/):
+A practical extension of [NVIDIA Kimodo](https://research.nvidia.com/labs/sil/projects/kimodo/):
 the manual and tooling for turning its generated motion into shipped game
 animations for **any humanoid character, in any engine**. Motion is generated
 once on the canonical skeleton, quality-gated, retargeted onto a **certified**
@@ -19,18 +19,19 @@ game from generated motion, but every stage states its contract in plain data
  Stage 1 — ALIGN            Stage 2 — BAKE                Stage 3 — INTEGRATE
  certify the rig            author clips on the           play baked clips:
  (rigmap roles, probe       canonical skeleton:           state machine, root-
- battery, gates,            keyframes → generation →      motion integration,
+ battery, gates,            prompts → generation →        motion integration,
  certificate JSON)          QA gates → best-of-N →        crossfades, frame-data
                             canonicalize + frame data     gameplay, QA harness
         │                          │                              │
-   ALIGN.md                BAKE.md + MOTIONBRICKS.md        INTEGRATE.md
+   ALIGN.md                  BAKE.md + KIMODO.md             INTEGRATE.md
 ```
 
-The motion generator is **NVIDIA MotionBricks**
-(<https://nvlabs.github.io/motionbricks/>) — a keyframe-conditioned motion
-model over the Unitree G1 skeleton, used entirely offline; the model never
-ships with the game. MOTIONBRICKS.md covers download, install, and running
-the generation tools in `motionbricks/` end to end.
+The motion generator is **NVIDIA Kimodo** — a text- and constraint-conditioned
+motion diffusion model over the SOMA human skeleton (77 joints), trained on
+700 hours of studio mocap that explicitly covers videogame combat. It is used
+entirely offline; the model never ships with the game. KIMODO.md covers
+download, install, conventions, and running the generation tools in `kimodo/`
+end to end.
 
 Two principles carry the whole design:
 
@@ -48,8 +49,8 @@ Two principles carry the whole design:
 | File | What it is |
 |---|---|
 | `ALIGN.md` | Stage 1 manual: rig resolution, retargeting, certification battery |
-| `BAKE.md` | Stage 2 manual: pose libraries, move specs, generation gates, baking |
-| `MOTIONBRICKS.md` | Stage 2 setup: download/install/run the MotionBricks generator |
+| `BAKE.md` | Stage 2 manual: move specs, prompts + constraints, generation gates, baking |
+| `KIMODO.md` | Stage 2 setup: download/install/run the Kimodo generator, its conventions and traps |
 | `INTEGRATE.md` | Stage 3 manual: runtime layers, root motion, combat timing, QA |
 | `rigmap.js` | bone → canonical-role resolution for arbitrary humanoid rigs |
 | `retarget.js` | the two-skeleton position-based retargeter |
@@ -59,19 +60,16 @@ Two principles carry the whole design:
 | `prebake.mjs` | Stage 3 pre-bake for non-three.js engines: character GLB + baked manifest → same GLB with one glTF animation per clip + `rootmotion.json` (INTEGRATE.md §9) |
 | `qa_endeffectors.mjs` | end-effector fidelity gates: foot flatness + wrist-bend tracking per baked clip on the character — catches rest-anchor skew ("skewed fists/feet") mechanically |
 | `selftest.mjs` | zero-asset self-test (synthetic rigs, procedural motion, sabotage cases) |
-| `motionbricks/` | Stage 2 generation tools (run inside the MotionBricks checkout): `posekit.py`, `movegen.py`, `bake_moves.py`, starter pose library, example move spec |
-| `KIMODO.md` | Stage 2 setup for the **NVIDIA Kimodo** human-skeleton source (recommended): install, gated-encoder workarounds, conventions, tooling manual |
-| `kimodo/` | Stage 2 tools for the Kimodo source: `kimogen.py` (text-prompted moves + stance bookends + gates), `bake_kimodo.py`, the validated MK move spec, axis validator, text-encoder setup |
+| `kimodo/` | Stage 2 generation tools (run against a Kimodo install): `kimogen.py` (text-prompted moves + stance bookends + gates), `bake_kimodo.py`, the validated MK move spec, axis validator, text-encoder setup |
 
 The JS scripts are the complete Stage 1 implementation and the runtime
-retarget layer used in Stage 3. The Python tools are the complete Stage 2
-implementation for **two motion sources** — NVIDIA Kimodo (`kimodo/`, human
-SOMA skeleton, text-prompted, recommended) and NVIDIA MotionBricks
-(`motionbricks/`, Unitree G1 robot skeleton, keyframe-driven) — both feeding
-the same hourglass waist: clips carry a `srcMap` and the retargeter drives
-any certified rig from either source with no runtime branching. BAKE.md also
-states the plain-data contracts (pose format, gate thresholds, clip format)
-any other motion source would have to meet.
+retarget layer used in Stage 3; the Python tools in `kimodo/` are the complete
+Stage 2 implementation. The pipeline is source-agnostic at its waist: every
+baked clip carries a `srcMap` (canonical role → source joint name) and the
+retargeter drives any certified rig from it with no runtime branching, so a
+different motion source — a mocap library, another text-to-motion model,
+hand-keyed animation — only has to meet the plain-data clip contract stated
+in BAKE.md.
 
 ## Quick start
 
@@ -87,8 +85,8 @@ node certify.mjs character.glb --clips baked/idle_stance.json,baked/walk_fwd.jso
 # → character.glb.retarget_certificate.json, exit 0 = certified
 ```
 
-The clips come from the generator — MOTIONBRICKS.md walks through producing
-the example move set (`baked/*.json` + `manifest.json`) from scratch.
+The clips come from the generator — KIMODO.md walks through producing a full
+move set (`baked/*.json` + `manifest.json`) from scratch.
 
 Retarget any motion source onto any humanoid GLB in the browser:
 
@@ -107,16 +105,15 @@ rt.applyFrame(f);   // pose the rig for frame f, call per render tick
 You were probably sent here to add animated characters to a game. The order
 of work is fixed and each stage gates the next:
 
-1. Pick a motion source and read its manual — **KIMODO.md** (human skeleton,
-   text-prompted; the default choice) or **MOTIONBRICKS.md** (G1 robot
-   skeleton, keyframe-driven). Install it and generate the example move set —
-   you need baked clips before you can certify anything.
+1. Read **KIMODO.md**. Install the generator and produce the example move
+   set — you need baked clips before you can certify anything.
 2. Read **ALIGN.md**. Certify every character rig. If certification fails,
    fix or regenerate the rig — do not proceed with an uncertified character;
    every downstream artifact would be built on a broken mapping.
-3. Read **BAKE.md**. Author the game's move set on the canonical skeleton,
-   gate every generated clip numerically, then look at filmstrips before
-   accepting. Output: canonicalized clips + a manifest + frame data.
+3. Read **BAKE.md**. Author the game's move set (prompts + constraints on the
+   canonical skeleton), gate every generated clip numerically, then look at
+   filmstrips before accepting. Output: canonicalized clips + a manifest +
+   frame data.
 4. Read **INTEGRATE.md**. Wire the clips into the game with the three-layer
    architecture (clip / entity / game). Build the deterministic QA harness
    *before* tuning gameplay — it is what makes the rest debuggable.
@@ -131,10 +128,10 @@ a gate failure as a real defect, not noise.
   neck are optional and degrade gracefully; missing core roles are a hard fail.
 - **Y-up, meters**, feet flat and pointing forward at bind pose. Uniform
   armature scale (0.01-scaled FBX→GLB exports are handled).
-- Verified against Mixamo, Tripo3D, Meshy AI and UE-style rigs, plus the
-  Unitree G1 robot and Kimodo SOMA-77 human skeletons as motion sources
-  (clips carry their source map — `srcMap` — so both play through the same
-  runtime); runs in the browser and node.
+- Verified against Mixamo, Tripo3D, Meshy AI and UE-style rigs, driven from
+  the Kimodo SOMA-77 human skeleton (clips carry their source map — `srcMap` —
+  so any source meeting the clip contract plays through the same runtime);
+  runs in the browser and node.
 
 ## License
 

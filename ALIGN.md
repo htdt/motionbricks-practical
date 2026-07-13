@@ -30,7 +30,7 @@ any motion source (role-keyed positions + quats per frame)
 | File | What it is | Environment |
 |---|---|---|
 | `rigmap.js` | bone → canonical role resolution (Mixamo ± prefix, Tripo, UE, VRoid, Meshy naming; spine-chain walk; full topology fallback for unnamed bones; partial-chain completion) | browser + node |
-| `retarget.js` | the two-skeleton retargeter (`Retargeter`, `loadGLBSkeleton`, `buildBoneOrder`, `G1_SRC`) | browser + node |
+| `retarget.js` | the two-skeleton retargeter (`Retargeter`, `loadGLBSkeleton`, `buildBoneOrder`, `SOMA_SRC`) | browser + node |
 | `align.js` | alignment & certification: probe mining, inverse recovery, gates, calibration, `certifyRig` | browser + node |
 | `glbskel.mjs` | GLB → `THREE.Bone` hierarchy + animation sampler without a browser (gltf-transform) | node only |
 | `certify.mjs` | certification CLI, writes `<char.glb>.retarget_certificate.json` | node only |
@@ -51,7 +51,7 @@ Pick probe clips that cover range of motion — a walk, a kick, a jump, a reach.
 The battery mines its probe poses from whatever clips you give it, so clips
 that never bend a knee can't certify knees. The source role map comes from
 `--srcmap map.json`, or a `srcMap` field on the first clip, or defaults to the
-Unitree G1 skeleton.
+SOMA skeleton.
 
 Retarget in the browser (any humanoid GLB, any motion source):
 
@@ -104,8 +104,8 @@ get true ankle orientation (heel-strike/toe-off) and wrist articulation.
 
 The `srcMap` names which joints play which canonical role
 (`Hips, Chest, L/R UpLeg/Leg/Foot, L/R Arm/ForeArm/Hand`, plus optional
-`*Anchor` roles for the hip/shoulder frame lines). Defaults to the Unitree G1
-(`G1_SRC`); `srcMapFromRig(rig.map)` builds one for any resolved GLB rig.
+`*Anchor` roles for the hip/shoulder frame lines). Defaults to SOMA
+(`SOMA_SRC`); `srcMapFromRig(rig.map)` builds one for any resolved GLB rig.
 
 This format is the pipeline's **hourglass waist**: every motion source
 (generative model, mocap library, another rig's clips) converts into it once,

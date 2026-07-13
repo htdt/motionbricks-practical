@@ -1,30 +1,23 @@
-# Kimodo — installing and running the human-skeleton motion generator
+# Kimodo — installing and running the motion generator
 
-The second motion source this pipeline ships working tooling for — and the
-recommended one since its release — is **NVIDIA Kimodo**
+The pipeline's motion source is **NVIDIA Kimodo**
 (<https://research.nvidia.com/labs/sil/projects/kimodo/>), a text- and
 constraint-conditioned motion diffusion model trained on 700 hours of studio
-mocap (Bones Rigplay). Unlike MotionBricks (MOTIONBRICKS.md), which generates
-on the Unitree G1 *robot* skeleton, Kimodo generates on **SOMA — a full human
-skeleton** (77 joints incl. head, neck, fingers, toes), which removes the G1
-path's structural gaps in one move: no more synthesized head channels, no
-amplitude timidity (`yLift` hacks), no wrist-noise authoring discipline, and
-its training data explicitly covers **videogame combat**.
+mocap (Bones Rigplay), generating on **SOMA — a full human skeleton**
+(77 joints incl. head, neck, fingers, toes). Its training data explicitly
+covers **videogame combat**, locomotion, gestures and dance.
 
 Why it fits the pipeline: generation is *offline*, output is joint positions
-+ rotations on one canonical skeleton, and its constraint system (full-body
-keyframes at arbitrary frames, end-effector targets, 2D root paths) is a
-superset of the keyframe conditioning BAKE.md's design needs. Where the
-MotionBricks flow *requires* mined keyframes (its only steering channel is
-the inbetweening API), Kimodo flips the priority: **text prompts do the
-authoring** ("A person throws a rising uppercut punch, then returns to the
-fighting stance") and keyframe constraints are reserved for what prompts
-can't pin down — e.g. bookending every move with THE stance pose so clips
-chain in-game.
++ rotations on one canonical skeleton, and it is steerable on exactly the two
+channels Stage 2 needs: **text prompts do the authoring** ("A person throws a
+rising uppercut punch, then returns to the fighting stance") and its
+constraint system (full-body keyframes at arbitrary frames, end-effector
+targets, 2D root paths) pins down what prompts can't — e.g. bookending every
+move with THE stance pose so clips chain in-game.
 
-Licensing mirrors MotionBricks: Apache-2.0 code, weights under the NVIDIA
-Open Model License (commercial use OK, outputs are yours). The SMPL-X variant
-is under the more restrictive R&D license — use the SOMA models.
+Licensing: Apache-2.0 code, weights under the NVIDIA Open Model License
+(commercial use OK, outputs are yours). The SMPL-X variant is under the more
+restrictive R&D license — use the SOMA models.
 
 ## 0. Requirements
 
@@ -100,9 +93,8 @@ The output NPZ contains `posed_joints [T,77,3]`, `global_rot_mats
 them on any NPZ): Y-up, ground at y=0, meters, root = `Hips` at ~0.95 m
 standing; heading angle t stored as `[cos t, sin t]` with facing direction
 `(sin t, 0, cos t)` — heading 0 faces **+Z**. Note this is already
-three.js-style axes: no basis conversion at bake time (the G1 path's
-MuJoCo-Z-up shuffle is gone), only a yaw canonicalization to the baked-clip
-convention (forward = +X).
+three.js-style axes: no basis conversion at bake time, only a yaw
+canonicalization to the baked-clip convention (forward = +X).
 
 **The rest-pose trap (cost one shipped defect — read this).** In Kimodo NPZ
 outputs, the T-pose is the zero pose: `global_rot_mats` of *every* joint is
@@ -141,22 +133,21 @@ character forearm twist matches the source exactly (mean ~2°/frame).
 axes, raw mocap wrist channels read poorly on game hands: every twitch,
 roll, and stylistic flex of the performer shows on a fingerless fist mesh as
 a "broken" wrist (the balancing hand during a side kick was the reported
-case). This is the same lesson the G1 pipeline learned (it *authored* wrists
-and discarded model output entirely). The clip JSON carries
-`handFollow` — the retargeter slerps between the hand rigidly riding the
-forearm (0) and the full source wrist (1). `bake_kimodo.py` bakes **0.3**:
-hands stay aligned with the forearm, keeping a hint of wrist life. Authored-
-wrist sources (the G1 set) omit the key and default to full transfer.
+case). The clip JSON carries `handFollow` — the retargeter slerps between
+the hand rigidly riding the forearm (0) and the full source wrist (1).
+`bake_kimodo.py` bakes **0.3**: hands stay aligned with the forearm, keeping
+a hint of wrist life. Authored-wrist sources omit the key and default to
+full transfer.
 
 ## 3. The tooling in `kimodo/` (this repo)
 
-BAKE.md's contract, reimplemented for a text-first generator:
+The Stage 2 implementation (contract and workflow: BAKE.md):
 
 | file | role |
 |---|---|
 | `kimogen.py` | move-set generation: prompt + optional stance-bookend fullbody constraints → best-of-8 → QA gates → NPZ + gate/frame-data JSON per move |
 | `moveset_mk.json` | the validated 17-move Mortal Kombat spec (prompts, travel intents, apex gates, bookend flags) |
-| `bake_kimodo.py` | canonicalized NPZ → browser motion JSON (+`srcMap`) + manifest — the Kimodo `bake_moves.py` |
+| `bake_kimodo.py` | canonicalized NPZ → browser motion JSON (+`srcMap`) + manifest |
 | `validate_axes.py` | prints/verifies the axis & heading conventions on any output NPZ |
 | `setup_text_encoder.py` | builds the local mirror `TEXT_ENCODERS_DIR` (§1a) |
 
@@ -172,35 +163,28 @@ python kimogen.py report          # gate table
 python bake_kimodo.py --web ../web/moves_kimodo
 ```
 
-### What changed vs the MotionBricks flow, stage by stage
+### The stance bookend, mechanically
 
-| BAKE.md stage | MotionBricks (G1) | Kimodo (SOMA) |
-|---|---|---|
-| pose library | mined from LAFAN1→G1 CSVs (`posekit.py`) | one stance pose, extracted from Kimodo's own idle generation |
-| move authoring | keyframe schedule per move (only control channel) | text prompt per move; fullbody keyframes only as bookends |
-| wrists | authored channels, model output discarded | model output used as-is (mocap-clean hands + real fingers) |
-| duration | pinned in 4-frame tokens (24-frame floor) | seconds, free (10 s max per prompt) |
-| cleanup | external contact-lock IK required (teacher skates 0.34 m/s) | built-in post-process (`MotionCorrection`); measured skate 0.003–0.03 m/s |
-| gates | keyframe-hit error, skate, jitter, limits | travel intent, apex (kick height / root rise/dip/floor), stance-match at both ends, skate, jitter |
-| frame data | derived from keyframe-arrival frames | derived from strike-limb tip speed peaks, plus `contact` — the impact frame (max tip extension; sync damage/sfx to it, the active window opens ~5–9 frames before the hit visually lands) |
-
-The stance-bookend trick replaces the G1 flow's "every move starts and ends
-on the stance keyframe" design rule: constrain frames `[0, T-1]` to the
-stance pose (somaskel30 axis-angle + root height, authored in Kimodo's
-native +Z frame), CFG `separated (2.0, 2.0)`. Prompts that end "...then
-returns to the fighting stance" plus the constraint give end poses within
-0.05–0.2 m of the reference — inside a 5-frame crossfade's coverage.
+The bookend constraint (BAKE.md §2) pins frames `[0, T-1]` to the stance
+pose as a fullbody keyframe constraint — somaskel30 axis-angle + root
+height, authored in Kimodo's **native +Z frame** (constraints are applied
+before canonicalization, so a stance extracted from a canonicalized clip
+must be de-rotated back). CFG `separated (2.0, 2.0)`. Prompts that end
+"...then returns to the fighting stance" plus the constraint give end poses
+within 0.05–0.2 m of the reference — inside a 5-frame crossfade's coverage.
+Built-in post-processing (`MotionCorrection`) is what turns near-miss
+constraints into hits; measured foot skate after it: 0.003–0.03 m/s.
 
 ## 4. Retargeting Kimodo output (Stage 1 / Stage 3 hookup)
 
-`retarget.js` ships a `SOMA_SRC` source map (the SOMA-77 joints are
+`retarget.js` ships the `SOMA_SRC` source map (the SOMA-77 joints are
 anatomical, so limb roles are 1:1) and the `Retargeter` accepts the map from
 the clip itself: `bake_kimodo.py` writes `srcMap` into every motion JSON, so
-runtimes don't branch on the source family — a G1 clip and a SOMA clip play
-through the same code. Rest pose comes from the SOMA standard T-pose assets,
-ground-lifted and yawed to face +X like every canonicalized clip. Everything
-in ALIGN.md (certification) and INTEGRATE.md (runtime) applies unchanged;
-`yLift`-style amplitude hacks become no-ops (human clips jump for real).
+runtimes don't branch on the source family — any source meeting the clip
+contract plays through the same code. Rest pose comes from the SOMA standard
+T-pose joint positions, ground-lifted and yawed to face +X like every
+canonicalized clip. Everything in ALIGN.md (certification) and INTEGRATE.md
+(runtime) applies unchanged.
 
 **End-effector fidelity gates** — `qa_endeffectors.mjs <char.glb> <movesDir>
 --gate` retargets every baked clip headless and measures, on the character:

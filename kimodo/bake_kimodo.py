@@ -1,11 +1,10 @@
 """bake_kimodo — export Kimodo move NPZs as browser motion JSONs + manifest.
 
-Kimodo counterpart of motionbricks/bake_moves.py. Clips are already
-canonicalized by kimogen (frame-0 root at origin facing +X) and already Y-up
-(Kimodo == three.js axes, no basis change — the G1 pipeline's mujoco Z-up
-conversion is gone). Each JSON carries `srcMap` (SOMA-77 joint names →
-canonical source roles) so align/retarget.js drives any certified rig from it
-without knowing the source family.
+The Stage 2 bake step (BAKE.md §5). Clips are already canonicalized by
+kimogen (frame-0 root at origin facing +X) and already Y-up (Kimodo ==
+three.js axes, no basis change). Each JSON carries `srcMap` (SOMA-77 joint
+names → canonical source roles) so align/retarget.js drives any certified
+rig from it without knowing the source family.
 
 Usage: kimenv/bin/python bake_kimodo.py [--in out/moves] [--web ../web/moves_kimodo]
 No GPU needed.

@@ -3,11 +3,12 @@ import { resolveRig } from './rigmap.js';
 
 // Position-based, pelvis-relative retargeter — RIG-AGNOSTIC version.
 //
-// Reads the G1 joint WORLD POSITIONS, builds a pelvis frame and a chest frame from
-// positions, and re-applies the motion on the character: limbs are aimed at their child
-// joint; the spine is bent/twisted from the pelvis frame (bottom) to the chest frame
-// (top). Driving from positions means knees/elbows point where the G1's do and cannot
-// invert, and the chest frame (built from the shoulder line) carries the torso twist.
+// Reads the source-skeleton joint WORLD POSITIONS, builds a pelvis frame and a chest
+// frame from positions, and re-applies the motion on the character: limbs are aimed at
+// their child joint; the spine is bent/twisted from the pelvis frame (bottom) to the
+// chest frame (top). Driving from positions means knees/elbows point where the source's
+// do and cannot invert, and the chest frame (built from the shoulder line) carries the
+// torso twist.
 //
 // The character side is addressed through CANONICAL ROLES resolved by rigmap.js
 // (Mixamo with/without prefix, Tripo3D rig specs, topology fallback), so the same
@@ -18,9 +19,9 @@ import { resolveRig } from './rigmap.js';
 //  - limb aims are REBASED on the transferred pelvis (legs) / chest (arms) frame, so the
 //    roll around each bone follows the body and setFromUnitVectors only contributes the
 //    residual swing — hands riding the forearm keep a natural palm facing;
-//  - feet take the G1 ankle body's TRUE orientation (data.quat), transferred
+//  - feet take the source ankle's TRUE orientation (data.quat), transferred
 //    pelvis-relative, giving real heel-strike/toe-off instead of inheriting the shin;
-//  - HANDS take the G1 wrist body's TRUE orientation, transferred chest-relative, then
+//  - HANDS take the source wrist's TRUE orientation, transferred chest-relative, then
 //    CLAMPED to anatomical limits relative to the forearm (twist/swing decomposition) —
 //    fixes the "hand spinning on the wrist" artifact;
 //  - neck/head are damped toward the overall body heading instead of riding chest twist 1:1.
@@ -51,30 +52,18 @@ export async function loadGLBSkeleton(GLTFLoader, url, scene) {
 }
 
 // SOURCE-SKELETON MAP: canonical source roles -> joint names in the motion data.
-// The default is the Unitree G1 (MotionBricks canonical skeleton), preserving the
-// original behavior; align.js builds the same map for any GLB rig via rigmap, which
-// is what makes the retargeter a general two-skeleton aligner.
-// *Anchor roles are frame-building references (may coincide with limb roles on rigs
-// that don't have separate yaw/pitch links):
+// Baked clips carry their own map (data.srcMap); align.js builds the same map for
+// any GLB rig via rigmap, which is what makes the retargeter a general
+// two-skeleton aligner.
+// *Anchor roles are frame-building references (may coincide with limb roles on
+// rigs that don't have separate yaw/pitch links):
 //   Hips/Chest        pelvis + chest frame origins
 //   L/RHipAnchor      the hip line (pelvis frame right axis)
 //   L/RShoulderAnchor the shoulder line (chest frame right axis + origin midpoint)
-// NOTE (G1): thigh/upper-arm segments start at the hip_ROLL / shoulder_ROLL links —
-// the anatomical joint centers (the yaw links sit several cm along the limb).
-export const G1_SRC = {
-  Hips: 'pelvis', Chest: 'torso_link',
-  LeftHipAnchor: 'left_hip_yaw_link', RightHipAnchor: 'right_hip_yaw_link',
-  LeftShoulderAnchor: 'left_shoulder_pitch_link', RightShoulderAnchor: 'right_shoulder_pitch_link',
-  LeftUpLeg: 'left_hip_roll_link', LeftLeg: 'left_knee_link', LeftFoot: 'left_ankle_roll_link',
-  RightUpLeg: 'right_hip_roll_link', RightLeg: 'right_knee_link', RightFoot: 'right_ankle_roll_link',
-  LeftArm: 'left_shoulder_roll_link', LeftForeArm: 'left_elbow_link', LeftHand: 'left_wrist_yaw_link',
-  RightArm: 'right_shoulder_roll_link', RightForeArm: 'right_elbow_link', RightHand: 'right_wrist_yaw_link',
-};
-
-// SOMA source map (NVIDIA Kimodo somaskel77 output — a human skeleton, so the
+//
+// The default is SOMA (NVIDIA Kimodo somaskel77 output — a human skeleton, so the
 // anatomical joint centers ARE the named joints; anchors coincide with limbs
-// and fall back inside the constructor). Baked Kimodo clips carry this map in
-// their JSON (data.srcMap), so players don't need to know the source family.
+// and fall back inside the constructor).
 export const SOMA_SRC = {
   Hips: 'Hips', Chest: 'Chest',
   LeftHipAnchor: 'LeftLeg', RightHipAnchor: 'RightLeg',
@@ -176,10 +165,11 @@ export class Retargeter {
     this.hipsParent = hipsParent ?? this.hips.parent;
     this.data = data;
     this.idx = {}; data.names.forEach((n, i) => this.idx[n] = i);
-    // source-skeleton map (canonical source role -> data joint name); default G1.
-    // Anchor roles fall back to their limb roles when the source has no separate
-    // anchor joints (a GLB-rig source: shoulder line = the Arm joints, etc.).
-    this.S = { ...(srcMap ?? data.srcMap ?? G1_SRC) };
+    // source-skeleton map (canonical source role -> data joint name); baked
+    // clips carry their own (data.srcMap), default SOMA. Anchor roles fall back
+    // to their limb roles when the source has no separate anchor joints
+    // (a GLB-rig source: shoulder line = the Arm joints, etc.).
+    this.S = { ...(srcMap ?? data.srcMap ?? SOMA_SRC) };
     for (const [anchor, fb] of [['LeftHipAnchor', 'LeftUpLeg'], ['RightHipAnchor', 'RightUpLeg'],
       ['LeftShoulderAnchor', 'LeftArm'], ['RightShoulderAnchor', 'RightArm']]) {
       if (!(this.S[anchor] in this.idx)) this.S[anchor] = this.S[fb];
@@ -199,9 +189,9 @@ export class Retargeter {
     this._contPrev = {};
     this._lastF = null;
     this.yLift = 1;                            // extra gain on upward root displacement (jumps)
-    // per-character override of the hand twist/swing limits (deg). The G1 holds its
-    // wrists with a constant bias vs some characters' bind hands, so the transfer can
-    // sit ON the clamp — tightening it per character is how that bias is absorbed.
+    // per-character override of the hand twist/swing limits (deg). A source can
+    // hold its wrists with a constant bias vs some characters' bind hands, so the
+    // transfer can sit ON the clamp — tightening it per character absorbs the bias.
     this.clampLim = {};
     for (const role in CLAMP) this.clampLim[role] = { ...CLAMP[role], ...(handClampDeg ?? {}) };
     this.hasQuat = Array.isArray(data.quat) && Array.isArray(data.restQuat);
@@ -288,7 +278,6 @@ export class Retargeter {
     this.FchestRest = this._srcChestFrame(data.rest);
 
     this.srcHipY = data.rest[this.idx[this.S.Hips]][1] || 0.8;
-    this.g1HipY = this.srcHipY;               // legacy alias
     // root displacement scale: FUNCTIONAL LEG LENGTH ratio (hip→ankle drop at
     // bind), not raw hip-height ratio — with aim-transferred knee angles, the
     // pelvis must drop in proportion to the legs or planted feet sink/float on
@@ -306,7 +295,7 @@ export class Retargeter {
 
     // ground clamp: foot/toe bones with their bind-pose world heights — during
     // animation none of them may sink below its bind height (proportion mismatch
-    // between the G1's legs and the character's puts feet underground otherwise)
+    // between the source's legs and the character's puts feet underground otherwise)
     this.groundBones = [];
     for (const role of ['LeftFoot', 'RightFoot', 'LeftToeBase', 'RightToeBase']) {
       const name = this.R[role];
@@ -315,10 +304,10 @@ export class Retargeter {
     }
     this.groundOffset = 0;
 
-    // root displacement must be re-based from the G1's rest heading onto the
+    // root displacement must be re-based from the source's rest heading onto the
     // character's bind heading (yaw only), like every direction already is —
     // otherwise a character whose bind faces +Z slides 90° off its facing when
-    // driven by the +X-facing G1 (it "moonwalks" sideways).
+    // driven by a +X-facing source (it "moonwalks" sideways).
     const fwdC = new THREE.Vector3(0, 0, 1).applyQuaternion(this.FcBind); fwdC.y = 0; fwdC.normalize();
     const fwdG = new THREE.Vector3(0, 0, 1).applyQuaternion(this.FpRest); fwdG.y = 0; fwdG.normalize();
     const dyaw = Math.atan2(fwdC.x, fwdC.z) - Math.atan2(fwdG.x, fwdG.z);
@@ -332,9 +321,9 @@ export class Retargeter {
     if (this.hasQuat) {
       this.restQInv = {};
       for (const name in this.fullqByBone) {
-        const g1 = this.fullqByBone[name][0];
-        if (this.idx[g1] === undefined) continue;
-        this.restQInv[g1] = this._q(data.restQuat[this.idx[g1]]).invert();
+        const sj = this.fullqByBone[name][0];
+        if (this.idx[sj] === undefined) continue;
+        this.restQInv[sj] = this._q(data.restQuat[this.idx[sj]]).invert();
       }
       // hand transfer constants. Per frame the hand target is
       //   foreNowChar · M · srcForeNow⁻¹ · srcWristNow · T
@@ -344,10 +333,9 @@ export class Retargeter {
       // bone-local axes — source and character rigs disagree arbitrarily on
       // bone frames. (The old form  foreNow·srcForeNow⁻¹·srcWristNow·
       // restW⁻¹·restF·bindFore⁻¹·bindHand  spliced the source-local delta
-      // straight into the character chain; with near-rigid wrists — the
-      // authored-wrist G1 clips — both coincide, but real mocap wrist
-      // deviations got applied about wrong axes: cocked "skewed fists" on
-      // Kimodo clips, caught by qa_endeffectors.mjs.)
+      // straight into the character chain; with near-rigid wrists both
+      // coincide, but real mocap wrist deviations got applied about wrong
+      // axes: cocked "skewed fists", caught by qa_endeffectors.mjs.)
       this.handM = {}; this.handT = {}; this.handRide = {};
       for (const name in this.handByBone) {
         const [sw, sf, foreName] = this.handByBone[name];
@@ -363,7 +351,7 @@ export class Retargeter {
       // channels read poorly on fingerless fist meshes — every twitch and
       // roll shows as a "broken" fist — so human-mocap sources bake a low
       // value (clip JSON handFollow) and keep only a hint of wrist life.
-      // Authored-wrist sources (the G1 set) default to 1.
+      // Authored-wrist sources omit the key and default to full transfer.
       this.handFollow = handFollow ?? data.handFollow ?? 1;
       // forearm roll from the source's own twist instead of the body-rebase
       // projection (see the AIM branch); opt-in per clip (data.foreRollSrc)
@@ -389,9 +377,6 @@ export class Retargeter {
     const mid = ls.clone().add(rs).multiplyScalar(0.5);
     return frameQ(this._gp(P, this.S.Chest), mid, ls, rs);
   }
-  // legacy aliases (debug.js / check_heading.mjs)
-  _g1PelvisFrame(P) { return this._srcPelvisFrame(P); }
-  _g1ChestFrame(P) { return this._srcChestFrame(P); }
   _charPelvisFrame() {
     const chest = this.chestBone ? this.chestBone.name : this.R.Hips;
     return frameQ(this._cp(this.R.Hips), this._cp(chest),
@@ -513,8 +498,8 @@ export class Retargeter {
         // naturally; the aim then only adds the residual swing (near-zero twist artifact)
         const [sj, scj, base, childName, aimRole] = this.aimByBone[b.name];
         const D = base === 'chest' ? chestDelta : pelvisDelta;
-        const dG1 = this._gp(P, scj).sub(this._gp(P, sj)).normalize();
-        let dTarget = dG1.applyQuaternion(FpInv).applyQuaternion(Fc).normalize();
+        const dLimb = this._gp(P, scj).sub(this._gp(P, sj)).normalize();
+        let dTarget = dLimb.applyQuaternion(FpInv).applyQuaternion(Fc).normalize();
         if (this.guards.torsoCapsule && CLIP_GUARD.has(aimRole)) {
           if (!capA) { capA = this._framePos(this.hips); capB = this._framePos(this.chestBone); }
           dTarget = this._capsuleGuard(this._framePos(b), dTarget, this.bindLen[b.name], capA, capB);
@@ -556,9 +541,9 @@ export class Retargeter {
         target = this._clampToParent(target, b, hRole, parentWorld);
       } else if (this.hasQuat && this.fullqByBone[b.name] && this.restQInv[this.fullqByBone[b.name][0]]) {
         // feet: true source ankle orientation, transferred pelvis-relative
-        const [g1] = this.fullqByBone[b.name];
-        const qNow = this._q(this.data.quat[f][this.idx[g1]]);
-        target = Fc.clone().multiply(FpInv).multiply(qNow).multiply(this.restQInv[g1])
+        const [sq] = this.fullqByBone[b.name];
+        const qNow = this._q(this.data.quat[f][this.idx[sq]]);
+        target = Fc.clone().multiply(FpInv).multiply(qNow).multiply(this.restQInv[sq])
           .multiply(this.FpRest).multiply(this.FcBindInv).multiply(this.bindWorldQ[b.name]);
       } else if (this.headDamp[b.name] !== undefined) {
         const D = pelvisDelta.clone().slerp(chestDelta, this.headDamp[b.name]);
