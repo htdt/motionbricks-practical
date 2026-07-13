@@ -37,6 +37,17 @@ SOMA_SRC = {
 }
 
 
+def minrot(a, b):
+    """Minimal rotation matrix taking unit vector a to unit vector b."""
+    a = a / np.linalg.norm(a)
+    b = b / np.linalg.norm(b)
+    v, c = np.cross(a, b), float(a @ b)
+    if c > 1 - 1e-9:
+        return np.eye(3)
+    vx = np.array([[0, -v[2], v[1]], [v[2], 0, -v[0]], [-v[1], v[0], 0]])
+    return np.eye(3) + vx + vx @ vx / (1 + c)
+
+
 def mats_to_xyzw(m):
     """[...,3,3] rotation matrices -> [...,4] xyzw quats (three.js order)."""
     shape = m.shape[:-2]
@@ -56,16 +67,49 @@ def main():
     from kimodo.skeleton.definitions import SOMASkeleton30, SOMASkeleton77
 
     def skel_pack(J):
-        """names/parents/rest/restQuat for a 77- or 30-joint SOMA export."""
+        """names/parents/rest/restQuat for a 77- or 30-joint SOMA export.
+
+        restQuat convention: in Kimodo NPZ outputs the T-pose is the zero
+        pose — global_rot_mats of EVERY joint is the IDENTITY at rest (FK of
+        identity locals). So the baked rest rotations are the identity
+        (yawed to the canonical +X facing), NOT the
+        `standard_t_pose_global_offsets_rots` asset — that file is a
+        BVH-export convention; using it shipped garbage orientation anchors
+        (skewed fists/feet, caught by align/qa_endeffectors.mjs).
+
+        FEET keep the identity anchor as-is: at a generated standing frame
+        the source foot global rotation returns to ~identity (measured:
+        0.1°) — the T-pose toe droop (~14°) is anatomy shared by every
+        frame, and "leveling" it injects exactly that skew. Verified
+        empirically — do not re-add foot leveling.
+
+        HANDS get one semantic correction on top: the SOMA T-pose hand bends
+        ~18° off the forearm axis, while game rigs bind hands straight along
+        the forearm. The retargeter transfers wrist DELTAS from rest — with
+        a bent rest, a straight mocap wrist would hyperextend the character's
+        straight-bind hand by that 18°. Pre-rotating the hand rest onto the
+        forearm axis makes the anchor "straight source wrist ↔ straight
+        character hand": absolute bend tracking. (Only valid together with
+        retarget.js's world-axes wrist mapping — under the old bone-local
+        splice this same correction rotated about wrong axes.)
+        """
         sk77 = SOMASkeleton77()
-        if J == 77:
-            sk, rots = sk77, sk77.global_rot_offsets.numpy()
-        else:
-            sk = SOMASkeleton30()
-            rots = sk77.global_rot_offsets.numpy()[sk.get_skel_slice(sk77)]
+        sk = sk77 if J == 77 else SOMASkeleton30()
         names = sk.bone_order_names
         parents = [-1 if p is None else names.index(p)
                    for _, p in sk.bone_order_names_with_parents]
+        nj = sk.neutral_joints.numpy()
+        ni = {n: i for i, n in enumerate(names)}
+
+        rots = np.tile(np.eye(3), (len(names), 1, 1))
+        for side in ("Left", "Right"):
+            mid = f"{side}HandMiddle1" if f"{side}HandMiddle1" in ni else \
+                  (f"{side}HandMiddleEnd" if f"{side}HandMiddleEnd" in ni else None)
+            if mid:
+                hd = nj[ni[mid]] - nj[ni[f"{side}Hand"]]
+                fd = nj[ni[f"{side}Hand"]] - nj[ni[f"{side}ForeArm"]]
+                rots[ni[f"{side}Hand"]] = minrot(hd, fd)
+
         # rest pose: standard T-pose, lifted so the lowest foot joint sits on
         # the ground (the retargeter reads rest hip/ankle heights from this),
         # and yawed -90° so it faces +X like every canonicalized clip (the
@@ -73,7 +117,7 @@ def main():
         # REST heading, so rest and clips must agree)
         c, s = 0.0, 1.0                                   # rot_y(pi/2): +Z -> +X
         Ry = np.array([[c, 0.0, s], [0.0, 1.0, 0.0], [-s, 0.0, c]])
-        rest = sk.neutral_joints.numpy() @ Ry.T
+        rest = nj @ Ry.T
         foot_i = [names.index(n) for n in
                   ["LeftFoot", "LeftToeBase", "RightFoot", "RightToeBase"]]
         rest[:, 1] -= rest[foot_i, 1].min()

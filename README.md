@@ -57,6 +57,7 @@ Two principles carry the whole design:
 | `glbskel.mjs` | GLB → bone hierarchy + animation sampler in node (no browser) |
 | `certify.mjs` | certification CLI, writes `<char.glb>.retarget_certificate.json` |
 | `prebake.mjs` | Stage 3 pre-bake for non-three.js engines: character GLB + baked manifest → same GLB with one glTF animation per clip + `rootmotion.json` (INTEGRATE.md §9) |
+| `qa_endeffectors.mjs` | end-effector fidelity gates: foot flatness + wrist-bend tracking per baked clip on the character — catches rest-anchor skew ("skewed fists/feet") mechanically |
 | `selftest.mjs` | zero-asset self-test (synthetic rigs, procedural motion, sabotage cases) |
 | `motionbricks/` | Stage 2 generation tools (run inside the MotionBricks checkout): `posekit.py`, `movegen.py`, `bake_moves.py`, starter pose library, example move spec |
 | `KIMODO.md` | Stage 2 setup for the **NVIDIA Kimodo** human-skeleton source (recommended): install, gated-encoder workarounds, conventions, tooling manual |

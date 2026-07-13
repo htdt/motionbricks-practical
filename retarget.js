@@ -336,15 +336,24 @@ export class Retargeter {
         if (this.idx[g1] === undefined) continue;
         this.restQInv[g1] = this._q(data.restQuat[this.idx[g1]]).invert();
       }
-      // hand transfer constant: (srcForeRest⁻¹·srcWristRest)⁻¹ mapped onto the
-      // character's bind forearm→hand relation; per frame the hand target is
-      // just  foreNowChar · srcForeNow⁻¹ · srcWristNow · K
-      this.handK = {};
+      // hand transfer constants. Per frame the hand target is
+      //   foreNowChar · M · srcForeNow⁻¹ · srcWristNow · T
+      // with M = bindFore⁻¹·srcForeRest and T = srcWristRest⁻¹·bindHand:
+      // the source wrist-vs-forearm delta is mapped through the WORLD axes
+      // at rest/bind (both are the same canonical pose), never through raw
+      // bone-local axes — source and character rigs disagree arbitrarily on
+      // bone frames. (The old form  foreNow·srcForeNow⁻¹·srcWristNow·
+      // restW⁻¹·restF·bindFore⁻¹·bindHand  spliced the source-local delta
+      // straight into the character chain; with near-rigid wrists — the
+      // authored-wrist G1 clips — both coincide, but real mocap wrist
+      // deviations got applied about wrong axes: cocked "skewed fists" on
+      // Kimodo clips, caught by qa_endeffectors.mjs.)
+      this.handM = {}; this.handT = {};
       for (const name in this.handByBone) {
         const [sw, sf, foreName] = this.handByBone[name];
-        this.handK[name] = this._q(data.restQuat[this.idx[sw]]).invert()
-          .multiply(this._q(data.restQuat[this.idx[sf]]))
-          .multiply(this.bindWorldQ[foreName].clone().invert())
+        this.handM[name] = this.bindWorldQ[foreName].clone().invert()
+          .multiply(this._q(data.restQuat[this.idx[sf]]));
+        this.handT[name] = this._q(data.restQuat[this.idx[sw]]).invert()
           .multiply(this.bindWorldQ[name]);
       }
     }
@@ -508,9 +517,10 @@ export class Retargeter {
         const [sw, sf, foreName, hRole] = this.handByBone[b.name];
         const foreNow = this.animWorld[this.bones[foreName].uuid] ?? this.bindWorldQ[foreName];
         target = foreNow.clone()
+          .multiply(this.handM[b.name])
           .multiply(this._q(this.data.quat[f][this.idx[sf]]).invert())
           .multiply(this._q(this.data.quat[f][this.idx[sw]]))
-          .multiply(this.handK[b.name]);
+          .multiply(this.handT[b.name]);
         target = this._clampToParent(target, b, hRole, parentWorld);
       } else if (this.hasQuat && this.fullqByBone[b.name] && this.restQInv[this.fullqByBone[b.name][0]]) {
         // feet: true source ankle orientation, transferred pelvis-relative

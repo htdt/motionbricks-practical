@@ -104,6 +104,29 @@ three.js-style axes: no basis conversion at bake time (the G1 path's
 MuJoCo-Z-up shuffle is gone), only a yaw canonicalization to the baked-clip
 convention (forward = +X).
 
+**The rest-pose trap (cost one shipped defect — read this).** In Kimodo NPZ
+outputs, the T-pose is the zero pose: `global_rot_mats` of *every* joint is
+the **identity** at rest. The `standard_t_pose_global_offsets_rots.p` asset
+in the repo is a *different* (BVH-export) convention — baking it as the
+clips' `restQuat` gives garbage orientation anchors, which shipped as
+visibly skewed fists and toes-up feet. Two facts to bake by:
+
+- **Feet**: identity rest is also the correct *semantic* anchor — at a
+  generated standing frame the foot's global rotation returns to ~identity
+  (measured 0.1°). The T-pose toe droop (~14°) is anatomy present in every
+  frame; do NOT "level" it (that injects exactly 14° of toes-up skew).
+- **Hands**: one correction is needed — the SOMA T-pose hand bends ~18° off
+  the forearm axis while game rigs bind hands straight, so the identity
+  anchor hyperextends the character's wrist whenever the mocap wrist is
+  straight. `bake_kimodo.py` pre-rotates the hand rest onto the forearm
+  axis (absolute bend tracking). This is only valid because `retarget.js`
+  maps wrist deltas through **world axes at rest/bind** (`handM`/`handT`),
+  never through raw bone-local axes — source and character rigs disagree
+  arbitrarily on bone frames.
+
+All three mistakes are caught mechanically by `qa_endeffectors.mjs` (§4) —
+run it after any bake or retargeter change.
+
 ## 3. The tooling in `kimodo/` (this repo)
 
 BAKE.md's contract, reimplemented for a text-first generator:
@@ -157,6 +180,16 @@ through the same code. Rest pose comes from the SOMA standard T-pose assets,
 ground-lifted and yawed to face +X like every canonicalized clip. Everything
 in ALIGN.md (certification) and INTEGRATE.md (runtime) applies unchanged;
 `yLift`-style amplitude hacks become no-ops (human clips jump for real).
+
+**End-effector fidelity gates** — `qa_endeffectors.mjs <char.glb> <movesDir>
+--gate` retargets every baked clip headless and measures, on the character:
+median foot pitch vs bind on frames where the *source* foot is grounded and
+still (flat by definition; gate ≤ 8° per clip, ≥15 contact frames), and
+median |character wrist bend − source wrist bend| (knuckle direction vs
+forearm axis, gate ≤ 30° per clip cap / ≤ 12° aggregate). This is the gate
+that catches rest-anchor mistakes — a wrong rest convention reads as 15–90°
+medians on *every* clip, unmistakably. Wire it into the project test suite
+next to the game QA; run it for every new character × move-set pair.
 
 ## 5. Known limits
 
