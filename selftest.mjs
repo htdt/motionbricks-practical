@@ -15,6 +15,8 @@ import {
   certifyRig, checkSideConsistency, resetBindPose, DEFAULT_GATES,
 } from './align.js';
 import { prebake } from './prebake.mjs';
+import { loadGLBBones } from './glbskel.mjs';
+import { ConstraintIK } from './ik.js';
 import { classify } from './rigmap.js';
 import { Retargeter } from './retarget.js';
 
@@ -25,8 +27,11 @@ function check(label, ok, detail = '') {
 }
 
 // build a bone hierarchy from { name: [parentName, [x,y,z]] } (parents first);
-// wraps in a Group with the given uniform scale (bone offsets given in WORLD
-// units are divided by it, like scaled-armature exports store them)
+// wraps in a Group with the given uniform scale. EVERY bone's local offset is
+// stored divided by that scale, exactly like scaled-armature exports store
+// them (a Mixamo/Meshy GLB keeps centimeter offsets under a 0.01 armature):
+// each local offset is multiplied by the wrapper scale exactly once on the
+// way to world space, so world geometry equals the authored meters.
 function buildRig(spec, armatureScale = 1) {
   const bones = {};
   const wrapper = new THREE.Group();
@@ -37,11 +42,6 @@ function buildRig(spec, armatureScale = 1) {
     b.position.set(...pos).multiplyScalar(1 / armatureScale);
     bones[name] = b;
     if (parent) bones[parent].add(b); else wrapper.add(b);
-  }
-  // child local offsets were divided once too much (parents already carry the
-  // scale correction exactly once, at the wrapper) — restore all but the root
-  for (const [name, [parent]] of Object.entries(spec)) {
-    if (parent) bones[name].position.multiplyScalar(armatureScale);
   }
   wrapper.updateMatrixWorld(true);
   return { bones, wrapper, all: Object.values(bones) };
@@ -144,24 +144,32 @@ check('motion snapshot has quats + rest', Array.isArray(motion.quat) && motion.r
 const srcMap = srcMapFromRig(srcT.rig.map);
 const probes = mineProbeFrames([motion], srcMap);
 check('probes mined from synthetic clip', probes.numFrames === 7, `got ${probes.numFrames}`);
-check('probe mining preserves runtime transfer settings',
-  probes.handFollow === 1 && probes.foreRollSrc === false);
+check('probe mining preserves runtime transfer settings', probes.handFollow === 1);
 let mixedSettingsRejected = false;
 try { mineProbeFrames([motion, { ...motion, handFollow: 0.3 }], srcMap); }
 catch { mixedSettingsRejected = true; }
 check('probe mining rejects mixed transfer settings', mixedSettingsRejected);
-let invalidGuardRejected = false;
+// the guards and the foreRollSrc switch were DELETED after the ablation
+// (evidence/README.md); passing them must fail loudly, not silently change behavior
+let removedOptionRejected = false;
 try {
-  new Retargeter({ ...tgtT, data: motion, srcMap, guards: { continuity: 'yes' } });
-} catch { invalidGuardRejected = true; }
-check('retargeter rejects malformed guard options', invalidGuardRejected);
-let quatlessRollRejected = false;
+  new Retargeter({ ...tgtT, data: motion, srcMap, guards: { continuity: true } });
+} catch { removedOptionRejected = true; }
+check('retargeter rejects the removed guards option', removedOptionRejected);
+let removedRollRejected = false;
 try {
-  const positionOnly = { ...motion, foreRollSrc: true };
+  new Retargeter({ ...tgtT, data: motion, srcMap, foreRollSrc: true });
+} catch { removedRollRejected = true; }
+check('retargeter rejects the removed foreRollSrc switch', removedRollRejected);
+check('source forearm roll is automatic for quaternion clips',
+  new Retargeter({ ...tgtT, data: motion, srcMap }).foreRollSrc === true);
+{
+  const positionOnly = { ...motion };
   delete positionOnly.quat; delete positionOnly.restQuat;
-  new Retargeter({ ...tgtT, data: positionOnly, srcMap });
-} catch { quatlessRollRejected = true; }
-check('retargeter rejects source forearm roll without quaternions', quatlessRollRejected);
+  check('position-only clips fall back to body-frame forearm roll',
+    new Retargeter({ ...tgtT, data: positionOnly, srcMap }).foreRollSrc === false);
+}
+resetBindPose(tgtT);
 
 // prone probe: supine pose (horizontal hips→chest axis) with the hands held
 // above the belly. Locks in the capsule-clearance fix: the gate must measure
@@ -255,6 +263,18 @@ resetBindPose(tgtT);
   // discontinuous source signs; emitted animation tracks must stay continuous.
   for (let f = 1; f < N; f += 2)
     for (const q of travelClip.quat[f]) for (let k = 0; k < 4; k++) q[k] *= -1;
+  // One authored wrist target makes this an offline determinism test too:
+  // the GLB key emitted by prebake must equal a direct runtime IK evaluation.
+  const constraintFrame = 40;
+  const leftHand = travelClip.names.indexOf(srcMap.LeftHand);
+  travelClip.constraints = [{
+    family: 'end-effector', type: 'left-hand', source: 'selftest',
+    originalType: 'left-hand', required: true, provenance: 'conditioned+corrected',
+    frame: constraintFrame, role: 'LeftHand',
+    pos: [...travelClip.pos[constraintFrame][leftHand]],
+    quat: [...travelClip.quat[constraintFrame][leftHand]],
+    posConstrained: true, rotConstrained: true,
+  }];
 
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'mb-selftest-'));
   try {
@@ -316,6 +336,29 @@ resetBindPose(tgtT);
     }
     check('prebake: quaternion tracks are sign-continuous', worstQuatDot >= -1e-6,
       `minimum adjacent dot ${worstQuatDot}`);
+
+    const live = await loadGLBBones(glbPath);
+    const liveTarget = rigFromBones(live.bones);
+    const liveRT = new Retargeter({ ...liveTarget, data: travelClip, srcMap, inPlace: true });
+    liveRT.yLift = 1.5;
+    liveRT.applyFrame(constraintFrame);
+    const liveIK = new ConstraintIK(liveRT, travelClip.constraints);
+    const solves = liveIK.apply(constraintFrame);
+    let offlineRotDelta = 0;
+    for (const ch of rot) {
+      const name = ch.getTargetNode()?.getName();
+      const bone = liveTarget.bones[name];
+      if (!bone) continue;
+      const values = ch.getSampler().getOutput().getArray();
+      const o = constraintFrame * 4;
+      const bakedQ = new THREE.Quaternion(values[o], values[o + 1], values[o + 2], values[o + 3]);
+      offlineRotDelta = Math.max(offlineRotDelta,
+        THREE.MathUtils.radToDeg(bakedQ.angleTo(bone.quaternion)));
+    }
+    check('prebake: constrained frame equals direct runtime IK',
+      solves.some(s => s.role === 'LeftHand' && s.weight === 1 && s.reachable)
+        && offlineRotDelta < 0.05, // Float32 glTF quaternion quantization
+      `max local rotation delta ${offlineRotDelta}°`);
 
     const rm = JSON.parse(fs.readFileSync(rmPath, 'utf8'));
     const clip = rm.clips.selftest_clip;

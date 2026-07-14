@@ -9,14 +9,16 @@
     "./retarget": "./retarget.js",
     "./rigmap": "./rigmap.js",
     "./glbskel": "./glbskel.mjs",
-    "./prebake": "./prebake.mjs"
+    "./prebake": "./prebake.mjs",
+    "./ik": "./ik.js",
+    "./qametrics": "./qametrics.mjs"
   },
   "bin": {
     "kimodo-certify": "./certify.mjs"
   },
   "scripts": {
-    "test": "node selftest.mjs",
-    "test:python": "python3 -m unittest kimodo/test_tools.py"
+    "test": "node selftest.mjs && node selftest_constraints.mjs",
+    "test:python": "python3 -m unittest discover -s kimodo -p 'test_*.py'"
   },
   "dependencies": {
     "three": "^0.160.0",
@@ -31,17 +33,26 @@
     "align.js",
     "retarget.js",
     "rigmap.js",
+    "ik.js",
     "glbskel.mjs",
     "certify.mjs",
     "prebake.mjs",
+    "qametrics.mjs",
     "qa_endeffectors.mjs",
+    "qa_constraints.mjs",
+    "ablate.mjs",
     "selftest.mjs",
+    "selftest_constraints.mjs",
     "README.md",
     "ALIGN.md",
     "BAKE.md",
     "KIMODO.md",
     "INTEGRATE.md",
+    "ANIMATION_AGENT.md",
+    "evidence/README.md",
     "kimodo/*.py",
-    "kimodo/*.json"
+    "kimodo/*.json",
+    "kimodo/*.mjs",
+    "kimodo/*.sh"
   ]
 }

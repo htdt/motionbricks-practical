@@ -3,7 +3,7 @@ import unittest
 
 import numpy as np
 
-from kimodo.bake_kimodo import manifest_entry, minrot
+from kimodo.bake_kimodo import has_authored_hand_rotation, manifest_entry, minrot
 from kimodo.kimogen import best_loop, canonicalize, gate_sample
 
 
@@ -87,6 +87,15 @@ class KimodoToolTests(unittest.TestCase):
         self.assertEqual(entry["fps"], 30)
         self.assertTrue(entry["loop"])
         self.assertNotIn("loop_trim", entry["gates"])
+
+    def test_authored_hand_rotation_disables_wrist_stylization(self):
+        self.assertTrue(has_authored_hand_rotation([
+            {"family": "end-effector", "role": "LeftHand", "rotConstrained": True}]))
+        self.assertTrue(has_authored_hand_rotation([
+            {"family": "fullbody", "rotConstrained": True,
+             "ee": {"LeftHand": {"quat": [0, 0, 0, 1]}}}]))
+        self.assertFalse(has_authored_hand_rotation([
+            {"family": "end-effector", "role": "LeftFoot", "rotConstrained": True}]))
 
     def test_minrot_handles_opposite_vectors(self):
         rotation = minrot(np.array([1.0, 0.0, 0.0]),

@@ -5,9 +5,13 @@ of your motion source, not of any character. Clips authored here drive every
 certified character forever; a new character never requires regenerating a
 clip, and a new clip never requires touching a character.
 
-The idea in one line: **author moves as text prompts (plus a shared bookend
-constraint), generate N samples per move, gate the results numerically, keep
-the best, and bake canonicalized clips + frame data.**
+The idea in one line: **author moves as text prompts plus any compatible
+combination of Kimodo constraints (full-body keyframes, hand/foot targets,
+root waypoints/paths — or constraints alone), generate N samples per move,
+gate the results numerically (including per-constraint adherence), keep the
+best, and bake canonicalized clips + resolved constraint records + frame
+data.** The one-page control-selection guide for authoring agents:
+ANIMATION_AGENT.md.
 
 ```
  move spec              stance pose             generation             bake
@@ -49,8 +53,20 @@ Each clip also carries:
 - `srcMap` — canonical source role → joint name in this clip. This is what
   makes the runtime source-agnostic: the retargeter reads the map from the
   clip, never assumes a skeleton.
-- `handFollow`, `foreRollSrc` — wrist-articulation gain and forearm-roll
-  source flags for the retargeter (what they fix and why: KIMODO.md §2).
+- `handFollow` — the wrist-articulation stylization gain (what it does and
+  the ablation evidence: KIMODO.md §2). Clips with authored hand constraints
+  are always baked at 1.0.
+- `contacts` + `contactJoints` — Kimodo's per-frame foot-contact
+  **predictions** with their explicit joint mapping. QA and cleanup evidence,
+  never authored targets.
+- `constraints` — the resolved constraint records for every authored
+  constraint, re-expressed in the clip's canonical frame with the exact
+  rigid transform + loop trim the motion got: family, authoring source,
+  canonical frame index, world position/rotation targets (end-effectors),
+  root/path/heading targets, position/rotation constrained flags, and
+  post-processing provenance (`conditioned+corrected` vs `conditioned`).
+  Directly usable by runtime constraint IK (`ik.js`) and constraint QA
+  (`qa_constraints.mjs`) — no authoring skeleton, no FK.
 
 Root motion stays **in the clip data** (the pelvis actually travels). The
 runtime decides how to consume it; never bake clips "in place".
@@ -107,6 +123,71 @@ reference). Per move:
   `root_floor` (knockdowns) with a `min`/`max` in meters.
 - `strike` (`"hand"`/`"foot"`) + `height` — enables frame-data extraction
   (§5) and tags the move for gameplay rules.
+
+### Constraints: pinning what prompts can't
+
+Any move can carry Kimodo constraints — inline (`constraints`: a JSON array
+in the exact upstream schema) or from a file saved by the Kimodo demo/API
+(`constraints_file`; the two are mutually exclusive). Every family the
+installed Kimodo supports passes through:
+
+```jsonc
+{"name": "reach_while_walking", "duration": 3.0,
+ "prompt": "A person walks forward and reaches for an object.",
+ "constraints": [
+   // sparse root waypoints (dense per-frame arrays = an exact path);
+   // optional global_root_heading pins facing as [cos t, sin t] pairs
+   {"type": "root2d", "frame_indices": [0, 45, 89],
+    "smooth_root_2d": [[0.0, 0.0], [0.4, 0.2], [0.9, 0.2]]},
+   // hand/foot end-effector target: a complete SOMA pose per frame; the
+   // world target is its FK. Shorthands: left-hand right-hand left-foot
+   // right-foot; or "end-effector" + joint_names (exact tokens LeftHand,
+   // RightHand, LeftFoot, RightFoot) — the wrapper splits the generic form
+   // into shorthands so MotionCorrection corrects them.
+   {"type": "right-hand", "frame_indices": [60],
+    "local_joints_rot": ["... [1,30,3] axis-angle ..."],
+    "root_positions": [[0.55, 0.95, 0.2]]},
+   // arbitrary full-body keyframe at any frame
+   {"type": "fullbody", "frame_indices": [110],
+    "local_joints_rot": ["... [1,30,3] ..."], "root_positions": [[0.62, 0.95, 0.28]]}
+ ]}
+```
+
+Real complete examples for every family (and their mixed combination) are in
+`kimodo/moveset_e2e.json`. The essentials:
+
+- **Native authoring frame**: Y-up, meters, heading 0 faces **+Z**, root
+  starts near the XZ origin. Accepted clips are canonicalized to +X later —
+  the wrapper re-expresses resolved targets with the same transform.
+- **Everything validates before the model loads**: known types and
+  end-effector tokens, integer/sorted/unique in-range frames, exact
+  SOMA-30/77 array shapes, finite values, radians (a magnitude > 2π is
+  rejected as degrees), plausible hip heights, non-zero headings, Kimodo's
+  <20 sparse-frames-per-type guidance (dense root paths exempt), root-speed
+  reachability (≤ 5 m/s between pinned frames), and conflict detection.
+- **Conflicts are rejected, never overwritten**: two same-type constraints on
+  one frame, fullbody + end-effector on the same frame, co-framed
+  end-effectors with disagreeing roots (an EE constraint also pins root XZ,
+  height, and heading from its pose), root2d vs pose XZ disagreements, and
+  heading contradictions all fail with a move/constraint/frame diagnostic.
+- **`stance_bookend` stays a convenience**: it produces a fullbody constraint
+  at frames `[0, T−1]` and merges with authored constraints under the same
+  conflict rules.
+- **Constraint-only moves** omit `prompt`: the installed API zeroes empty
+  text explicitly (no placeholder wording is ever substituted).
+- **`reach_policy: "clamp"`** (optional, per move) documents that mapped
+  end-effector targets beyond a character's limb reach may be explicitly
+  clamped at retarget time; the default is strict (character QA fails
+  unreachable targets).
+- **Loop moves**: retained constraint frames shift with the trim; a trim that
+  would drop a required constraint is rejected (constraints may opt out with
+  `"required": false` — e.g. dense paths on loop clips).
+
+Generation measures **per-constraint adherence** on every sample and hard-
+gates the winner (`ee_pos_max ≤ 5 mm`, `ee_rot_max ≤ 2°`, `root_xz_max ≤
+2 cm`, fullbody EE positions, heading error); the report records per-record
+errors, and `out/moves/<move>.resolved_constraints.json` stores the resolved
+canonical targets that the bake embeds into the clip.
 
 Design rules that survived a full move-set in production:
 
@@ -172,9 +253,13 @@ python bake_kimodo.py --web <movesDir>    # clips + manifest.json
 `kimogen.py` has already canonicalized the motion and trimmed loops;
 `bake_kimodo.py` verifies that frame, builds the normalized rest pose (identity
 rest + straightened hand anchors — the trap and its fix: KIMODO.md §2), and
-injects `srcMap`/`handFollow`/`foreRollSrc`. The manifest carries
-each move's file, frame count, fps, loop flag and frame data — runtimes and
-the pre-bake tool consume it as-is and never re-derive which clips loop.
+injects `srcMap`/`handFollow`, the predicted foot-contact channels
+(`contacts` + `contactJoints`), and the resolved constraint records
+(`constraints`, from `<move>.resolved_constraints.json`; frame/fps mismatches
+are rejected). The manifest carries each move's file, frame count, fps, loop
+flag, frame data, constraint counts + generation adherence, and any
+`reachPolicy` — runtimes and the pre-bake tool consume it as-is and never
+re-derive which clips loop.
 The bake rejects missing or failed generation reports by default. Imported
 example NPZs can opt out explicitly with `--allow-ungated`; generated moves
 must never use that escape hatch, and an explicit failed report is always
@@ -215,8 +300,11 @@ and check:
 - root travel matches intent (lunge forward, knockback back, in-place else)?
 
 A weak move is **a prompt/spec edit + regenerate** (~a minute), never a
-runtime patch. Run `qa_endeffectors.mjs` (end-effector fidelity gates) after
-any bake — it catches rest-anchor skew mechanically.
+runtime patch. Run `qa_constraints.mjs` (stage-separated constraint accuracy:
+authored → SOMA → unguarded rig → shipped rig, plus determinism/flip/skate
+gates) and `qa_endeffectors.mjs` (perceptual foot-pitch/wrist-bend gates)
+after any bake — together they catch rest-anchor skew, constraint misses,
+and transfer regressions mechanically, per character × move set.
 
 ## 7. New character = zero work here
 

@@ -1,0 +1,4920 @@
+{
+ "character": "/home/alex/Downloads/ani_test/char2/Meshy_AI_Harbinger_of_the_With_biped_Character_output.glb",
+ "movesDir": "/home/alex/Documents/kimodo-practical/kimodo/out/web_e2e",
+ "gates": {
+  "somaPosMax": 0.005,
+  "somaRotMaxDeg": 2,
+  "rootXZMax": 0.02,
+  "charPosP95": 0.02,
+  "charPosMax": 0.04,
+  "charRotP95": 5,
+  "charRotMax": 10,
+  "skateTolerance": 0.03,
+  "seekTolDeg": 0.0001
+ },
+ "clips": {
+  "e2e_text": {
+   "constrained": false,
+   "baselineConfig": {
+    "handFollow": 1,
+    "foreRollSrc": true,
+    "inPlace": false,
+    "yLift": 1,
+    "hasQuat": true,
+    "scaleRoot": 0.9211,
+    "capsuleR": 0.128,
+    "rootYawDeg": 90.01,
+    "srcMap": {
+     "Hips": "Hips",
+     "Chest": "Chest",
+     "LeftHipAnchor": "LeftLeg",
+     "RightHipAnchor": "RightLeg",
+     "LeftShoulderAnchor": "LeftArm",
+     "RightShoulderAnchor": "RightArm",
+     "LeftUpLeg": "LeftLeg",
+     "LeftLeg": "LeftShin",
+     "LeftFoot": "LeftFoot",
+     "RightUpLeg": "RightLeg",
+     "RightLeg": "RightShin",
+     "RightFoot": "RightFoot",
+     "LeftArm": "LeftArm",
+     "LeftForeArm": "LeftForeArm",
+     "LeftHand": "LeftHand",
+     "RightArm": "RightArm",
+     "RightForeArm": "RightForeArm",
+     "RightHand": "RightHand"
+    }
+   },
+   "stage2": {
+    "fidelity": {
+     "LeftHand": {
+      "rot": {
+       "n": 90,
+       "mean": 0.00002,
+       "median": 0.00002,
+       "p95": 0.00002,
+       "max": 0.00002
+      },
+      "swing": {
+       "n": 90,
+       "mean": 0.44991,
+       "median": 0.45355,
+       "p95": 1.05297,
+       "max": 1.21888
+      },
+      "twist": {
+       "n": 90,
+       "mean": 0.80979,
+       "median": 0.8065,
+       "p95": 1.89576,
+       "max": 2.10034
+      },
+      "demandTracking": {
+       "n": 90,
+       "mean": 0,
+       "median": 0,
+       "p95": 0,
+       "max": 0
+      }
+     },
+     "RightHand": {
+      "rot": {
+       "n": 90,
+       "mean": 0.00007,
+       "median": 0.00004,
+       "p95": 0.00017,
+       "max": 0.00019
+      },
+      "swing": {
+       "n": 90,
+       "mean": 6.42887,
+       "median": 5.38651,
+       "p95": 15.97644,
+       "max": 20.78474
+      },
+      "twist": {
+       "n": 90,
+       "mean": 9.49355,
+       "median": 8.8425,
+       "p95": 22.98229,
+       "max": 27.22903
+      },
+      "demandTracking": {
+       "n": 90,
+       "mean": 0,
+       "median": 0,
+       "p95": 0,
+       "max": 0
+      }
+     },
+     "LeftFoot": {
+      "rot": {
+       "n": 90,
+       "mean": 0.07198,
+       "median": 0.07757,
+       "p95": 0.11286,
+       "max": 0.11695
+      },
+      "swing": {
+       "n": 90,
+       "mean": 1.53798,
+       "median": 1.51678,
+       "p95": 2.20838,
+       "max": 2.25801
+      },
+      "twist": {
+       "n": 90,
+       "mean": 0.64894,
+       "median": 0.65224,
+       "p95": 0.83523,
+       "max": 0.86791
+      },
+      "demandTracking": {
+       "n": 90,
+       "mean": 0,
+       "median": 0,
+       "p95": 0,
+       "max": 0
+      }
+     },
+     "RightFoot": {
+      "rot": {
+       "n": 90,
+       "mean": 0.03896,
+       "median": 0.03818,
+       "p95": 0.04924,
+       "max": 0.05125
+      },
+      "swing": {
+       "n": 90,
+       "mean": 4.4096,
+       "median": 4.34262,
+       "p95": 5.15922,
+       "max": 5.28363
+      },
+      "twist": {
+       "n": 90,
+       "mean": 2.00586,
+       "median": 1.97434,
+       "p95": 2.25278,
+       "max": 2.31263
+      },
+      "demandTracking": {
+       "n": 90,
+       "mean": 0,
+       "median": 0,
+       "p95": 0,
+       "max": 0
+      }
+     }
+    },
+    "roundTripMean": {
+     "n": 90,
+     "mean": 0.01426,
+     "median": 0.01297,
+     "p95": 0.0185,
+     "max": 0.0189
+    }
+   },
+   "stage3": {
+    "handFollow": {
+     "maxRotDeg": 51.0758,
+     "maxPosM": 0
+    }
+   },
+   "shippedConfig": {
+    "handFollow": 0.3,
+    "foreRollSrc": true,
+    "inPlace": false,
+    "yLift": 1,
+    "hasQuat": true,
+    "scaleRoot": 0.9211,
+    "capsuleR": 0.128,
+    "rootYawDeg": 90.01,
+    "srcMap": {
+     "Hips": "Hips",
+     "Chest": "Chest",
+     "LeftHipAnchor": "LeftLeg",
+     "RightHipAnchor": "RightLeg",
+     "LeftShoulderAnchor": "LeftArm",
+     "RightShoulderAnchor": "RightArm",
+     "LeftUpLeg": "LeftLeg",
+     "LeftLeg": "LeftShin",
+     "LeftFoot": "LeftFoot",
+     "RightUpLeg": "RightLeg",
+     "RightLeg": "RightShin",
+     "RightFoot": "RightFoot",
+     "LeftArm": "LeftArm",
+     "LeftForeArm": "LeftForeArm",
+     "LeftHand": "LeftHand",
+     "RightArm": "RightArm",
+     "RightForeArm": "RightForeArm",
+     "RightHand": "RightHand"
+    }
+   },
+   "ik": false,
+   "validity": {
+    "nan": 0,
+    "denorm": 0,
+    "ok": true
+   },
+   "kinematics": {
+    "LeftHand": {
+     "velMax": 0.31749,
+     "accMax": 0.16794,
+     "flips": 0
+    },
+    "RightHand": {
+     "velMax": 3.28086,
+     "accMax": 2.46131,
+     "flips": 0
+    },
+    "LeftFoot": {
+     "velMax": 0.61372,
+     "accMax": 0.40487,
+     "flips": 0
+    },
+    "RightFoot": {
+     "velMax": 0.65514,
+     "accMax": 0.21433,
+     "flips": 0
+    }
+   },
+   "contactSource": "channels",
+   "skate": {
+    "baseline": {
+     "Left": {
+      "n": 89,
+      "mean": 0.00742,
+      "median": 0.00613,
+      "p95": 0.02159,
+      "max": 0.0331
+     },
+     "Right": {
+      "n": 89,
+      "mean": 0.00947,
+      "median": 0.00626,
+      "p95": 0.03308,
+      "max": 0.0364
+     }
+    },
+    "shipped": {
+     "Left": {
+      "n": 89,
+      "mean": 0.00742,
+      "median": 0.00613,
+      "p95": 0.02159,
+      "max": 0.0331
+     },
+     "Right": {
+      "n": 89,
+      "mean": 0.00947,
+      "median": 0.00626,
+      "p95": 0.03308,
+      "max": 0.0364
+     }
+    }
+   },
+   "determinism": {
+    "maxRotDeg": 0,
+    "maxPosM": 0
+   }
+  },
+  "e2e_fb_key": {
+   "constrained": true,
+   "stage1": {
+    "records": [
+     {
+      "type": "fullbody",
+      "frame": 79,
+      "role": "LeftHand",
+      "posErr": 0.00007
+     },
+     {
+      "type": "fullbody",
+      "frame": 79,
+      "role": "RightHand",
+      "posErr": 0.00006
+     },
+     {
+      "type": "fullbody",
+      "frame": 79,
+      "role": "LeftFoot",
+      "posErr": 0.00005
+     },
+     {
+      "type": "fullbody",
+      "frame": 79,
+      "role": "RightFoot",
+      "posErr": 0.00005
+     },
+     {
+      "type": "fullbody",
+      "frame": 79,
+      "role": "Head",
+      "posErr": 0.00007
+     },
+     {
+      "type": "fullbody",
+      "frame": 134,
+      "role": "LeftHand",
+      "posErr": 0.00004
+     },
+     {
+      "type": "fullbody",
+      "frame": 134,
+      "role": "RightHand",
+      "posErr": 0.00006
+     },
+     {
+      "type": "fullbody",
+      "frame": 134,
+      "role": "LeftFoot",
+      "posErr": 0.00004
+     },
+     {
+      "type": "fullbody",
+      "frame": 134,
+      "role": "RightFoot",
+      "posErr": 0.00005
+     },
+     {
+      "type": "fullbody",
+      "frame": 134,
+      "role": "Head",
+      "posErr": 0.00005
+     }
+    ],
+    "generationAdherence": {
+     "ee_pos_max": 0,
+     "ee_rot_max_deg": 0,
+     "root_xz_max": 0,
+     "fullbody_ee_pos_max": 0,
+     "fullbody_root_max": 0,
+     "heading_max_deg": 0.0177,
+     "constraint_ok": true
+    }
+   },
+   "baselineConfig": {
+    "handFollow": 1,
+    "foreRollSrc": true,
+    "inPlace": false,
+    "yLift": 1,
+    "hasQuat": true,
+    "scaleRoot": 0.9211,
+    "capsuleR": 0.128,
+    "rootYawDeg": 90.01,
+    "srcMap": {
+     "Hips": "Hips",
+     "Chest": "Chest",
+     "LeftHipAnchor": "LeftLeg",
+     "RightHipAnchor": "RightLeg",
+     "LeftShoulderAnchor": "LeftArm",
+     "RightShoulderAnchor": "RightArm",
+     "LeftUpLeg": "LeftLeg",
+     "LeftLeg": "LeftShin",
+     "LeftFoot": "LeftFoot",
+     "RightUpLeg": "RightLeg",
+     "RightLeg": "RightShin",
+     "RightFoot": "RightFoot",
+     "LeftArm": "LeftArm",
+     "LeftForeArm": "LeftForeArm",
+     "LeftHand": "LeftHand",
+     "RightArm": "RightArm",
+     "RightForeArm": "RightForeArm",
+     "RightHand": "RightHand"
+    }
+   },
+   "stage2": {
+    "fidelity": {
+     "LeftHand": {
+      "rot": {
+       "n": 135,
+       "mean": 0.00001,
+       "median": 0.00001,
+       "p95": 0.00002,
+       "max": 0.00002
+      },
+      "swing": {
+       "n": 135,
+       "mean": 19.63158,
+       "median": 16.85192,
+       "p95": 51.61715,
+       "max": 55.46649
+      },
+      "twist": {
+       "n": 135,
+       "mean": 17.29141,
+       "median": 15.75355,
+       "p95": 43.24465,
+       "max": 46.91846
+      },
+      "demandTracking": {
+       "n": 135,
+       "mean": 0,
+       "median": 0,
+       "p95": 0,
+       "max": 0
+      }
+     },
+     "RightHand": {
+      "rot": {
+       "n": 135,
+       "mean": 0.00011,
+       "median": 0.00011,
+       "p95": 0.00013,
+       "max": 0.00013
+      },
+      "swing": {
+       "n": 135,
+       "mean": 1.69913,
+       "median": 1.3646,
+       "p95": 3.99456,
+       "max": 5.63247
+      },
+      "twist": {
+       "n": 135,
+       "mean": 3.04139,
+       "median": 2.57114,
+       "p95": 8.01173,
+       "max": 10.66282
+      },
+      "demandTracking": {
+       "n": 135,
+       "mean": 0,
+       "median": 0,
+       "p95": 0,
+       "max": 0
+      }
+     },
+     "LeftFoot": {
+      "rot": {
+       "n": 135,
+       "mean": 0.17336,
+       "median": 0.04391,
+       "p95": 0.64915,
+       "max": 0.70506
+      },
+      "swing": {
+       "n": 135,
+       "mean": 2.52868,
+       "median": 2.32316,
+       "p95": 4.8746,
+       "max": 5.54715
+      },
+      "twist": {
+       "n": 135,
+       "mean": 5.42875,
+       "median": 4.44902,
+       "p95": 12.59601,
+       "max": 16.92194
+      },
+      "demandTracking": {
+       "n": 135,
+       "mean": 0,
+       "median": 0,
+       "p95": 0,
+       "max": 0
+      }
+     },
+     "RightFoot": {
+      "rot": {
+       "n": 135,
+       "mean": 0.18955,
+       "median": 0.03301,
+       "p95": 0.72223,
+       "max": 0.76111
+      },
+      "swing": {
+       "n": 135,
+       "mean": 5.96797,
+       "median": 6.08578,
+       "p95": 15.08483,
+       "max": 16.16078
+      },
+      "twist": {
+       "n": 135,
+       "mean": 4.3107,
+       "median": 4.18185,
+       "p95": 8.09663,
+       "max": 11.41027
+      },
+      "demandTracking": {
+       "n": 135,
+       "mean": 0,
+       "median": 0,
+       "p95": 0,
+       "max": 0
+      }
+     }
+    },
+    "roundTripMean": {
+     "n": 135,
+     "mean": 0.01095,
+     "median": 0.00926,
+     "p95": 0.0214,
+     "max": 0.02228
+    }
+   },
+   "stage3": {
+    "handFollow": {
+     "maxRotDeg": 53.5399,
+     "maxPosM": 0
+    }
+   },
+   "shippedConfig": {
+    "handFollow": 0.3,
+    "foreRollSrc": true,
+    "inPlace": false,
+    "yLift": 1,
+    "hasQuat": true,
+    "scaleRoot": 0.9211,
+    "capsuleR": 0.128,
+    "rootYawDeg": 90.01,
+    "srcMap": {
+     "Hips": "Hips",
+     "Chest": "Chest",
+     "LeftHipAnchor": "LeftLeg",
+     "RightHipAnchor": "RightLeg",
+     "LeftShoulderAnchor": "LeftArm",
+     "RightShoulderAnchor": "RightArm",
+     "LeftUpLeg": "LeftLeg",
+     "LeftLeg": "LeftShin",
+     "LeftFoot": "LeftFoot",
+     "RightUpLeg": "RightLeg",
+     "RightLeg": "RightShin",
+     "RightFoot": "RightFoot",
+     "LeftArm": "LeftArm",
+     "LeftForeArm": "LeftForeArm",
+     "LeftHand": "LeftHand",
+     "RightArm": "RightArm",
+     "RightForeArm": "RightForeArm",
+     "RightHand": "RightHand"
+    }
+   },
+   "ik": false,
+   "stage4": {
+    "details": [],
+    "summary": {},
+    "count": 0
+   },
+   "validity": {
+    "nan": 0,
+    "denorm": 0,
+    "ok": true
+   },
+   "kinematics": {
+    "LeftHand": {
+     "velMax": 2.1889,
+     "accMax": 0.76172,
+     "flips": 0
+    },
+    "RightHand": {
+     "velMax": 0.8193,
+     "accMax": 0.46699,
+     "flips": 0
+    },
+    "LeftFoot": {
+     "velMax": 12.01836,
+     "accMax": 7.7315,
+     "flips": 0
+    },
+    "RightFoot": {
+     "velMax": 15.99731,
+     "accMax": 10.20212,
+     "flips": 0
+    }
+   },
+   "contactSource": "channels",
+   "skate": {
+    "baseline": {
+     "Left": {
+      "n": 75,
+      "mean": 0.04471,
+      "median": 0.03469,
+      "p95": 0.11618,
+      "max": 0.19069
+     },
+     "Right": {
+      "n": 87,
+      "mean": 0.0522,
+      "median": 0.0504,
+      "p95": 0.10961,
+      "max": 0.30356
+     }
+    },
+    "shipped": {
+     "Left": {
+      "n": 75,
+      "mean": 0.04471,
+      "median": 0.03469,
+      "p95": 0.11618,
+      "max": 0.19069
+     },
+     "Right": {
+      "n": 87,
+      "mean": 0.0522,
+      "median": 0.0504,
+      "p95": 0.10961,
+      "max": 0.30356
+     }
+    }
+   },
+   "determinism": {
+    "maxRotDeg": 0,
+    "maxPosM": 0
+   }
+  },
+  "e2e_lhand": {
+   "constrained": true,
+   "stage1": {
+    "records": [
+     {
+      "type": "left-hand",
+      "frame": 45,
+      "role": "LeftHand",
+      "posErr": 0.00002,
+      "rotErrDeg": 0.001
+     }
+    ],
+    "generationAdherence": {
+     "ee_pos_max": 0,
+     "ee_rot_max_deg": 0,
+     "root_xz_max": 0,
+     "fullbody_ee_pos_max": 0,
+     "fullbody_root_max": 0,
+     "heading_max_deg": 0.2376,
+     "constraint_ok": true
+    }
+   },
+   "baselineConfig": {
+    "handFollow": 1,
+    "foreRollSrc": true,
+    "inPlace": false,
+    "yLift": 1,
+    "hasQuat": true,
+    "scaleRoot": 0.9211,
+    "capsuleR": 0.128,
+    "rootYawDeg": 90.01,
+    "srcMap": {
+     "Hips": "Hips",
+     "Chest": "Chest",
+     "LeftHipAnchor": "LeftLeg",
+     "RightHipAnchor": "RightLeg",
+     "LeftShoulderAnchor": "LeftArm",
+     "RightShoulderAnchor": "RightArm",
+     "LeftUpLeg": "LeftLeg",
+     "LeftLeg": "LeftShin",
+     "LeftFoot": "LeftFoot",
+     "RightUpLeg": "RightLeg",
+     "RightLeg": "RightShin",
+     "RightFoot": "RightFoot",
+     "LeftArm": "LeftArm",
+     "LeftForeArm": "LeftForeArm",
+     "LeftHand": "LeftHand",
+     "RightArm": "RightArm",
+     "RightForeArm": "RightForeArm",
+     "RightHand": "RightHand"
+    }
+   },
+   "stage2": {
+    "fidelity": {
+     "LeftHand": {
+      "rot": {
+       "n": 90,
+       "mean": 0,
+       "median": 0,
+       "p95": 0.00001,
+       "max": 0.00001
+      },
+      "swing": {
+       "n": 90,
+       "mean": 19.30486,
+       "median": 17.3748,
+       "p95": 31.92642,
+       "max": 32.16427
+      },
+      "twist": {
+       "n": 90,
+       "mean": 16.69224,
+       "median": 14.5459,
+       "p95": 28.1898,
+       "max": 28.48113
+      },
+      "demandTracking": {
+       "n": 90,
+       "mean": 0,
+       "median": 0,
+       "p95": 0,
+       "max": 0
+      }
+     },
+     "RightHand": {
+      "rot": {
+       "n": 90,
+       "mean": 0.00011,
+       "median": 0.00011,
+       "p95": 0.00013,
+       "max": 0.00014
+      },
+      "swing": {
+       "n": 90,
+       "mean": 0.75654,
+       "median": 0.56918,
+       "p95": 1.78015,
+       "max": 1.91746
+      },
+      "twist": {
+       "n": 90,
+       "mean": 1.4859,
+       "median": 1.35056,
+       "p95": 3.06618,
+       "max": 3.4704
+      },
+      "demandTracking": {
+       "n": 90,
+       "mean": 0,
+       "median": 0,
+       "p95": 0,
+       "max": 0
+      }
+     },
+     "LeftFoot": {
+      "rot": {
+       "n": 90,
+       "mean": 0.08879,
+       "median": 0.05142,
+       "p95": 0.21183,
+       "max": 0.21457
+      },
+      "swing": {
+       "n": 90,
+       "mean": 1.61542,
+       "median": 1.64518,
+       "p95": 3.23743,
+       "max": 3.98017
+      },
+      "twist": {
+       "n": 90,
+       "mean": 0.59319,
+       "median": 0.62778,
+       "p95": 1.17805,
+       "max": 1.47569
+      },
+      "demandTracking": {
+       "n": 90,
+       "mean": 0,
+       "median": 0,
+       "p95": 0,
+       "max": 0
+      }
+     },
+     "RightFoot": {
+      "rot": {
+       "n": 90,
+       "mean": 0.06736,
+       "median": 0.0671,
+       "p95": 0.14237,
+       "max": 0.14443
+      },
+      "swing": {
+       "n": 90,
+       "mean": 4.91884,
+       "median": 5.93992,
+       "p95": 6.54947,
+       "max": 6.57229
+      },
+      "twist": {
+       "n": 90,
+       "mean": 2.81686,
+       "median": 3.28597,
+       "p95": 3.6284,
+       "max": 3.64986
+      },
+      "demandTracking": {
+       "n": 90,
+       "mean": 0,
+       "median": 0,
+       "p95": 0,
+       "max": 0
+      }
+     }
+    },
+    "roundTripMean": {
+     "n": 90,
+     "mean": 0.01118,
+     "median": 0.01153,
+     "p95": 0.01259,
+     "max": 0.01263
+    }
+   },
+   "stage3": {
+    "handFollow": {
+     "maxRotDeg": 0,
+     "maxPosM": 0
+    }
+   },
+   "shippedConfig": {
+    "handFollow": 1,
+    "foreRollSrc": true,
+    "inPlace": false,
+    "yLift": 1,
+    "hasQuat": true,
+    "scaleRoot": 0.9211,
+    "capsuleR": 0.128,
+    "rootYawDeg": 90.01,
+    "srcMap": {
+     "Hips": "Hips",
+     "Chest": "Chest",
+     "LeftHipAnchor": "LeftLeg",
+     "RightHipAnchor": "RightLeg",
+     "LeftShoulderAnchor": "LeftArm",
+     "RightShoulderAnchor": "RightArm",
+     "LeftUpLeg": "LeftLeg",
+     "LeftLeg": "LeftShin",
+     "LeftFoot": "LeftFoot",
+     "RightUpLeg": "RightLeg",
+     "RightLeg": "RightShin",
+     "RightFoot": "RightFoot",
+     "LeftArm": "LeftArm",
+     "LeftForeArm": "LeftForeArm",
+     "LeftHand": "LeftHand",
+     "RightArm": "RightArm",
+     "RightForeArm": "RightForeArm",
+     "RightHand": "RightHand"
+    }
+   },
+   "ik": false,
+   "stage4": {
+    "details": [
+     {
+      "role": "LeftHand",
+      "frame": 45,
+      "source": "inline",
+      "posErr": 0.13325,
+      "rotErrDeg": 88.718,
+      "reachable": null
+     }
+    ],
+    "summary": {
+     "LeftHand": {
+      "pos": {
+       "n": 1,
+       "mean": 0.13325,
+       "median": 0.13325,
+       "p95": 0.13325,
+       "max": 0.13325
+      },
+      "rot": {
+       "n": 1,
+       "mean": 88.71803,
+       "median": 88.71803,
+       "p95": 88.71803,
+       "max": 88.71803
+      },
+      "unreachable": 0
+     }
+    },
+    "count": 1
+   },
+   "validity": {
+    "nan": 0,
+    "denorm": 0,
+    "ok": true
+   },
+   "kinematics": {
+    "LeftHand": {
+     "velMax": 2.36272,
+     "accMax": 0.74375,
+     "flips": 0
+    },
+    "RightHand": {
+     "velMax": 0.94009,
+     "accMax": 0.64001,
+     "flips": 0
+    },
+    "LeftFoot": {
+     "velMax": 1.15182,
+     "accMax": 0.68414,
+     "flips": 0
+    },
+    "RightFoot": {
+     "velMax": 1.03577,
+     "accMax": 0.38036,
+     "flips": 0
+    }
+   },
+   "contactSource": "channels",
+   "skate": {
+    "baseline": {
+     "Left": {
+      "n": 89,
+      "mean": 0.01572,
+      "median": 0.01184,
+      "p95": 0.04527,
+      "max": 0.0794
+     },
+     "Right": {
+      "n": 89,
+      "mean": 0.01391,
+      "median": 0.00972,
+      "p95": 0.039,
+      "max": 0.04951
+     }
+    },
+    "shipped": {
+     "Left": {
+      "n": 89,
+      "mean": 0.01572,
+      "median": 0.01184,
+      "p95": 0.04527,
+      "max": 0.0794
+     },
+     "Right": {
+      "n": 89,
+      "mean": 0.01391,
+      "median": 0.00972,
+      "p95": 0.039,
+      "max": 0.04951
+     }
+    }
+   },
+   "determinism": {
+    "maxRotDeg": 0,
+    "maxPosM": 0
+   }
+  },
+  "e2e_rhand": {
+   "constrained": true,
+   "stage1": {
+    "records": [
+     {
+      "type": "right-hand",
+      "frame": 45,
+      "role": "RightHand",
+      "posErr": 0.00003,
+      "rotErrDeg": 0
+     }
+    ],
+    "generationAdherence": {
+     "ee_pos_max": 0,
+     "ee_rot_max_deg": 0,
+     "root_xz_max": 0,
+     "fullbody_ee_pos_max": 0,
+     "fullbody_root_max": 0,
+     "heading_max_deg": 0.1124,
+     "constraint_ok": true
+    }
+   },
+   "baselineConfig": {
+    "handFollow": 1,
+    "foreRollSrc": true,
+    "inPlace": false,
+    "yLift": 1,
+    "hasQuat": true,
+    "scaleRoot": 0.9211,
+    "capsuleR": 0.128,
+    "rootYawDeg": 90.01,
+    "srcMap": {
+     "Hips": "Hips",
+     "Chest": "Chest",
+     "LeftHipAnchor": "LeftLeg",
+     "RightHipAnchor": "RightLeg",
+     "LeftShoulderAnchor": "LeftArm",
+     "RightShoulderAnchor": "RightArm",
+     "LeftUpLeg": "LeftLeg",
+     "LeftLeg": "LeftShin",
+     "LeftFoot": "LeftFoot",
+     "RightUpLeg": "RightLeg",
+     "RightLeg": "RightShin",
+     "RightFoot": "RightFoot",
+     "LeftArm": "LeftArm",
+     "LeftForeArm": "LeftForeArm",
+     "LeftHand": "LeftHand",
+     "RightArm": "RightArm",
+     "RightForeArm": "RightForeArm",
+     "RightHand": "RightHand"
+    }
+   },
+   "stage2": {
+    "fidelity": {
+     "LeftHand": {
+      "rot": {
+       "n": 90,
+       "mean": 0.00001,
+       "median": 0.00001,
+       "p95": 0.00001,
+       "max": 0.00001
+      },
+      "swing": {
+       "n": 90,
+       "mean": 5.85866,
+       "median": 5.98238,
+       "p95": 7.4015,
+       "max": 7.83805
+      },
+      "twist": {
+       "n": 90,
+       "mean": 8.46611,
+       "median": 8.54517,
+       "p95": 10.44657,
+       "max": 10.46421
+      },
+      "demandTracking": {
+       "n": 90,
+       "mean": 0,
+       "median": 0,
+       "p95": 0,
+       "max": 0
+      }
+     },
+     "RightHand": {
+      "rot": {
+       "n": 90,
+       "mean": 0.00005,
+       "median": 0.00005,
+       "p95": 0.00008,
+       "max": 0.00008
+      },
+      "swing": {
+       "n": 90,
+       "mean": 15.83932,
+       "median": 14.56147,
+       "p95": 39.57277,
+       "max": 40.88455
+      },
+      "twist": {
+       "n": 90,
+       "mean": 13.53834,
+       "median": 13.54605,
+       "p95": 29.79687,
+       "max": 30.82998
+      },
+      "demandTracking": {
+       "n": 90,
+       "mean": 0,
+       "median": 0,
+       "p95": 0,
+       "max": 0
+      }
+     },
+     "LeftFoot": {
+      "rot": {
+       "n": 90,
+       "mean": 0.02188,
+       "median": 0.01299,
+       "p95": 0.05698,
+       "max": 0.05759
+      },
+      "swing": {
+       "n": 90,
+       "mean": 0.35007,
+       "median": 0.44058,
+       "p95": 0.78711,
+       "max": 0.80015
+      },
+      "twist": {
+       "n": 90,
+       "mean": 1.01,
+       "median": 1.18866,
+       "p95": 1.54794,
+       "max": 1.56689
+      },
+      "demandTracking": {
+       "n": 90,
+       "mean": 0,
+       "median": 0,
+       "p95": 0,
+       "max": 0
+      }
+     },
+     "RightFoot": {
+      "rot": {
+       "n": 90,
+       "mean": 0.05414,
+       "median": 0.03251,
+       "p95": 0.13971,
+       "max": 0.14215
+      },
+      "swing": {
+       "n": 90,
+       "mean": 6.19924,
+       "median": 6.24241,
+       "p95": 6.60722,
+       "max": 6.66004
+      },
+      "twist": {
+       "n": 90,
+       "mean": 2.45437,
+       "median": 2.43306,
+       "p95": 2.87489,
+       "max": 2.8977
+      },
+      "demandTracking": {
+       "n": 90,
+       "mean": 0,
+       "median": 0,
+       "p95": 0,
+       "max": 0
+      }
+     }
+    },
+    "roundTripMean": {
+     "n": 90,
+     "mean": 0.01217,
+     "median": 0.01155,
+     "p95": 0.01872,
+     "max": 0.01888
+    }
+   },
+   "stage3": {
+    "handFollow": {
+     "maxRotDeg": 0,
+     "maxPosM": 0
+    }
+   },
+   "shippedConfig": {
+    "handFollow": 1,
+    "foreRollSrc": true,
+    "inPlace": false,
+    "yLift": 1,
+    "hasQuat": true,
+    "scaleRoot": 0.9211,
+    "capsuleR": 0.128,
+    "rootYawDeg": 90.01,
+    "srcMap": {
+     "Hips": "Hips",
+     "Chest": "Chest",
+     "LeftHipAnchor": "LeftLeg",
+     "RightHipAnchor": "RightLeg",
+     "LeftShoulderAnchor": "LeftArm",
+     "RightShoulderAnchor": "RightArm",
+     "LeftUpLeg": "LeftLeg",
+     "LeftLeg": "LeftShin",
+     "LeftFoot": "LeftFoot",
+     "RightUpLeg": "RightLeg",
+     "RightLeg": "RightShin",
+     "RightFoot": "RightFoot",
+     "LeftArm": "LeftArm",
+     "LeftForeArm": "LeftForeArm",
+     "LeftHand": "LeftHand",
+     "RightArm": "RightArm",
+     "RightForeArm": "RightForeArm",
+     "RightHand": "RightHand"
+    }
+   },
+   "ik": false,
+   "stage4": {
+    "details": [
+     {
+      "role": "RightHand",
+      "frame": 45,
+      "source": "inline",
+      "posErr": 0.1528,
+      "rotErrDeg": 69.258,
+      "reachable": null
+     }
+    ],
+    "summary": {
+     "RightHand": {
+      "pos": {
+       "n": 1,
+       "mean": 0.1528,
+       "median": 0.1528,
+       "p95": 0.1528,
+       "max": 0.1528
+      },
+      "rot": {
+       "n": 1,
+       "mean": 69.25781,
+       "median": 69.25781,
+       "p95": 69.25781,
+       "max": 69.25781
+      },
+      "unreachable": 0
+     }
+    },
+    "count": 1
+   },
+   "validity": {
+    "nan": 0,
+    "denorm": 0,
+    "ok": true
+   },
+   "kinematics": {
+    "LeftHand": {
+     "velMax": 0.75982,
+     "accMax": 0.34432,
+     "flips": 0
+    },
+    "RightHand": {
+     "velMax": 4.01633,
+     "accMax": 1.04993,
+     "flips": 0
+    },
+    "LeftFoot": {
+     "velMax": 0.57613,
+     "accMax": 0.34355,
+     "flips": 0
+    },
+    "RightFoot": {
+     "velMax": 0.48405,
+     "accMax": 0.20506,
+     "flips": 0
+    }
+   },
+   "contactSource": "channels",
+   "skate": {
+    "baseline": {
+     "Left": {
+      "n": 89,
+      "mean": 0.01547,
+      "median": 0.01459,
+      "p95": 0.03106,
+      "max": 0.04849
+     },
+     "Right": {
+      "n": 89,
+      "mean": 0.01197,
+      "median": 0.01046,
+      "p95": 0.02572,
+      "max": 0.03911
+     }
+    },
+    "shipped": {
+     "Left": {
+      "n": 89,
+      "mean": 0.01547,
+      "median": 0.01459,
+      "p95": 0.03106,
+      "max": 0.04849
+     },
+     "Right": {
+      "n": 89,
+      "mean": 0.01197,
+      "median": 0.01046,
+      "p95": 0.02572,
+      "max": 0.03911
+     }
+    }
+   },
+   "determinism": {
+    "maxRotDeg": 0,
+    "maxPosM": 0
+   }
+  },
+  "e2e_lfoot": {
+   "constrained": true,
+   "stage1": {
+    "records": [
+     {
+      "type": "left-foot",
+      "frame": 45,
+      "role": "LeftFoot",
+      "posErr": 0.00003,
+      "rotErrDeg": 0.001
+     }
+    ],
+    "generationAdherence": {
+     "ee_pos_max": 0,
+     "ee_rot_max_deg": 0,
+     "root_xz_max": 0,
+     "fullbody_ee_pos_max": 0,
+     "fullbody_root_max": 0,
+     "heading_max_deg": 0.688,
+     "constraint_ok": true
+    }
+   },
+   "baselineConfig": {
+    "handFollow": 1,
+    "foreRollSrc": true,
+    "inPlace": false,
+    "yLift": 1,
+    "hasQuat": true,
+    "scaleRoot": 0.9211,
+    "capsuleR": 0.128,
+    "rootYawDeg": 90.01,
+    "srcMap": {
+     "Hips": "Hips",
+     "Chest": "Chest",
+     "LeftHipAnchor": "LeftLeg",
+     "RightHipAnchor": "RightLeg",
+     "LeftShoulderAnchor": "LeftArm",
+     "RightShoulderAnchor": "RightArm",
+     "LeftUpLeg": "LeftLeg",
+     "LeftLeg": "LeftShin",
+     "LeftFoot": "LeftFoot",
+     "RightUpLeg": "RightLeg",
+     "RightLeg": "RightShin",
+     "RightFoot": "RightFoot",
+     "LeftArm": "LeftArm",
+     "LeftForeArm": "LeftForeArm",
+     "LeftHand": "LeftHand",
+     "RightArm": "RightArm",
+     "RightForeArm": "RightForeArm",
+     "RightHand": "RightHand"
+    }
+   },
+   "stage2": {
+    "fidelity": {
+     "LeftHand": {
+      "rot": {
+       "n": 90,
+       "mean": 0.00002,
+       "median": 0.00002,
+       "p95": 0.00002,
+       "max": 0.00002
+      },
+      "swing": {
+       "n": 90,
+       "mean": 1.8869,
+       "median": 1.88767,
+       "p95": 3.1369,
+       "max": 3.25544
+      },
+      "twist": {
+       "n": 90,
+       "mean": 6.20802,
+       "median": 6.34641,
+       "p95": 9.69264,
+       "max": 9.87775
+      },
+      "demandTracking": {
+       "n": 90,
+       "mean": 0,
+       "median": 0,
+       "p95": 0,
+       "max": 0
+      }
+     },
+     "RightHand": {
+      "rot": {
+       "n": 90,
+       "mean": 0.00011,
+       "median": 0.00011,
+       "p95": 0.00013,
+       "max": 0.00013
+      },
+      "swing": {
+       "n": 90,
+       "mean": 3.27343,
+       "median": 3.31743,
+       "p95": 7.90153,
+       "max": 8.47026
+      },
+      "twist": {
+       "n": 90,
+       "mean": 4.38651,
+       "median": 3.16925,
+       "p95": 12.40958,
+       "max": 13.82701
+      },
+      "demandTracking": {
+       "n": 90,
+       "mean": 0,
+       "median": 0,
+       "p95": 0,
+       "max": 0
+      }
+     },
+     "LeftFoot": {
+      "rot": {
+       "n": 90,
+       "mean": 0.02761,
+       "median": 0.03565,
+       "p95": 0.044,
+       "max": 0.04666
+      },
+      "swing": {
+       "n": 90,
+       "mean": 2.21465,
+       "median": 1.82749,
+       "p95": 4.30081,
+       "max": 4.42312
+      },
+      "twist": {
+       "n": 90,
+       "mean": 0.97035,
+       "median": 0.84433,
+       "p95": 2.32777,
+       "max": 3.07875
+      },
+      "demandTracking": {
+       "n": 90,
+       "mean": 0,
+       "median": 0,
+       "p95": 0,
+       "max": 0
+      }
+     },
+     "RightFoot": {
+      "rot": {
+       "n": 90,
+       "mean": 0.03391,
+       "median": 0.04248,
+       "p95": 0.05761,
+       "max": 0.12957
+      },
+      "swing": {
+       "n": 90,
+       "mean": 6.61331,
+       "median": 8.03865,
+       "p95": 8.853,
+       "max": 8.93147
+      },
+      "twist": {
+       "n": 90,
+       "mean": 2.84962,
+       "median": 3.23938,
+       "p95": 4.56333,
+       "max": 6.17447
+      },
+      "demandTracking": {
+       "n": 90,
+       "mean": 0,
+       "median": 0,
+       "p95": 0,
+       "max": 0
+      }
+     }
+    },
+    "roundTripMean": {
+     "n": 90,
+     "mean": 0.00611,
+     "median": 0.00578,
+     "p95": 0.00765,
+     "max": 0.00804
+    }
+   },
+   "stage3": {
+    "handFollow": {
+     "maxRotDeg": 16.6292,
+     "maxPosM": 0
+    }
+   },
+   "shippedConfig": {
+    "handFollow": 0.3,
+    "foreRollSrc": true,
+    "inPlace": false,
+    "yLift": 1,
+    "hasQuat": true,
+    "scaleRoot": 0.9211,
+    "capsuleR": 0.128,
+    "rootYawDeg": 90.01,
+    "srcMap": {
+     "Hips": "Hips",
+     "Chest": "Chest",
+     "LeftHipAnchor": "LeftLeg",
+     "RightHipAnchor": "RightLeg",
+     "LeftShoulderAnchor": "LeftArm",
+     "RightShoulderAnchor": "RightArm",
+     "LeftUpLeg": "LeftLeg",
+     "LeftLeg": "LeftShin",
+     "LeftFoot": "LeftFoot",
+     "RightUpLeg": "RightLeg",
+     "RightLeg": "RightShin",
+     "RightFoot": "RightFoot",
+     "LeftArm": "LeftArm",
+     "LeftForeArm": "LeftForeArm",
+     "LeftHand": "LeftHand",
+     "RightArm": "RightArm",
+     "RightForeArm": "RightForeArm",
+     "RightHand": "RightHand"
+    }
+   },
+   "ik": false,
+   "stage4": {
+    "details": [
+     {
+      "role": "LeftFoot",
+      "frame": 45,
+      "source": "inline",
+      "posErr": 0.01415,
+      "rotErrDeg": 0.372,
+      "reachable": null
+     }
+    ],
+    "summary": {
+     "LeftFoot": {
+      "pos": {
+       "n": 1,
+       "mean": 0.01415,
+       "median": 0.01415,
+       "p95": 0.01415,
+       "max": 0.01415
+      },
+      "rot": {
+       "n": 1,
+       "mean": 0.37232,
+       "median": 0.37232,
+       "p95": 0.37232,
+       "max": 0.37232
+      },
+      "unreachable": 0
+     }
+    },
+    "count": 1
+   },
+   "validity": {
+    "nan": 0,
+    "denorm": 0,
+    "ok": true
+   },
+   "kinematics": {
+    "LeftHand": {
+     "velMax": 0.60015,
+     "accMax": 0.32037,
+     "flips": 0
+    },
+    "RightHand": {
+     "velMax": 0.42134,
+     "accMax": 0.32186,
+     "flips": 0
+    },
+    "LeftFoot": {
+     "velMax": 1.54309,
+     "accMax": 0.74338,
+     "flips": 0
+    },
+    "RightFoot": {
+     "velMax": 3.45037,
+     "accMax": 1.48516,
+     "flips": 0
+    }
+   },
+   "contactSource": "channels",
+   "skate": {
+    "baseline": {
+     "Left": {
+      "n": 89,
+      "mean": 0.01524,
+      "median": 0.01085,
+      "p95": 0.05166,
+      "max": 0.12995
+     },
+     "Right": {
+      "n": 75,
+      "mean": 0.01599,
+      "median": 0.01047,
+      "p95": 0.05651,
+      "max": 0.11434
+     }
+    },
+    "shipped": {
+     "Left": {
+      "n": 89,
+      "mean": 0.01524,
+      "median": 0.01085,
+      "p95": 0.05166,
+      "max": 0.12995
+     },
+     "Right": {
+      "n": 75,
+      "mean": 0.01599,
+      "median": 0.01047,
+      "p95": 0.05651,
+      "max": 0.11434
+     }
+    }
+   },
+   "determinism": {
+    "maxRotDeg": 0,
+    "maxPosM": 0
+   }
+  },
+  "e2e_rfoot": {
+   "constrained": true,
+   "stage1": {
+    "records": [
+     {
+      "type": "right-foot",
+      "frame": 45,
+      "role": "RightFoot",
+      "posErr": 0.00006,
+      "rotErrDeg": 0.001
+     }
+    ],
+    "generationAdherence": {
+     "ee_pos_max": 0,
+     "ee_rot_max_deg": 0,
+     "root_xz_max": 0,
+     "fullbody_ee_pos_max": 0,
+     "fullbody_root_max": 0,
+     "heading_max_deg": 0,
+     "constraint_ok": true
+    }
+   },
+   "baselineConfig": {
+    "handFollow": 1,
+    "foreRollSrc": true,
+    "inPlace": false,
+    "yLift": 1,
+    "hasQuat": true,
+    "scaleRoot": 0.9211,
+    "capsuleR": 0.128,
+    "rootYawDeg": 90.01,
+    "srcMap": {
+     "Hips": "Hips",
+     "Chest": "Chest",
+     "LeftHipAnchor": "LeftLeg",
+     "RightHipAnchor": "RightLeg",
+     "LeftShoulderAnchor": "LeftArm",
+     "RightShoulderAnchor": "RightArm",
+     "LeftUpLeg": "LeftLeg",
+     "LeftLeg": "LeftShin",
+     "LeftFoot": "LeftFoot",
+     "RightUpLeg": "RightLeg",
+     "RightLeg": "RightShin",
+     "RightFoot": "RightFoot",
+     "LeftArm": "LeftArm",
+     "LeftForeArm": "LeftForeArm",
+     "LeftHand": "LeftHand",
+     "RightArm": "RightArm",
+     "RightForeArm": "RightForeArm",
+     "RightHand": "RightHand"
+    }
+   },
+   "stage2": {
+    "fidelity": {
+     "LeftHand": {
+      "rot": {
+       "n": 90,
+       "mean": 0.00002,
+       "median": 0.00002,
+       "p95": 0.00002,
+       "max": 0.00002
+      },
+      "swing": {
+       "n": 90,
+       "mean": 0.2633,
+       "median": 0.31334,
+       "p95": 0.45669,
+       "max": 0.47665
+      },
+      "twist": {
+       "n": 90,
+       "mean": 2.04635,
+       "median": 2.33993,
+       "p95": 3.65981,
+       "max": 3.84282
+      },
+      "demandTracking": {
+       "n": 90,
+       "mean": 0,
+       "median": 0,
+       "p95": 0,
+       "max": 0
+      }
+     },
+     "RightHand": {
+      "rot": {
+       "n": 90,
+       "mean": 0.0001,
+       "median": 0.0001,
+       "p95": 0.0001,
+       "max": 0.0001
+      },
+      "swing": {
+       "n": 90,
+       "mean": 0.87357,
+       "median": 0.86943,
+       "p95": 1.41005,
+       "max": 1.49451
+      },
+      "twist": {
+       "n": 90,
+       "mean": 2.02272,
+       "median": 1.95738,
+       "p95": 3.34477,
+       "max": 4.05734
+      },
+      "demandTracking": {
+       "n": 90,
+       "mean": 0,
+       "median": 0,
+       "p95": 0,
+       "max": 0
+      }
+     },
+     "LeftFoot": {
+      "rot": {
+       "n": 90,
+       "mean": 0.03763,
+       "median": 0.03318,
+       "p95": 0.08179,
+       "max": 0.10386
+      },
+      "swing": {
+       "n": 90,
+       "mean": 1.69189,
+       "median": 1.93514,
+       "p95": 3.15853,
+       "max": 3.49194
+      },
+      "twist": {
+       "n": 90,
+       "mean": 0.83352,
+       "median": 0.68733,
+       "p95": 2.282,
+       "max": 3.28296
+      },
+      "demandTracking": {
+       "n": 90,
+       "mean": 0,
+       "median": 0,
+       "p95": 0,
+       "max": 0
+      }
+     },
+     "RightFoot": {
+      "rot": {
+       "n": 90,
+       "mean": 0.02456,
+       "median": 0.02608,
+       "p95": 0.05224,
+       "max": 0.05875
+      },
+      "swing": {
+       "n": 90,
+       "mean": 0.47899,
+       "median": 0.32237,
+       "p95": 1.67205,
+       "max": 1.75797
+      },
+      "twist": {
+       "n": 90,
+       "mean": 0.34871,
+       "median": 0.2456,
+       "p95": 1.05271,
+       "max": 1.70936
+      },
+      "demandTracking": {
+       "n": 90,
+       "mean": 0,
+       "median": 0,
+       "p95": 0,
+       "max": 0
+      }
+     }
+    },
+    "roundTripMean": {
+     "n": 90,
+     "mean": 0.0125,
+     "median": 0.01291,
+     "p95": 0.01389,
+     "max": 0.01392
+    }
+   },
+   "stage3": {
+    "handFollow": {
+     "maxRotDeg": 19.9552,
+     "maxPosM": 0
+    }
+   },
+   "shippedConfig": {
+    "handFollow": 0.3,
+    "foreRollSrc": true,
+    "inPlace": false,
+    "yLift": 1,
+    "hasQuat": true,
+    "scaleRoot": 0.9211,
+    "capsuleR": 0.128,
+    "rootYawDeg": 90.01,
+    "srcMap": {
+     "Hips": "Hips",
+     "Chest": "Chest",
+     "LeftHipAnchor": "LeftLeg",
+     "RightHipAnchor": "RightLeg",
+     "LeftShoulderAnchor": "LeftArm",
+     "RightShoulderAnchor": "RightArm",
+     "LeftUpLeg": "LeftLeg",
+     "LeftLeg": "LeftShin",
+     "LeftFoot": "LeftFoot",
+     "RightUpLeg": "RightLeg",
+     "RightLeg": "RightShin",
+     "RightFoot": "RightFoot",
+     "LeftArm": "LeftArm",
+     "LeftForeArm": "LeftForeArm",
+     "LeftHand": "LeftHand",
+     "RightArm": "RightArm",
+     "RightForeArm": "RightForeArm",
+     "RightHand": "RightHand"
+    }
+   },
+   "ik": false,
+   "stage4": {
+    "details": [
+     {
+      "role": "RightFoot",
+      "frame": 45,
+      "source": "inline",
+      "posErr": 0.00991,
+      "rotErrDeg": 0.128,
+      "reachable": null
+     }
+    ],
+    "summary": {
+     "RightFoot": {
+      "pos": {
+       "n": 1,
+       "mean": 0.00991,
+       "median": 0.00991,
+       "p95": 0.00991,
+       "max": 0.00991
+      },
+      "rot": {
+       "n": 1,
+       "mean": 0.12807,
+       "median": 0.12807,
+       "p95": 0.12807,
+       "max": 0.12807
+      },
+      "unreachable": 0
+     }
+    },
+    "count": 1
+   },
+   "validity": {
+    "nan": 0,
+    "denorm": 0,
+    "ok": true
+   },
+   "kinematics": {
+    "LeftHand": {
+     "velMax": 0.17717,
+     "accMax": 0.13895,
+     "flips": 0
+    },
+    "RightHand": {
+     "velMax": 0.53737,
+     "accMax": 0.22883,
+     "flips": 0
+    },
+    "LeftFoot": {
+     "velMax": 1.11612,
+     "accMax": 0.82425,
+     "flips": 0
+    },
+    "RightFoot": {
+     "velMax": 1.20752,
+     "accMax": 0.49468,
+     "flips": 0
+    }
+   },
+   "contactSource": "channels",
+   "skate": {
+    "baseline": {
+     "Left": {
+      "n": 81,
+      "mean": 0.01762,
+      "median": 0.00881,
+      "p95": 0.0888,
+      "max": 0.13161
+     },
+     "Right": {
+      "n": 89,
+      "mean": 0.01673,
+      "median": 0.00889,
+      "p95": 0.05182,
+      "max": 0.18114
+     }
+    },
+    "shipped": {
+     "Left": {
+      "n": 81,
+      "mean": 0.01762,
+      "median": 0.00881,
+      "p95": 0.0888,
+      "max": 0.13161
+     },
+     "Right": {
+      "n": 89,
+      "mean": 0.01673,
+      "median": 0.00889,
+      "p95": 0.05182,
+      "max": 0.18114
+     }
+    }
+   },
+   "determinism": {
+    "maxRotDeg": 0,
+    "maxPosM": 0
+   }
+  },
+  "e2e_hands": {
+   "constrained": true,
+   "stage1": {
+    "records": [
+     {
+      "type": "left-hand",
+      "frame": 45,
+      "role": "LeftHand",
+      "posErr": 0.00006,
+      "rotErrDeg": 0
+     },
+     {
+      "type": "right-hand",
+      "frame": 45,
+      "role": "RightHand",
+      "posErr": 0.00002,
+      "rotErrDeg": 0.001
+     }
+    ],
+    "generationAdherence": {
+     "ee_pos_max": 0,
+     "ee_rot_max_deg": 0,
+     "root_xz_max": 0,
+     "fullbody_ee_pos_max": 0,
+     "fullbody_root_max": 0,
+     "heading_max_deg": 0,
+     "constraint_ok": true
+    }
+   },
+   "baselineConfig": {
+    "handFollow": 1,
+    "foreRollSrc": true,
+    "inPlace": false,
+    "yLift": 1,
+    "hasQuat": true,
+    "scaleRoot": 0.9211,
+    "capsuleR": 0.128,
+    "rootYawDeg": 90.01,
+    "srcMap": {
+     "Hips": "Hips",
+     "Chest": "Chest",
+     "LeftHipAnchor": "LeftLeg",
+     "RightHipAnchor": "RightLeg",
+     "LeftShoulderAnchor": "LeftArm",
+     "RightShoulderAnchor": "RightArm",
+     "LeftUpLeg": "LeftLeg",
+     "LeftLeg": "LeftShin",
+     "LeftFoot": "LeftFoot",
+     "RightUpLeg": "RightLeg",
+     "RightLeg": "RightShin",
+     "RightFoot": "RightFoot",
+     "LeftArm": "LeftArm",
+     "LeftForeArm": "LeftForeArm",
+     "LeftHand": "LeftHand",
+     "RightArm": "RightArm",
+     "RightForeArm": "RightForeArm",
+     "RightHand": "RightHand"
+    }
+   },
+   "stage2": {
+    "fidelity": {
+     "LeftHand": {
+      "rot": {
+       "n": 90,
+       "mean": 0.00001,
+       "median": 0,
+       "p95": 0.00002,
+       "max": 0.00002
+      },
+      "swing": {
+       "n": 90,
+       "mean": 7.66249,
+       "median": 6.72262,
+       "p95": 19.47229,
+       "max": 20.55545
+      },
+      "twist": {
+       "n": 90,
+       "mean": 6.01877,
+       "median": 5.79446,
+       "p95": 14.15067,
+       "max": 14.82423
+      },
+      "demandTracking": {
+       "n": 90,
+       "mean": 0,
+       "median": 0,
+       "p95": 0,
+       "max": 0
+      }
+     },
+     "RightHand": {
+      "rot": {
+       "n": 90,
+       "mean": 0.00005,
+       "median": 0.00004,
+       "p95": 0.00008,
+       "max": 0.00008
+      },
+      "swing": {
+       "n": 90,
+       "mean": 12.20283,
+       "median": 8.55599,
+       "p95": 34.30238,
+       "max": 35.0409
+      },
+      "twist": {
+       "n": 90,
+       "mean": 9.55081,
+       "median": 7.59339,
+       "p95": 25.49782,
+       "max": 26.22061
+      },
+      "demandTracking": {
+       "n": 90,
+       "mean": 0,
+       "median": 0,
+       "p95": 0,
+       "max": 0
+      }
+     },
+     "LeftFoot": {
+      "rot": {
+       "n": 90,
+       "mean": 0.03543,
+       "median": 0.02968,
+       "p95": 0.07468,
+       "max": 0.07631
+      },
+      "swing": {
+       "n": 90,
+       "mean": 5.49251,
+       "median": 5.48766,
+       "p95": 6.04341,
+       "max": 6.10278
+      },
+      "twist": {
+       "n": 90,
+       "mean": 2.10625,
+       "median": 2.15914,
+       "p95": 2.52421,
+       "max": 2.58136
+      },
+      "demandTracking": {
+       "n": 90,
+       "mean": 0,
+       "median": 0,
+       "p95": 0,
+       "max": 0
+      }
+     },
+     "RightFoot": {
+      "rot": {
+       "n": 90,
+       "mean": 0.03402,
+       "median": 0.02611,
+       "p95": 0.07184,
+       "max": 0.07245
+      },
+      "swing": {
+       "n": 90,
+       "mean": 2.71733,
+       "median": 2.87893,
+       "p95": 3.5266,
+       "max": 3.7779
+      },
+      "twist": {
+       "n": 90,
+       "mean": 1.11034,
+       "median": 1.17437,
+       "p95": 1.55177,
+       "max": 1.56303
+      },
+      "demandTracking": {
+       "n": 90,
+       "mean": 0,
+       "median": 0,
+       "p95": 0,
+       "max": 0
+      }
+     }
+    },
+    "roundTripMean": {
+     "n": 90,
+     "mean": 0.01183,
+     "median": 0.01047,
+     "p95": 0.01982,
+     "max": 0.01992
+    }
+   },
+   "stage3": {
+    "handFollow": {
+     "maxRotDeg": 0,
+     "maxPosM": 0
+    }
+   },
+   "shippedConfig": {
+    "handFollow": 1,
+    "foreRollSrc": true,
+    "inPlace": false,
+    "yLift": 1,
+    "hasQuat": true,
+    "scaleRoot": 0.9211,
+    "capsuleR": 0.128,
+    "rootYawDeg": 90.01,
+    "srcMap": {
+     "Hips": "Hips",
+     "Chest": "Chest",
+     "LeftHipAnchor": "LeftLeg",
+     "RightHipAnchor": "RightLeg",
+     "LeftShoulderAnchor": "LeftArm",
+     "RightShoulderAnchor": "RightArm",
+     "LeftUpLeg": "LeftLeg",
+     "LeftLeg": "LeftShin",
+     "LeftFoot": "LeftFoot",
+     "RightUpLeg": "RightLeg",
+     "RightLeg": "RightShin",
+     "RightFoot": "RightFoot",
+     "LeftArm": "LeftArm",
+     "LeftForeArm": "LeftForeArm",
+     "LeftHand": "LeftHand",
+     "RightArm": "RightArm",
+     "RightForeArm": "RightForeArm",
+     "RightHand": "RightHand"
+    }
+   },
+   "ik": false,
+   "stage4": {
+    "details": [
+     {
+      "role": "LeftHand",
+      "frame": 45,
+      "source": "inline",
+      "posErr": 0.15451,
+      "rotErrDeg": 86.592,
+      "reachable": null
+     },
+     {
+      "role": "RightHand",
+      "frame": 45,
+      "source": "inline",
+      "posErr": 0.16407,
+      "rotErrDeg": 67.009,
+      "reachable": null
+     }
+    ],
+    "summary": {
+     "LeftHand": {
+      "pos": {
+       "n": 1,
+       "mean": 0.15451,
+       "median": 0.15451,
+       "p95": 0.15451,
+       "max": 0.15451
+      },
+      "rot": {
+       "n": 1,
+       "mean": 86.5925,
+       "median": 86.5925,
+       "p95": 86.5925,
+       "max": 86.5925
+      },
+      "unreachable": 0
+     },
+     "RightHand": {
+      "pos": {
+       "n": 1,
+       "mean": 0.16407,
+       "median": 0.16407,
+       "p95": 0.16407,
+       "max": 0.16407
+      },
+      "rot": {
+       "n": 1,
+       "mean": 67.00943,
+       "median": 67.00943,
+       "p95": 67.00943,
+       "max": 67.00943
+      },
+      "unreachable": 0
+     }
+    },
+    "count": 2
+   },
+   "validity": {
+    "nan": 0,
+    "denorm": 0,
+    "ok": true
+   },
+   "kinematics": {
+    "LeftHand": {
+     "velMax": 4.54227,
+     "accMax": 1.4853,
+     "flips": 0
+    },
+    "RightHand": {
+     "velMax": 3.03468,
+     "accMax": 0.95619,
+     "flips": 0
+    },
+    "LeftFoot": {
+     "velMax": 0.71817,
+     "accMax": 0.5867,
+     "flips": 0
+    },
+    "RightFoot": {
+     "velMax": 0.60177,
+     "accMax": 0.40575,
+     "flips": 0
+    }
+   },
+   "contactSource": "channels",
+   "skate": {
+    "baseline": {
+     "Left": {
+      "n": 89,
+      "mean": 0.01002,
+      "median": 0.00845,
+      "p95": 0.02128,
+      "max": 0.02973
+     },
+     "Right": {
+      "n": 89,
+      "mean": 0.00766,
+      "median": 0.00593,
+      "p95": 0.02033,
+      "max": 0.03711
+     }
+    },
+    "shipped": {
+     "Left": {
+      "n": 89,
+      "mean": 0.01002,
+      "median": 0.00845,
+      "p95": 0.02128,
+      "max": 0.02973
+     },
+     "Right": {
+      "n": 89,
+      "mean": 0.00766,
+      "median": 0.00593,
+      "p95": 0.02033,
+      "max": 0.03711
+     }
+    }
+   },
+   "determinism": {
+    "maxRotDeg": 0,
+    "maxPosM": 0
+   }
+  },
+  "e2e_feet": {
+   "constrained": true,
+   "stage1": {
+    "records": [
+     {
+      "type": "left-foot",
+      "frame": 60,
+      "role": "LeftFoot",
+      "posErr": 0.00005,
+      "rotErrDeg": 0.001
+     },
+     {
+      "type": "right-foot",
+      "frame": 60,
+      "role": "RightFoot",
+      "posErr": 0.00005,
+      "rotErrDeg": 0
+     }
+    ],
+    "generationAdherence": {
+     "ee_pos_max": 0,
+     "ee_rot_max_deg": 0,
+     "root_xz_max": 0,
+     "fullbody_ee_pos_max": 0,
+     "fullbody_root_max": 0,
+     "heading_max_deg": 0.1907,
+     "constraint_ok": true
+    }
+   },
+   "baselineConfig": {
+    "handFollow": 1,
+    "foreRollSrc": true,
+    "inPlace": false,
+    "yLift": 1,
+    "hasQuat": true,
+    "scaleRoot": 0.9211,
+    "capsuleR": 0.128,
+    "rootYawDeg": 90.01,
+    "srcMap": {
+     "Hips": "Hips",
+     "Chest": "Chest",
+     "LeftHipAnchor": "LeftLeg",
+     "RightHipAnchor": "RightLeg",
+     "LeftShoulderAnchor": "LeftArm",
+     "RightShoulderAnchor": "RightArm",
+     "LeftUpLeg": "LeftLeg",
+     "LeftLeg": "LeftShin",
+     "LeftFoot": "LeftFoot",
+     "RightUpLeg": "RightLeg",
+     "RightLeg": "RightShin",
+     "RightFoot": "RightFoot",
+     "LeftArm": "LeftArm",
+     "LeftForeArm": "LeftForeArm",
+     "LeftHand": "LeftHand",
+     "RightArm": "RightArm",
+     "RightForeArm": "RightForeArm",
+     "RightHand": "RightHand"
+    }
+   },
+   "stage2": {
+    "fidelity": {
+     "LeftHand": {
+      "rot": {
+       "n": 90,
+       "mean": 0.00002,
+       "median": 0.00002,
+       "p95": 0.00003,
+       "max": 0.00003
+      },
+      "swing": {
+       "n": 90,
+       "mean": 2.9076,
+       "median": 2.03382,
+       "p95": 7.62932,
+       "max": 8.7884
+      },
+      "twist": {
+       "n": 90,
+       "mean": 6.58091,
+       "median": 6.3375,
+       "p95": 14.05375,
+       "max": 14.84108
+      },
+      "demandTracking": {
+       "n": 90,
+       "mean": 0,
+       "median": 0,
+       "p95": 0,
+       "max": 0
+      }
+     },
+     "RightHand": {
+      "rot": {
+       "n": 90,
+       "mean": 0.00006,
+       "median": 0.00006,
+       "p95": 0.00008,
+       "max": 0.00008
+      },
+      "swing": {
+       "n": 90,
+       "mean": 11.8886,
+       "median": 10.12595,
+       "p95": 27.70642,
+       "max": 29.85934
+      },
+      "twist": {
+       "n": 90,
+       "mean": 20.80559,
+       "median": 18.91646,
+       "p95": 41.50014,
+       "max": 43.7274
+      },
+      "demandTracking": {
+       "n": 90,
+       "mean": 0,
+       "median": 0,
+       "p95": 0,
+       "max": 0
+      }
+     },
+     "LeftFoot": {
+      "rot": {
+       "n": 90,
+       "mean": 0.03749,
+       "median": 0.03596,
+       "p95": 0.08027,
+       "max": 0.08687
+      },
+      "swing": {
+       "n": 90,
+       "mean": 1.01447,
+       "median": 1.02267,
+       "p95": 2.11803,
+       "max": 2.19303
+      },
+      "twist": {
+       "n": 90,
+       "mean": 0.5911,
+       "median": 0.56633,
+       "p95": 1.05639,
+       "max": 1.24186
+      },
+      "demandTracking": {
+       "n": 90,
+       "mean": 0,
+       "median": 0,
+       "p95": 0,
+       "max": 0
+      }
+     },
+     "RightFoot": {
+      "rot": {
+       "n": 90,
+       "mean": 0.03747,
+       "median": 0.035,
+       "p95": 0.07773,
+       "max": 0.08346
+      },
+      "swing": {
+       "n": 90,
+       "mean": 2.13549,
+       "median": 2.03479,
+       "p95": 4.62661,
+       "max": 4.80323
+      },
+      "twist": {
+       "n": 90,
+       "mean": 1.59492,
+       "median": 1.54608,
+       "p95": 3.40178,
+       "max": 3.8608
+      },
+      "demandTracking": {
+       "n": 90,
+       "mean": 0,
+       "median": 0,
+       "p95": 0,
+       "max": 0
+      }
+     }
+    },
+    "roundTripMean": {
+     "n": 90,
+     "mean": 0.01804,
+     "median": 0.0166,
+     "p95": 0.03398,
+     "max": 0.03535
+    }
+   },
+   "stage3": {
+    "handFollow": {
+     "maxRotDeg": 35.9162,
+     "maxPosM": 0
+    }
+   },
+   "shippedConfig": {
+    "handFollow": 0.3,
+    "foreRollSrc": true,
+    "inPlace": false,
+    "yLift": 1,
+    "hasQuat": true,
+    "scaleRoot": 0.9211,
+    "capsuleR": 0.128,
+    "rootYawDeg": 90.01,
+    "srcMap": {
+     "Hips": "Hips",
+     "Chest": "Chest",
+     "LeftHipAnchor": "LeftLeg",
+     "RightHipAnchor": "RightLeg",
+     "LeftShoulderAnchor": "LeftArm",
+     "RightShoulderAnchor": "RightArm",
+     "LeftUpLeg": "LeftLeg",
+     "LeftLeg": "LeftShin",
+     "LeftFoot": "LeftFoot",
+     "RightUpLeg": "RightLeg",
+     "RightLeg": "RightShin",
+     "RightFoot": "RightFoot",
+     "LeftArm": "LeftArm",
+     "LeftForeArm": "LeftForeArm",
+     "LeftHand": "LeftHand",
+     "RightArm": "RightArm",
+     "RightForeArm": "RightForeArm",
+     "RightHand": "RightHand"
+    }
+   },
+   "ik": false,
+   "stage4": {
+    "details": [
+     {
+      "role": "LeftFoot",
+      "frame": 60,
+      "source": "inline",
+      "posErr": 0.01655,
+      "rotErrDeg": 0.378,
+      "reachable": null
+     },
+     {
+      "role": "RightFoot",
+      "frame": 60,
+      "source": "inline",
+      "posErr": 0.01843,
+      "rotErrDeg": 0.1,
+      "reachable": null
+     }
+    ],
+    "summary": {
+     "LeftFoot": {
+      "pos": {
+       "n": 1,
+       "mean": 0.01655,
+       "median": 0.01655,
+       "p95": 0.01655,
+       "max": 0.01655
+      },
+      "rot": {
+       "n": 1,
+       "mean": 0.37799,
+       "median": 0.37799,
+       "p95": 0.37799,
+       "max": 0.37799
+      },
+      "unreachable": 0
+     },
+     "RightFoot": {
+      "pos": {
+       "n": 1,
+       "mean": 0.01843,
+       "median": 0.01843,
+       "p95": 0.01843,
+       "max": 0.01843
+      },
+      "rot": {
+       "n": 1,
+       "mean": 0.09953,
+       "median": 0.09953,
+       "p95": 0.09953,
+       "max": 0.09953
+      },
+      "unreachable": 0
+     }
+    },
+    "count": 2
+   },
+   "validity": {
+    "nan": 0,
+    "denorm": 0,
+    "ok": true
+   },
+   "kinematics": {
+    "LeftHand": {
+     "velMax": 1.38032,
+     "accMax": 0.58608,
+     "flips": 0
+    },
+    "RightHand": {
+     "velMax": 2.33199,
+     "accMax": 0.76718,
+     "flips": 0
+    },
+    "LeftFoot": {
+     "velMax": 7.5003,
+     "accMax": 5.83694,
+     "flips": 0
+    },
+    "RightFoot": {
+     "velMax": 9.27302,
+     "accMax": 7.79253,
+     "flips": 0
+    }
+   },
+   "contactSource": "channels",
+   "skate": {
+    "baseline": {
+     "Left": {
+      "n": 84,
+      "mean": 0.03825,
+      "median": 0.03002,
+      "p95": 0.0988,
+      "max": 0.11009
+     },
+     "Right": {
+      "n": 84,
+      "mean": 0.0412,
+      "median": 0.03568,
+      "p95": 0.09347,
+      "max": 0.10716
+     }
+    },
+    "shipped": {
+     "Left": {
+      "n": 84,
+      "mean": 0.03825,
+      "median": 0.03002,
+      "p95": 0.0988,
+      "max": 0.11009
+     },
+     "Right": {
+      "n": 84,
+      "mean": 0.0412,
+      "median": 0.03568,
+      "p95": 0.09347,
+      "max": 0.10716
+     }
+    }
+   },
+   "determinism": {
+    "maxRotDeg": 0,
+    "maxPosM": 0
+   }
+  },
+  "e2e_hands_feet": {
+   "constrained": true,
+   "stage1": {
+    "records": [
+     {
+      "type": "left-hand",
+      "frame": 50,
+      "role": "LeftHand",
+      "posErr": 0.00006,
+      "rotErrDeg": 0.001
+     },
+     {
+      "type": "right-hand",
+      "frame": 50,
+      "role": "RightHand",
+      "posErr": 0.00002,
+      "rotErrDeg": 0
+     },
+     {
+      "type": "left-foot",
+      "frame": 50,
+      "role": "LeftFoot",
+      "posErr": 0.00002,
+      "rotErrDeg": 0
+     },
+     {
+      "type": "right-foot",
+      "frame": 50,
+      "role": "RightFoot",
+      "posErr": 0.00006,
+      "rotErrDeg": 0.001
+     }
+    ],
+    "generationAdherence": {
+     "ee_pos_max": 0,
+     "ee_rot_max_deg": 0,
+     "root_xz_max": 0,
+     "fullbody_ee_pos_max": 0,
+     "fullbody_root_max": 0,
+     "heading_max_deg": 1.0932,
+     "constraint_ok": true
+    }
+   },
+   "baselineConfig": {
+    "handFollow": 1,
+    "foreRollSrc": true,
+    "inPlace": false,
+    "yLift": 1,
+    "hasQuat": true,
+    "scaleRoot": 0.9211,
+    "capsuleR": 0.128,
+    "rootYawDeg": 90.01,
+    "srcMap": {
+     "Hips": "Hips",
+     "Chest": "Chest",
+     "LeftHipAnchor": "LeftLeg",
+     "RightHipAnchor": "RightLeg",
+     "LeftShoulderAnchor": "LeftArm",
+     "RightShoulderAnchor": "RightArm",
+     "LeftUpLeg": "LeftLeg",
+     "LeftLeg": "LeftShin",
+     "LeftFoot": "LeftFoot",
+     "RightUpLeg": "RightLeg",
+     "RightLeg": "RightShin",
+     "RightFoot": "RightFoot",
+     "LeftArm": "LeftArm",
+     "LeftForeArm": "LeftForeArm",
+     "LeftHand": "LeftHand",
+     "RightArm": "RightArm",
+     "RightForeArm": "RightForeArm",
+     "RightHand": "RightHand"
+    }
+   },
+   "stage2": {
+    "fidelity": {
+     "LeftHand": {
+      "rot": {
+       "n": 90,
+       "mean": 0,
+       "median": 0,
+       "p95": 0,
+       "max": 0
+      },
+      "swing": {
+       "n": 90,
+       "mean": 7.85968,
+       "median": 5.95035,
+       "p95": 23.5659,
+       "max": 26.77078
+      },
+      "twist": {
+       "n": 90,
+       "mean": 5.6457,
+       "median": 4.43468,
+       "p95": 16.67049,
+       "max": 18.31088
+      },
+      "demandTracking": {
+       "n": 90,
+       "mean": 0,
+       "median": 0,
+       "p95": 0,
+       "max": 0
+      }
+     },
+     "RightHand": {
+      "rot": {
+       "n": 90,
+       "mean": 0.00004,
+       "median": 0.00004,
+       "p95": 0.00005,
+       "max": 0.00005
+      },
+      "swing": {
+       "n": 90,
+       "mean": 22.59354,
+       "median": 23.67309,
+       "p95": 29.51158,
+       "max": 31.47417
+      },
+      "twist": {
+       "n": 90,
+       "mean": 17.78354,
+       "median": 18.84273,
+       "p95": 23.6496,
+       "max": 25.00372
+      },
+      "demandTracking": {
+       "n": 90,
+       "mean": 0,
+       "median": 0,
+       "p95": 0,
+       "max": 0
+      }
+     },
+     "LeftFoot": {
+      "rot": {
+       "n": 90,
+       "mean": 0.03891,
+       "median": 0.03072,
+       "p95": 0.10793,
+       "max": 0.11058
+      },
+      "swing": {
+       "n": 90,
+       "mean": 2.77527,
+       "median": 2.35671,
+       "p95": 5.64557,
+       "max": 6.20355
+      },
+      "twist": {
+       "n": 90,
+       "mean": 1.2746,
+       "median": 1.33666,
+       "p95": 2.2347,
+       "max": 2.54456
+      },
+      "demandTracking": {
+       "n": 90,
+       "mean": 0,
+       "median": 0,
+       "p95": 0,
+       "max": 0
+      }
+     },
+     "RightFoot": {
+      "rot": {
+       "n": 90,
+       "mean": 0.02081,
+       "median": 0.01591,
+       "p95": 0.05466,
+       "max": 0.05716
+      },
+      "swing": {
+       "n": 90,
+       "mean": 0.6298,
+       "median": 0.35623,
+       "p95": 1.65988,
+       "max": 1.75581
+      },
+      "twist": {
+       "n": 90,
+       "mean": 1.27311,
+       "median": 0.93769,
+       "p95": 3.63755,
+       "max": 4.04483
+      },
+      "demandTracking": {
+       "n": 90,
+       "mean": 0,
+       "median": 0,
+       "p95": 0,
+       "max": 0
+      }
+     }
+    },
+    "roundTripMean": {
+     "n": 90,
+     "mean": 0.01459,
+     "median": 0.00856,
+     "p95": 0.03489,
+     "max": 0.03515
+    }
+   },
+   "stage3": {
+    "handFollow": {
+     "maxRotDeg": 0,
+     "maxPosM": 0
+    }
+   },
+   "shippedConfig": {
+    "handFollow": 1,
+    "foreRollSrc": true,
+    "inPlace": false,
+    "yLift": 1,
+    "hasQuat": true,
+    "scaleRoot": 0.9211,
+    "capsuleR": 0.128,
+    "rootYawDeg": 90.01,
+    "srcMap": {
+     "Hips": "Hips",
+     "Chest": "Chest",
+     "LeftHipAnchor": "LeftLeg",
+     "RightHipAnchor": "RightLeg",
+     "LeftShoulderAnchor": "LeftArm",
+     "RightShoulderAnchor": "RightArm",
+     "LeftUpLeg": "LeftLeg",
+     "LeftLeg": "LeftShin",
+     "LeftFoot": "LeftFoot",
+     "RightUpLeg": "RightLeg",
+     "RightLeg": "RightShin",
+     "RightFoot": "RightFoot",
+     "LeftArm": "LeftArm",
+     "LeftForeArm": "LeftForeArm",
+     "LeftHand": "LeftHand",
+     "RightArm": "RightArm",
+     "RightForeArm": "RightForeArm",
+     "RightHand": "RightHand"
+    }
+   },
+   "ik": false,
+   "stage4": {
+    "details": [
+     {
+      "role": "LeftHand",
+      "frame": 50,
+      "source": "inline",
+      "posErr": 0.15012,
+      "rotErrDeg": 97.465,
+      "reachable": null
+     },
+     {
+      "role": "RightHand",
+      "frame": 50,
+      "source": "inline",
+      "posErr": 0.163,
+      "rotErrDeg": 71.188,
+      "reachable": null
+     },
+     {
+      "role": "LeftFoot",
+      "frame": 50,
+      "source": "inline",
+      "posErr": 0.01547,
+      "rotErrDeg": 0.283,
+      "reachable": null
+     },
+     {
+      "role": "RightFoot",
+      "frame": 50,
+      "source": "inline",
+      "posErr": 0.00672,
+      "rotErrDeg": 0.163,
+      "reachable": null
+     }
+    ],
+    "summary": {
+     "LeftHand": {
+      "pos": {
+       "n": 1,
+       "mean": 0.15012,
+       "median": 0.15012,
+       "p95": 0.15012,
+       "max": 0.15012
+      },
+      "rot": {
+       "n": 1,
+       "mean": 97.46507,
+       "median": 97.46507,
+       "p95": 97.46507,
+       "max": 97.46507
+      },
+      "unreachable": 0
+     },
+     "RightHand": {
+      "pos": {
+       "n": 1,
+       "mean": 0.163,
+       "median": 0.163,
+       "p95": 0.163,
+       "max": 0.163
+      },
+      "rot": {
+       "n": 1,
+       "mean": 71.18779,
+       "median": 71.18779,
+       "p95": 71.18779,
+       "max": 71.18779
+      },
+      "unreachable": 0
+     },
+     "LeftFoot": {
+      "pos": {
+       "n": 1,
+       "mean": 0.01547,
+       "median": 0.01547,
+       "p95": 0.01547,
+       "max": 0.01547
+      },
+      "rot": {
+       "n": 1,
+       "mean": 0.28292,
+       "median": 0.28292,
+       "p95": 0.28292,
+       "max": 0.28292
+      },
+      "unreachable": 0
+     },
+     "RightFoot": {
+      "pos": {
+       "n": 1,
+       "mean": 0.00672,
+       "median": 0.00672,
+       "p95": 0.00672,
+       "max": 0.00672
+      },
+      "rot": {
+       "n": 1,
+       "mean": 0.1627,
+       "median": 0.1627,
+       "p95": 0.1627,
+       "max": 0.1627
+      },
+      "unreachable": 0
+     }
+    },
+    "count": 4
+   },
+   "validity": {
+    "nan": 0,
+    "denorm": 0,
+    "ok": true
+   },
+   "kinematics": {
+    "LeftHand": {
+     "velMax": 1.78811,
+     "accMax": 0.81653,
+     "flips": 0
+    },
+    "RightHand": {
+     "velMax": 3.16297,
+     "accMax": 2.09473,
+     "flips": 0
+    },
+    "LeftFoot": {
+     "velMax": 0.93839,
+     "accMax": 0.49149,
+     "flips": 0
+    },
+    "RightFoot": {
+     "velMax": 1.99675,
+     "accMax": 1.64146,
+     "flips": 0
+    }
+   },
+   "contactSource": "channels",
+   "skate": {
+    "baseline": {
+     "Left": {
+      "n": 89,
+      "mean": 0.02665,
+      "median": 0.0184,
+      "p95": 0.06156,
+      "max": 0.06502
+     },
+     "Right": {
+      "n": 89,
+      "mean": 0.02954,
+      "median": 0.0173,
+      "p95": 0.07581,
+      "max": 0.08529
+     }
+    },
+    "shipped": {
+     "Left": {
+      "n": 89,
+      "mean": 0.02665,
+      "median": 0.0184,
+      "p95": 0.06156,
+      "max": 0.06502
+     },
+     "Right": {
+      "n": 89,
+      "mean": 0.02954,
+      "median": 0.0173,
+      "p95": 0.07581,
+      "max": 0.08529
+     }
+    }
+   },
+   "determinism": {
+    "maxRotDeg": 0,
+    "maxPosM": 0
+   }
+  },
+  "e2e_hand_rot": {
+   "constrained": true,
+   "stage1": {
+    "records": [
+     {
+      "type": "left-hand",
+      "frame": 40,
+      "role": "LeftHand",
+      "posErr": 0.00004,
+      "rotErrDeg": 0.001
+     },
+     {
+      "type": "left-hand",
+      "frame": 100,
+      "role": "LeftHand",
+      "posErr": 0.00005,
+      "rotErrDeg": 0.001
+     }
+    ],
+    "generationAdherence": {
+     "ee_pos_max": 0,
+     "ee_rot_max_deg": 0,
+     "root_xz_max": 0,
+     "fullbody_ee_pos_max": 0,
+     "fullbody_root_max": 0,
+     "heading_max_deg": 1.0049,
+     "constraint_ok": true
+    }
+   },
+   "baselineConfig": {
+    "handFollow": 1,
+    "foreRollSrc": true,
+    "inPlace": false,
+    "yLift": 1,
+    "hasQuat": true,
+    "scaleRoot": 0.9211,
+    "capsuleR": 0.128,
+    "rootYawDeg": 90.01,
+    "srcMap": {
+     "Hips": "Hips",
+     "Chest": "Chest",
+     "LeftHipAnchor": "LeftLeg",
+     "RightHipAnchor": "RightLeg",
+     "LeftShoulderAnchor": "LeftArm",
+     "RightShoulderAnchor": "RightArm",
+     "LeftUpLeg": "LeftLeg",
+     "LeftLeg": "LeftShin",
+     "LeftFoot": "LeftFoot",
+     "RightUpLeg": "RightLeg",
+     "RightLeg": "RightShin",
+     "RightFoot": "RightFoot",
+     "LeftArm": "LeftArm",
+     "LeftForeArm": "LeftForeArm",
+     "LeftHand": "LeftHand",
+     "RightArm": "RightArm",
+     "RightForeArm": "RightForeArm",
+     "RightHand": "RightHand"
+    }
+   },
+   "stage2": {
+    "fidelity": {
+     "LeftHand": {
+      "rot": {
+       "n": 120,
+       "mean": 0,
+       "median": 0,
+       "p95": 0.00001,
+       "max": 0.00001
+      },
+      "swing": {
+       "n": 120,
+       "mean": 13.72363,
+       "median": 12.88723,
+       "p95": 26.28391,
+       "max": 36.09199
+      },
+      "twist": {
+       "n": 120,
+       "mean": 14.95112,
+       "median": 11.81082,
+       "p95": 34.92265,
+       "max": 40.38828
+      },
+      "demandTracking": {
+       "n": 120,
+       "mean": 0,
+       "median": 0,
+       "p95": 0,
+       "max": 0
+      }
+     },
+     "RightHand": {
+      "rot": {
+       "n": 120,
+       "mean": 0.00013,
+       "median": 0.00012,
+       "p95": 0.00016,
+       "max": 0.00016
+      },
+      "swing": {
+       "n": 120,
+       "mean": 1.39634,
+       "median": 0.28985,
+       "p95": 4.67275,
+       "max": 4.93958
+      },
+      "twist": {
+       "n": 120,
+       "mean": 2.46846,
+       "median": 1.39978,
+       "p95": 7.02752,
+       "max": 7.43812
+      },
+      "demandTracking": {
+       "n": 120,
+       "mean": 0,
+       "median": 0,
+       "p95": 0,
+       "max": 0
+      }
+     },
+     "LeftFoot": {
+      "rot": {
+       "n": 120,
+       "mean": 0.46911,
+       "median": 0.34161,
+       "p95": 1.02409,
+       "max": 1.0392
+      },
+      "swing": {
+       "n": 120,
+       "mean": 3.31084,
+       "median": 3.09613,
+       "p95": 7.24719,
+       "max": 7.57162
+      },
+      "twist": {
+       "n": 120,
+       "mean": 1.19587,
+       "median": 1.20076,
+       "p95": 2.30788,
+       "max": 2.46361
+      },
+      "demandTracking": {
+       "n": 120,
+       "mean": 0,
+       "median": 0,
+       "p95": 0,
+       "max": 0
+      }
+     },
+     "RightFoot": {
+      "rot": {
+       "n": 120,
+       "mean": 0.28836,
+       "median": 0.30833,
+       "p95": 0.56319,
+       "max": 0.59241
+      },
+      "swing": {
+       "n": 120,
+       "mean": 0.80154,
+       "median": 0.69304,
+       "p95": 2.28587,
+       "max": 2.70062
+      },
+      "twist": {
+       "n": 120,
+       "mean": 0.86964,
+       "median": 0.94454,
+       "p95": 1.96047,
+       "max": 2.06359
+      },
+      "demandTracking": {
+       "n": 120,
+       "mean": 0,
+       "median": 0,
+       "p95": 0,
+       "max": 0
+      }
+     }
+    },
+    "roundTripMean": {
+     "n": 120,
+     "mean": 0.01142,
+     "median": 0.00923,
+     "p95": 0.02082,
+     "max": 0.02228
+    }
+   },
+   "stage3": {
+    "handFollow": {
+     "maxRotDeg": 0,
+     "maxPosM": 0
+    }
+   },
+   "shippedConfig": {
+    "handFollow": 1,
+    "foreRollSrc": true,
+    "inPlace": false,
+    "yLift": 1,
+    "hasQuat": true,
+    "scaleRoot": 0.9211,
+    "capsuleR": 0.128,
+    "rootYawDeg": 90.01,
+    "srcMap": {
+     "Hips": "Hips",
+     "Chest": "Chest",
+     "LeftHipAnchor": "LeftLeg",
+     "RightHipAnchor": "RightLeg",
+     "LeftShoulderAnchor": "LeftArm",
+     "RightShoulderAnchor": "RightArm",
+     "LeftUpLeg": "LeftLeg",
+     "LeftLeg": "LeftShin",
+     "LeftFoot": "LeftFoot",
+     "RightUpLeg": "RightLeg",
+     "RightLeg": "RightShin",
+     "RightFoot": "RightFoot",
+     "LeftArm": "LeftArm",
+     "LeftForeArm": "LeftForeArm",
+     "LeftHand": "LeftHand",
+     "RightArm": "RightArm",
+     "RightForeArm": "RightForeArm",
+     "RightHand": "RightHand"
+    }
+   },
+   "ik": false,
+   "stage4": {
+    "details": [
+     {
+      "role": "LeftHand",
+      "frame": 40,
+      "source": "inline",
+      "posErr": 0.1477,
+      "rotErrDeg": 78.169,
+      "reachable": null
+     },
+     {
+      "role": "LeftHand",
+      "frame": 100,
+      "source": "inline",
+      "posErr": 0.15031,
+      "rotErrDeg": 92.33,
+      "reachable": null
+     }
+    ],
+    "summary": {
+     "LeftHand": {
+      "pos": {
+       "n": 2,
+       "mean": 0.149,
+       "median": 0.15031,
+       "p95": 0.15031,
+       "max": 0.15031
+      },
+      "rot": {
+       "n": 2,
+       "mean": 85.24922,
+       "median": 92.32973,
+       "p95": 92.32973,
+       "max": 92.32973
+      },
+      "unreachable": 0
+     }
+    },
+    "count": 2
+   },
+   "validity": {
+    "nan": 0,
+    "denorm": 0,
+    "ok": true
+   },
+   "kinematics": {
+    "LeftHand": {
+     "velMax": 5.79133,
+     "accMax": 1.89831,
+     "flips": 0
+    },
+    "RightHand": {
+     "velMax": 0.97212,
+     "accMax": 0.59432,
+     "flips": 0
+    },
+    "LeftFoot": {
+     "velMax": 1.95406,
+     "accMax": 0.96562,
+     "flips": 0
+    },
+    "RightFoot": {
+     "velMax": 1.76651,
+     "accMax": 0.25814,
+     "flips": 0
+    }
+   },
+   "contactSource": "channels",
+   "skate": {
+    "baseline": {
+     "Left": {
+      "n": 119,
+      "mean": 0.01289,
+      "median": 0.01071,
+      "p95": 0.028,
+      "max": 0.07006
+     },
+     "Right": {
+      "n": 119,
+      "mean": 0.01296,
+      "median": 0.01042,
+      "p95": 0.0309,
+      "max": 0.053
+     }
+    },
+    "shipped": {
+     "Left": {
+      "n": 119,
+      "mean": 0.01289,
+      "median": 0.01071,
+      "p95": 0.028,
+      "max": 0.07006
+     },
+     "Right": {
+      "n": 119,
+      "mean": 0.01296,
+      "median": 0.01042,
+      "p95": 0.0309,
+      "max": 0.053
+     }
+    }
+   },
+   "determinism": {
+    "maxRotDeg": 0,
+    "maxPosM": 0
+   }
+  },
+  "e2e_waypoints": {
+   "constrained": true,
+   "stage1": {
+    "records": [],
+    "generationAdherence": {
+     "ee_pos_max": 0,
+     "ee_rot_max_deg": 0,
+     "root_xz_max": 0.01,
+     "fullbody_ee_pos_max": 0,
+     "fullbody_root_max": 0,
+     "heading_max_deg": 0,
+     "constraint_ok": true
+    }
+   },
+   "baselineConfig": {
+    "handFollow": 1,
+    "foreRollSrc": true,
+    "inPlace": false,
+    "yLift": 1,
+    "hasQuat": true,
+    "scaleRoot": 0.9211,
+    "capsuleR": 0.128,
+    "rootYawDeg": 90.01,
+    "srcMap": {
+     "Hips": "Hips",
+     "Chest": "Chest",
+     "LeftHipAnchor": "LeftLeg",
+     "RightHipAnchor": "RightLeg",
+     "LeftShoulderAnchor": "LeftArm",
+     "RightShoulderAnchor": "RightArm",
+     "LeftUpLeg": "LeftLeg",
+     "LeftLeg": "LeftShin",
+     "LeftFoot": "LeftFoot",
+     "RightUpLeg": "RightLeg",
+     "RightLeg": "RightShin",
+     "RightFoot": "RightFoot",
+     "LeftArm": "LeftArm",
+     "LeftForeArm": "LeftForeArm",
+     "LeftHand": "LeftHand",
+     "RightArm": "RightArm",
+     "RightForeArm": "RightForeArm",
+     "RightHand": "RightHand"
+    }
+   },
+   "stage2": {
+    "fidelity": {
+     "LeftHand": {
+      "rot": {
+       "n": 181,
+       "mean": 0.00002,
+       "median": 0.00002,
+       "p95": 0.00002,
+       "max": 0.00002
+      },
+      "swing": {
+       "n": 181,
+       "mean": 1.63416,
+       "median": 1.18219,
+       "p95": 5.04117,
+       "max": 6.9105
+      },
+      "twist": {
+       "n": 181,
+       "mean": 4.75834,
+       "median": 4.36397,
+       "p95": 11.533,
+       "max": 14.66299
+      },
+      "demandTracking": {
+       "n": 181,
+       "mean": 0,
+       "median": 0,
+       "p95": 0,
+       "max": 0
+      }
+     },
+     "RightHand": {
+      "rot": {
+       "n": 181,
+       "mean": 0.00009,
+       "median": 0.00009,
+       "p95": 0.00013,
+       "max": 0.00013
+      },
+      "swing": {
+       "n": 181,
+       "mean": 7.70003,
+       "median": 7.55878,
+       "p95": 15.66717,
+       "max": 18.06337
+      },
+      "twist": {
+       "n": 181,
+       "mean": 10.28117,
+       "median": 10.0052,
+       "p95": 17.58002,
+       "max": 20.39522
+      },
+      "demandTracking": {
+       "n": 181,
+       "mean": 0,
+       "median": 0,
+       "p95": 0,
+       "max": 0
+      }
+     },
+     "LeftFoot": {
+      "rot": {
+       "n": 181,
+       "mean": 0.20499,
+       "median": 0.14539,
+       "p95": 0.60423,
+       "max": 0.92938
+      },
+      "swing": {
+       "n": 181,
+       "mean": 44.91741,
+       "median": 44.7195,
+       "p95": 82.67297,
+       "max": 83.44375
+      },
+      "twist": {
+       "n": 181,
+       "mean": 9.31522,
+       "median": 11.69525,
+       "p95": 17.02628,
+       "max": 25.62238
+      },
+      "demandTracking": {
+       "n": 181,
+       "mean": 0,
+       "median": 0,
+       "p95": 0,
+       "max": 0
+      }
+     },
+     "RightFoot": {
+      "rot": {
+       "n": 181,
+       "mean": 0.13623,
+       "median": 0.08753,
+       "p95": 0.41264,
+       "max": 0.84076
+      },
+      "swing": {
+       "n": 181,
+       "mean": 50.47362,
+       "median": 63.72028,
+       "p95": 74.07839,
+       "max": 88.45751
+      },
+      "twist": {
+       "n": 181,
+       "mean": 16.32307,
+       "median": 19.1712,
+       "p95": 28.5813,
+       "max": 38.30873
+      },
+      "demandTracking": {
+       "n": 181,
+       "mean": 0,
+       "median": 0,
+       "p95": 0,
+       "max": 0
+      }
+     }
+    },
+    "roundTripMean": {
+     "n": 181,
+     "mean": 0.0098,
+     "median": 0.00948,
+     "p95": 0.01606,
+     "max": 0.01715
+    }
+   },
+   "stage3": {
+    "handFollow": {
+     "maxRotDeg": 33.3402,
+     "maxPosM": 0
+    }
+   },
+   "shippedConfig": {
+    "handFollow": 0.3,
+    "foreRollSrc": true,
+    "inPlace": false,
+    "yLift": 1,
+    "hasQuat": true,
+    "scaleRoot": 0.9211,
+    "capsuleR": 0.128,
+    "rootYawDeg": 90.01,
+    "srcMap": {
+     "Hips": "Hips",
+     "Chest": "Chest",
+     "LeftHipAnchor": "LeftLeg",
+     "RightHipAnchor": "RightLeg",
+     "LeftShoulderAnchor": "LeftArm",
+     "RightShoulderAnchor": "RightArm",
+     "LeftUpLeg": "LeftLeg",
+     "LeftLeg": "LeftShin",
+     "LeftFoot": "LeftFoot",
+     "RightUpLeg": "RightLeg",
+     "RightLeg": "RightShin",
+     "RightFoot": "RightFoot",
+     "LeftArm": "LeftArm",
+     "LeftForeArm": "LeftForeArm",
+     "LeftHand": "LeftHand",
+     "RightArm": "RightArm",
+     "RightForeArm": "RightForeArm",
+     "RightHand": "RightHand"
+    }
+   },
+   "ik": false,
+   "stage4": {
+    "details": [],
+    "summary": {},
+    "count": 0
+   },
+   "validity": {
+    "nan": 0,
+    "denorm": 0,
+    "ok": true
+   },
+   "kinematics": {
+    "LeftHand": {
+     "velMax": 0.95796,
+     "accMax": 0.55772,
+     "flips": 0
+    },
+    "RightHand": {
+     "velMax": 0.99858,
+     "accMax": 0.35472,
+     "flips": 0
+    },
+    "LeftFoot": {
+     "velMax": 18.42428,
+     "accMax": 7.63357,
+     "flips": 0
+    },
+    "RightFoot": {
+     "velMax": 15.05936,
+     "accMax": 5.53773,
+     "flips": 0
+    }
+   },
+   "contactSource": "channels",
+   "skate": {
+    "baseline": {
+     "Left": {
+      "n": 89,
+      "mean": 0.04434,
+      "median": 0.03319,
+      "p95": 0.12294,
+      "max": 0.20336
+     },
+     "Right": {
+      "n": 101,
+      "mean": 0.03852,
+      "median": 0.02243,
+      "p95": 0.10639,
+      "max": 0.19743
+     }
+    },
+    "shipped": {
+     "Left": {
+      "n": 89,
+      "mean": 0.04434,
+      "median": 0.03319,
+      "p95": 0.12294,
+      "max": 0.20336
+     },
+     "Right": {
+      "n": 101,
+      "mean": 0.03852,
+      "median": 0.02243,
+      "p95": 0.10639,
+      "max": 0.19743
+     }
+    }
+   },
+   "determinism": {
+    "maxRotDeg": 0,
+    "maxPosM": 0
+   }
+  },
+  "e2e_path": {
+   "constrained": true,
+   "stage1": {
+    "records": [],
+    "generationAdherence": {
+     "ee_pos_max": 0,
+     "ee_rot_max_deg": 0,
+     "root_xz_max": 0.01,
+     "fullbody_ee_pos_max": 0,
+     "fullbody_root_max": 0,
+     "heading_max_deg": 5.2029,
+     "constraint_ok": true
+    }
+   },
+   "baselineConfig": {
+    "handFollow": 1,
+    "foreRollSrc": true,
+    "inPlace": false,
+    "yLift": 1,
+    "hasQuat": true,
+    "scaleRoot": 0.9211,
+    "capsuleR": 0.128,
+    "rootYawDeg": 90.01,
+    "srcMap": {
+     "Hips": "Hips",
+     "Chest": "Chest",
+     "LeftHipAnchor": "LeftLeg",
+     "RightHipAnchor": "RightLeg",
+     "LeftShoulderAnchor": "LeftArm",
+     "RightShoulderAnchor": "RightArm",
+     "LeftUpLeg": "LeftLeg",
+     "LeftLeg": "LeftShin",
+     "LeftFoot": "LeftFoot",
+     "RightUpLeg": "RightLeg",
+     "RightLeg": "RightShin",
+     "RightFoot": "RightFoot",
+     "LeftArm": "LeftArm",
+     "LeftForeArm": "LeftForeArm",
+     "LeftHand": "LeftHand",
+     "RightArm": "RightArm",
+     "RightForeArm": "RightForeArm",
+     "RightHand": "RightHand"
+    }
+   },
+   "stage2": {
+    "fidelity": {
+     "LeftHand": {
+      "rot": {
+       "n": 240,
+       "mean": 0.00001,
+       "median": 0.00001,
+       "p95": 0.00001,
+       "max": 0.00001
+      },
+      "swing": {
+       "n": 240,
+       "mean": 20.90196,
+       "median": 21.30308,
+       "p95": 25.63865,
+       "max": 27.13065
+      },
+      "twist": {
+       "n": 240,
+       "mean": 28.88157,
+       "median": 29.42181,
+       "p95": 34.21219,
+       "max": 35.6147
+      },
+      "demandTracking": {
+       "n": 240,
+       "mean": 0,
+       "median": 0,
+       "p95": 0,
+       "max": 0
+      }
+     },
+     "RightHand": {
+      "rot": {
+       "n": 240,
+       "mean": 0.00005,
+       "median": 0.00005,
+       "p95": 0.00005,
+       "max": 0.00005
+      },
+      "swing": {
+       "n": 240,
+       "mean": 32.43029,
+       "median": 32.11211,
+       "p95": 36.81344,
+       "max": 37.92042
+      },
+      "twist": {
+       "n": 240,
+       "mean": 39.74696,
+       "median": 39.35108,
+       "p95": 45.97719,
+       "max": 47.24097
+      },
+      "demandTracking": {
+       "n": 240,
+       "mean": 0,
+       "median": 0,
+       "p95": 0,
+       "max": 0
+      }
+     },
+     "LeftFoot": {
+      "rot": {
+       "n": 240,
+       "mean": 0.0893,
+       "median": 0.04513,
+       "p95": 0.36869,
+       "max": 0.74725
+      },
+      "swing": {
+       "n": 240,
+       "mean": 32.14253,
+       "median": 31.66751,
+       "p95": 54.10824,
+       "max": 54.48079
+      },
+      "twist": {
+       "n": 240,
+       "mean": 13.06628,
+       "median": 13.71779,
+       "p95": 19.12485,
+       "max": 28.92172
+      },
+      "demandTracking": {
+       "n": 240,
+       "mean": 0,
+       "median": 0,
+       "p95": 0,
+       "max": 0
+      }
+     },
+     "RightFoot": {
+      "rot": {
+       "n": 240,
+       "mean": 0.17393,
+       "median": 0.13606,
+       "p95": 0.50256,
+       "max": 0.73499
+      },
+      "swing": {
+       "n": 240,
+       "mean": 19.49305,
+       "median": 16.40145,
+       "p95": 42.67429,
+       "max": 43.07445
+      },
+      "twist": {
+       "n": 240,
+       "mean": 9.2562,
+       "median": 9.71096,
+       "p95": 15.9699,
+       "max": 18.13526
+      },
+      "demandTracking": {
+       "n": 240,
+       "mean": 0,
+       "median": 0,
+       "p95": 0,
+       "max": 0
+      }
+     }
+    },
+    "roundTripMean": {
+     "n": 240,
+     "mean": 0.01011,
+     "median": 0.00993,
+     "p95": 0.01272,
+     "max": 0.01291
+    }
+   },
+   "stage3": {
+    "handFollow": {
+     "maxRotDeg": 38.9083,
+     "maxPosM": 0
+    }
+   },
+   "shippedConfig": {
+    "handFollow": 0.3,
+    "foreRollSrc": true,
+    "inPlace": false,
+    "yLift": 1,
+    "hasQuat": true,
+    "scaleRoot": 0.9211,
+    "capsuleR": 0.128,
+    "rootYawDeg": 90.01,
+    "srcMap": {
+     "Hips": "Hips",
+     "Chest": "Chest",
+     "LeftHipAnchor": "LeftLeg",
+     "RightHipAnchor": "RightLeg",
+     "LeftShoulderAnchor": "LeftArm",
+     "RightShoulderAnchor": "RightArm",
+     "LeftUpLeg": "LeftLeg",
+     "LeftLeg": "LeftShin",
+     "LeftFoot": "LeftFoot",
+     "RightUpLeg": "RightLeg",
+     "RightLeg": "RightShin",
+     "RightFoot": "RightFoot",
+     "LeftArm": "LeftArm",
+     "LeftForeArm": "LeftForeArm",
+     "LeftHand": "LeftHand",
+     "RightArm": "RightArm",
+     "RightForeArm": "RightForeArm",
+     "RightHand": "RightHand"
+    }
+   },
+   "ik": false,
+   "stage4": {
+    "details": [],
+    "summary": {},
+    "count": 0
+   },
+   "validity": {
+    "nan": 0,
+    "denorm": 0,
+    "ok": true
+   },
+   "kinematics": {
+    "LeftHand": {
+     "velMax": 0.33142,
+     "accMax": 0.16397,
+     "flips": 0
+    },
+    "RightHand": {
+     "velMax": 0.41335,
+     "accMax": 0.17511,
+     "flips": 0
+    },
+    "LeftFoot": {
+     "velMax": 6.75593,
+     "accMax": 2.75534,
+     "flips": 0
+    },
+    "RightFoot": {
+     "velMax": 9.04359,
+     "accMax": 5.97602,
+     "flips": 0
+    }
+   },
+   "contactSource": "channels",
+   "skate": {
+    "baseline": {
+     "Left": {
+      "n": 159,
+      "mean": 0.02466,
+      "median": 0.01344,
+      "p95": 0.09223,
+      "max": 0.3485
+     },
+     "Right": {
+      "n": 170,
+      "mean": 0.02396,
+      "median": 0.01536,
+      "p95": 0.08759,
+      "max": 0.23369
+     }
+    },
+    "shipped": {
+     "Left": {
+      "n": 159,
+      "mean": 0.02466,
+      "median": 0.01344,
+      "p95": 0.09223,
+      "max": 0.3485
+     },
+     "Right": {
+      "n": 170,
+      "mean": 0.02396,
+      "median": 0.01536,
+      "p95": 0.08759,
+      "max": 0.23369
+     }
+    }
+   },
+   "determinism": {
+    "maxRotDeg": 0,
+    "maxPosM": 0
+   }
+  },
+  "e2e_mixed": {
+   "constrained": true,
+   "stage1": {
+    "records": [
+     {
+      "type": "right-hand",
+      "frame": 60,
+      "role": "RightHand",
+      "posErr": 0.00002,
+      "rotErrDeg": 0
+     },
+     {
+      "type": "fullbody",
+      "frame": 110,
+      "role": "LeftHand",
+      "posErr": 0.00005
+     },
+     {
+      "type": "fullbody",
+      "frame": 110,
+      "role": "RightHand",
+      "posErr": 0.00006
+     },
+     {
+      "type": "fullbody",
+      "frame": 110,
+      "role": "LeftFoot",
+      "posErr": 0.00004
+     },
+     {
+      "type": "fullbody",
+      "frame": 110,
+      "role": "RightFoot",
+      "posErr": 0.00005
+     },
+     {
+      "type": "fullbody",
+      "frame": 110,
+      "role": "Head",
+      "posErr": 0.00005
+     }
+    ],
+    "generationAdherence": {
+     "ee_pos_max": 0,
+     "ee_rot_max_deg": 0,
+     "root_xz_max": 0.01,
+     "fullbody_ee_pos_max": 0,
+     "fullbody_root_max": 0,
+     "heading_max_deg": 0.4579,
+     "constraint_ok": true
+    }
+   },
+   "baselineConfig": {
+    "handFollow": 1,
+    "foreRollSrc": true,
+    "inPlace": false,
+    "yLift": 1,
+    "hasQuat": true,
+    "scaleRoot": 0.9211,
+    "capsuleR": 0.128,
+    "rootYawDeg": 90.01,
+    "srcMap": {
+     "Hips": "Hips",
+     "Chest": "Chest",
+     "LeftHipAnchor": "LeftLeg",
+     "RightHipAnchor": "RightLeg",
+     "LeftShoulderAnchor": "LeftArm",
+     "RightShoulderAnchor": "RightArm",
+     "LeftUpLeg": "LeftLeg",
+     "LeftLeg": "LeftShin",
+     "LeftFoot": "LeftFoot",
+     "RightUpLeg": "RightLeg",
+     "RightLeg": "RightShin",
+     "RightFoot": "RightFoot",
+     "LeftArm": "LeftArm",
+     "LeftForeArm": "LeftForeArm",
+     "LeftHand": "LeftHand",
+     "RightArm": "RightArm",
+     "RightForeArm": "RightForeArm",
+     "RightHand": "RightHand"
+    }
+   },
+   "stage2": {
+    "fidelity": {
+     "LeftHand": {
+      "rot": {
+       "n": 180,
+       "mean": 0,
+       "median": 0,
+       "p95": 0,
+       "max": 0
+      },
+      "swing": {
+       "n": 180,
+       "mean": 16.54826,
+       "median": 13.48733,
+       "p95": 29.84281,
+       "max": 30.84236
+      },
+      "twist": {
+       "n": 180,
+       "mean": 12.47623,
+       "median": 10.20241,
+       "p95": 22.73895,
+       "max": 23.42109
+      },
+      "demandTracking": {
+       "n": 180,
+       "mean": 0,
+       "median": 0,
+       "p95": 0,
+       "max": 0
+      }
+     },
+     "RightHand": {
+      "rot": {
+       "n": 180,
+       "mean": 0.00003,
+       "median": 0.00003,
+       "p95": 0.00003,
+       "max": 0.00003
+      },
+      "swing": {
+       "n": 180,
+       "mean": 21.74802,
+       "median": 22.61591,
+       "p95": 30.68417,
+       "max": 31.65018
+      },
+      "twist": {
+       "n": 180,
+       "mean": 16.36111,
+       "median": 16.85071,
+       "p95": 23.53878,
+       "max": 26.10516
+      },
+      "demandTracking": {
+       "n": 180,
+       "mean": 0,
+       "median": 0,
+       "p95": 0,
+       "max": 0
+      }
+     },
+     "LeftFoot": {
+      "rot": {
+       "n": 180,
+       "mean": 0.22969,
+       "median": 0.13486,
+       "p95": 0.96516,
+       "max": 1.34595
+      },
+      "swing": {
+       "n": 180,
+       "mean": 14.76325,
+       "median": 7.06776,
+       "p95": 43.07229,
+       "max": 43.50475
+      },
+      "twist": {
+       "n": 180,
+       "mean": 5.7131,
+       "median": 3.33987,
+       "p95": 13.76494,
+       "max": 19.1588
+      },
+      "demandTracking": {
+       "n": 180,
+       "mean": 0,
+       "median": 0,
+       "p95": 0,
+       "max": 0
+      }
+     },
+     "RightFoot": {
+      "rot": {
+       "n": 180,
+       "mean": 0.11024,
+       "median": 0.07538,
+       "p95": 0.35282,
+       "max": 1.12632
+      },
+      "swing": {
+       "n": 180,
+       "mean": 20.21652,
+       "median": 6.52931,
+       "p95": 53.24257,
+       "max": 53.47378
+      },
+      "twist": {
+       "n": 180,
+       "mean": 8.57043,
+       "median": 3.93053,
+       "p95": 19.65199,
+       "max": 21.34781
+      },
+      "demandTracking": {
+       "n": 180,
+       "mean": 0,
+       "median": 0,
+       "p95": 0,
+       "max": 0
+      }
+     }
+    },
+    "roundTripMean": {
+     "n": 180,
+     "mean": 0.00889,
+     "median": 0.00858,
+     "p95": 0.01125,
+     "max": 0.01277
+    }
+   },
+   "stage3": {
+    "handFollow": {
+     "maxRotDeg": 0,
+     "maxPosM": 0
+    }
+   },
+   "shippedConfig": {
+    "handFollow": 1,
+    "foreRollSrc": true,
+    "inPlace": false,
+    "yLift": 1,
+    "hasQuat": true,
+    "scaleRoot": 0.9211,
+    "capsuleR": 0.128,
+    "rootYawDeg": 90.01,
+    "srcMap": {
+     "Hips": "Hips",
+     "Chest": "Chest",
+     "LeftHipAnchor": "LeftLeg",
+     "RightHipAnchor": "RightLeg",
+     "LeftShoulderAnchor": "LeftArm",
+     "RightShoulderAnchor": "RightArm",
+     "LeftUpLeg": "LeftLeg",
+     "LeftLeg": "LeftShin",
+     "LeftFoot": "LeftFoot",
+     "RightUpLeg": "RightLeg",
+     "RightLeg": "RightShin",
+     "RightFoot": "RightFoot",
+     "LeftArm": "LeftArm",
+     "LeftForeArm": "LeftForeArm",
+     "LeftHand": "LeftHand",
+     "RightArm": "RightArm",
+     "RightForeArm": "RightForeArm",
+     "RightHand": "RightHand"
+    }
+   },
+   "ik": false,
+   "stage4": {
+    "details": [
+     {
+      "role": "RightHand",
+      "frame": 60,
+      "source": "inline",
+      "posErr": 0.17005,
+      "rotErrDeg": 82.769,
+      "reachable": null
+     }
+    ],
+    "summary": {
+     "RightHand": {
+      "pos": {
+       "n": 1,
+       "mean": 0.17005,
+       "median": 0.17005,
+       "p95": 0.17005,
+       "max": 0.17005
+      },
+      "rot": {
+       "n": 1,
+       "mean": 82.76893,
+       "median": 82.76893,
+       "p95": 82.76893,
+       "max": 82.76893
+      },
+      "unreachable": 0
+     }
+    },
+    "count": 1
+   },
+   "validity": {
+    "nan": 0,
+    "denorm": 0,
+    "ok": true
+   },
+   "kinematics": {
+    "LeftHand": {
+     "velMax": 2.90827,
+     "accMax": 1.09801,
+     "flips": 0
+    },
+    "RightHand": {
+     "velMax": 3.06866,
+     "accMax": 1.10446,
+     "flips": 0
+    },
+    "LeftFoot": {
+     "velMax": 12.98925,
+     "accMax": 8.12598,
+     "flips": 0
+    },
+    "RightFoot": {
+     "velMax": 6.05784,
+     "accMax": 1.70241,
+     "flips": 0
+    }
+   },
+   "contactSource": "channels",
+   "skate": {
+    "baseline": {
+     "Left": {
+      "n": 160,
+      "mean": 0.03165,
+      "median": 0.01466,
+      "p95": 0.14869,
+      "max": 0.1873
+     },
+     "Right": {
+      "n": 147,
+      "mean": 0.03325,
+      "median": 0.01383,
+      "p95": 0.16177,
+      "max": 0.19659
+     }
+    },
+    "shipped": {
+     "Left": {
+      "n": 160,
+      "mean": 0.03165,
+      "median": 0.01466,
+      "p95": 0.14869,
+      "max": 0.1873
+     },
+     "Right": {
+      "n": 147,
+      "mean": 0.03325,
+      "median": 0.01383,
+      "p95": 0.16177,
+      "max": 0.19659
+     }
+    }
+   },
+   "determinism": {
+    "maxRotDeg": 0,
+    "maxPosM": 0
+   }
+  },
+  "e2e_constraint_only": {
+   "constrained": true,
+   "stage1": {
+    "records": [],
+    "generationAdherence": {
+     "ee_pos_max": 0,
+     "ee_rot_max_deg": 0,
+     "root_xz_max": 0.01,
+     "fullbody_ee_pos_max": 0,
+     "fullbody_root_max": 0,
+     "heading_max_deg": 0,
+     "constraint_ok": true
+    }
+   },
+   "baselineConfig": {
+    "handFollow": 1,
+    "foreRollSrc": true,
+    "inPlace": false,
+    "yLift": 1,
+    "hasQuat": true,
+    "scaleRoot": 0.9211,
+    "capsuleR": 0.128,
+    "rootYawDeg": 90.01,
+    "srcMap": {
+     "Hips": "Hips",
+     "Chest": "Chest",
+     "LeftHipAnchor": "LeftLeg",
+     "RightHipAnchor": "RightLeg",
+     "LeftShoulderAnchor": "LeftArm",
+     "RightShoulderAnchor": "RightArm",
+     "LeftUpLeg": "LeftLeg",
+     "LeftLeg": "LeftShin",
+     "LeftFoot": "LeftFoot",
+     "RightUpLeg": "RightLeg",
+     "RightLeg": "RightShin",
+     "RightFoot": "RightFoot",
+     "LeftArm": "LeftArm",
+     "LeftForeArm": "LeftForeArm",
+     "LeftHand": "LeftHand",
+     "RightArm": "RightArm",
+     "RightForeArm": "RightForeArm",
+     "RightHand": "RightHand"
+    }
+   },
+   "stage2": {
+    "fidelity": {
+     "LeftHand": {
+      "rot": {
+       "n": 181,
+       "mean": 0.00001,
+       "median": 0.00001,
+       "p95": 0.00001,
+       "max": 0.00001
+      },
+      "swing": {
+       "n": 181,
+       "mean": 2.17932,
+       "median": 1.30656,
+       "p95": 7.08383,
+       "max": 8.40267
+      },
+      "twist": {
+       "n": 181,
+       "mean": 5.513,
+       "median": 4.89975,
+       "p95": 11.2988,
+       "max": 17.98983
+      },
+      "demandTracking": {
+       "n": 181,
+       "mean": 0,
+       "median": 0,
+       "p95": 0,
+       "max": 0
+      }
+     },
+     "RightHand": {
+      "rot": {
+       "n": 181,
+       "mean": 0.0001,
+       "median": 0.0001,
+       "p95": 0.00016,
+       "max": 0.00016
+      },
+      "swing": {
+       "n": 181,
+       "mean": 3.20885,
+       "median": 1.49527,
+       "p95": 11.3339,
+       "max": 15.8674
+      },
+      "twist": {
+       "n": 181,
+       "mean": 6.49952,
+       "median": 3.45813,
+       "p95": 19.83299,
+       "max": 23.62681
+      },
+      "demandTracking": {
+       "n": 181,
+       "mean": 0,
+       "median": 0,
+       "p95": 0,
+       "max": 0
+      }
+     },
+     "LeftFoot": {
+      "rot": {
+       "n": 181,
+       "mean": 0.19879,
+       "median": 0.12615,
+       "p95": 0.6199,
+       "max": 1.32137
+      },
+      "swing": {
+       "n": 181,
+       "mean": 32.62632,
+       "median": 33.0109,
+       "p95": 58.21603,
+       "max": 60.63319
+      },
+      "twist": {
+       "n": 181,
+       "mean": 12.44863,
+       "median": 14.33733,
+       "p95": 21.29269,
+       "max": 25.49888
+      },
+      "demandTracking": {
+       "n": 181,
+       "mean": 0,
+       "median": 0,
+       "p95": 0,
+       "max": 0
+      }
+     },
+     "RightFoot": {
+      "rot": {
+       "n": 181,
+       "mean": 0.1353,
+       "median": 0.10907,
+       "p95": 0.37705,
+       "max": 0.50736
+      },
+      "swing": {
+       "n": 181,
+       "mean": 35.27215,
+       "median": 43.27984,
+       "p95": 57.28287,
+       "max": 59.06448
+      },
+      "twist": {
+       "n": 181,
+       "mean": 12.58808,
+       "median": 14.803,
+       "p95": 18.63457,
+       "max": 20.86302
+      },
+      "demandTracking": {
+       "n": 181,
+       "mean": 0,
+       "median": 0,
+       "p95": 0,
+       "max": 0
+      }
+     }
+    },
+    "roundTripMean": {
+     "n": 181,
+     "mean": 0.01621,
+     "median": 0.01937,
+     "p95": 0.02134,
+     "max": 0.02169
+    }
+   },
+   "stage3": {
+    "handFollow": {
+     "maxRotDeg": 38.3528,
+     "maxPosM": 0
+    }
+   },
+   "shippedConfig": {
+    "handFollow": 0.3,
+    "foreRollSrc": true,
+    "inPlace": false,
+    "yLift": 1,
+    "hasQuat": true,
+    "scaleRoot": 0.9211,
+    "capsuleR": 0.128,
+    "rootYawDeg": 90.01,
+    "srcMap": {
+     "Hips": "Hips",
+     "Chest": "Chest",
+     "LeftHipAnchor": "LeftLeg",
+     "RightHipAnchor": "RightLeg",
+     "LeftShoulderAnchor": "LeftArm",
+     "RightShoulderAnchor": "RightArm",
+     "LeftUpLeg": "LeftLeg",
+     "LeftLeg": "LeftShin",
+     "LeftFoot": "LeftFoot",
+     "RightUpLeg": "RightLeg",
+     "RightLeg": "RightShin",
+     "RightFoot": "RightFoot",
+     "LeftArm": "LeftArm",
+     "LeftForeArm": "LeftForeArm",
+     "LeftHand": "LeftHand",
+     "RightArm": "RightArm",
+     "RightForeArm": "RightForeArm",
+     "RightHand": "RightHand"
+    }
+   },
+   "ik": false,
+   "stage4": {
+    "details": [],
+    "summary": {},
+    "count": 0
+   },
+   "validity": {
+    "nan": 0,
+    "denorm": 0,
+    "ok": true
+   },
+   "kinematics": {
+    "LeftHand": {
+     "velMax": 1.00177,
+     "accMax": 0.32813,
+     "flips": 0
+    },
+    "RightHand": {
+     "velMax": 1.96615,
+     "accMax": 0.53637,
+     "flips": 0
+    },
+    "LeftFoot": {
+     "velMax": 9.93008,
+     "accMax": 5.6907,
+     "flips": 0
+    },
+    "RightFoot": {
+     "velMax": 11.19152,
+     "accMax": 8.07546,
+     "flips": 0
+    }
+   },
+   "contactSource": "channels",
+   "skate": {
+    "baseline": {
+     "Left": {
+      "n": 85,
+      "mean": 0.04281,
+      "median": 0.03582,
+      "p95": 0.09467,
+      "max": 0.18953
+     },
+     "Right": {
+      "n": 94,
+      "mean": 0.04022,
+      "median": 0.02687,
+      "p95": 0.13459,
+      "max": 0.23258
+     }
+    },
+    "shipped": {
+     "Left": {
+      "n": 85,
+      "mean": 0.04281,
+      "median": 0.03582,
+      "p95": 0.09467,
+      "max": 0.18953
+     },
+     "Right": {
+      "n": 94,
+      "mean": 0.04022,
+      "median": 0.02687,
+      "p95": 0.13459,
+      "max": 0.23258
+     }
+    }
+   },
+   "determinism": {
+    "maxRotDeg": 0,
+    "maxPosM": 0
+   }
+  },
+  "e2e_constraint_only_pose": {
+   "constrained": true,
+   "stage1": {
+    "records": [
+     {
+      "type": "fullbody",
+      "frame": 0,
+      "role": "LeftHand",
+      "posErr": 0.00006
+     },
+     {
+      "type": "fullbody",
+      "frame": 0,
+      "role": "RightHand",
+      "posErr": 0.00005
+     },
+     {
+      "type": "fullbody",
+      "frame": 0,
+      "role": "LeftFoot",
+      "posErr": 0.00001
+     },
+     {
+      "type": "fullbody",
+      "frame": 0,
+      "role": "RightFoot",
+      "posErr": 0.00006
+     },
+     {
+      "type": "fullbody",
+      "frame": 0,
+      "role": "Head",
+      "posErr": 0.00005
+     },
+     {
+      "type": "fullbody",
+      "frame": 89,
+      "role": "LeftHand",
+      "posErr": 0.00005
+     },
+     {
+      "type": "fullbody",
+      "frame": 89,
+      "role": "RightHand",
+      "posErr": 0.00006
+     },
+     {
+      "type": "fullbody",
+      "frame": 89,
+      "role": "LeftFoot",
+      "posErr": 0.00001
+     },
+     {
+      "type": "fullbody",
+      "frame": 89,
+      "role": "RightFoot",
+      "posErr": 0.00004
+     },
+     {
+      "type": "fullbody",
+      "frame": 89,
+      "role": "Head",
+      "posErr": 0.00004
+     }
+    ],
+    "generationAdherence": {
+     "ee_pos_max": 0,
+     "ee_rot_max_deg": 0,
+     "root_xz_max": 0,
+     "fullbody_ee_pos_max": 0,
+     "fullbody_root_max": 0,
+     "heading_max_deg": 0.0554,
+     "constraint_ok": true
+    }
+   },
+   "baselineConfig": {
+    "handFollow": 1,
+    "foreRollSrc": true,
+    "inPlace": false,
+    "yLift": 1,
+    "hasQuat": true,
+    "scaleRoot": 0.9211,
+    "capsuleR": 0.128,
+    "rootYawDeg": 90.01,
+    "srcMap": {
+     "Hips": "Hips",
+     "Chest": "Chest",
+     "LeftHipAnchor": "LeftLeg",
+     "RightHipAnchor": "RightLeg",
+     "LeftShoulderAnchor": "LeftArm",
+     "RightShoulderAnchor": "RightArm",
+     "LeftUpLeg": "LeftLeg",
+     "LeftLeg": "LeftShin",
+     "LeftFoot": "LeftFoot",
+     "RightUpLeg": "RightLeg",
+     "RightLeg": "RightShin",
+     "RightFoot": "RightFoot",
+     "LeftArm": "LeftArm",
+     "LeftForeArm": "LeftForeArm",
+     "LeftHand": "LeftHand",
+     "RightArm": "RightArm",
+     "RightForeArm": "RightForeArm",
+     "RightHand": "RightHand"
+    }
+   },
+   "stage2": {
+    "fidelity": {
+     "LeftHand": {
+      "rot": {
+       "n": 90,
+       "mean": 0,
+       "median": 0,
+       "p95": 0,
+       "max": 0
+      },
+      "swing": {
+       "n": 90,
+       "mean": 16.3136,
+       "median": 12.91685,
+       "p95": 32.13414,
+       "max": 32.24537
+      },
+      "twist": {
+       "n": 90,
+       "mean": 11.58278,
+       "median": 9.80144,
+       "p95": 22.71023,
+       "max": 22.85198
+      },
+      "demandTracking": {
+       "n": 90,
+       "mean": 0,
+       "median": 0,
+       "p95": 0,
+       "max": 0
+      }
+     },
+     "RightHand": {
+      "rot": {
+       "n": 90,
+       "mean": 0.00003,
+       "median": 0.00003,
+       "p95": 0.00005,
+       "max": 0.00006
+      },
+      "swing": {
+       "n": 90,
+       "mean": 15.20409,
+       "median": 10.1161,
+       "p95": 37.58166,
+       "max": 38.83618
+      },
+      "twist": {
+       "n": 90,
+       "mean": 11.47,
+       "median": 8.18222,
+       "p95": 26.98938,
+       "max": 27.81353
+      },
+      "demandTracking": {
+       "n": 90,
+       "mean": 0,
+       "median": 0,
+       "p95": 0,
+       "max": 0
+      }
+     },
+     "LeftFoot": {
+      "rot": {
+       "n": 90,
+       "mean": 0.76753,
+       "median": 0.81994,
+       "p95": 1.5354,
+       "max": 1.54425
+      },
+      "swing": {
+       "n": 90,
+       "mean": 5.58139,
+       "median": 4.59553,
+       "p95": 12.59245,
+       "max": 12.69675
+      },
+      "twist": {
+       "n": 90,
+       "mean": 1.93321,
+       "median": 1.08234,
+       "p95": 4.93118,
+       "max": 5.03676
+      },
+      "demandTracking": {
+       "n": 90,
+       "mean": 0,
+       "median": 0,
+       "p95": 0,
+       "max": 0
+      }
+     },
+     "RightFoot": {
+      "rot": {
+       "n": 90,
+       "mean": 0.42585,
+       "median": 0.10978,
+       "p95": 1.10433,
+       "max": 1.1405
+      },
+      "swing": {
+       "n": 90,
+       "mean": 0.80334,
+       "median": 0.16842,
+       "p95": 2.87406,
+       "max": 2.98167
+      },
+      "twist": {
+       "n": 90,
+       "mean": 0.99543,
+       "median": 0.56882,
+       "p95": 2.84595,
+       "max": 2.89944
+      },
+      "demandTracking": {
+       "n": 90,
+       "mean": 0,
+       "median": 0,
+       "p95": 0,
+       "max": 0
+      }
+     }
+    },
+    "roundTripMean": {
+     "n": 90,
+     "mean": 0.01249,
+     "median": 0.01301,
+     "p95": 0.01576,
+     "max": 0.016
+    }
+   },
+   "stage3": {
+    "handFollow": {
+     "maxRotDeg": 61.6519,
+     "maxPosM": 0
+    }
+   },
+   "shippedConfig": {
+    "handFollow": 0.3,
+    "foreRollSrc": true,
+    "inPlace": false,
+    "yLift": 1,
+    "hasQuat": true,
+    "scaleRoot": 0.9211,
+    "capsuleR": 0.128,
+    "rootYawDeg": 90.01,
+    "srcMap": {
+     "Hips": "Hips",
+     "Chest": "Chest",
+     "LeftHipAnchor": "LeftLeg",
+     "RightHipAnchor": "RightLeg",
+     "LeftShoulderAnchor": "LeftArm",
+     "RightShoulderAnchor": "RightArm",
+     "LeftUpLeg": "LeftLeg",
+     "LeftLeg": "LeftShin",
+     "LeftFoot": "LeftFoot",
+     "RightUpLeg": "RightLeg",
+     "RightLeg": "RightShin",
+     "RightFoot": "RightFoot",
+     "LeftArm": "LeftArm",
+     "LeftForeArm": "LeftForeArm",
+     "LeftHand": "LeftHand",
+     "RightArm": "RightArm",
+     "RightForeArm": "RightForeArm",
+     "RightHand": "RightHand"
+    }
+   },
+   "ik": false,
+   "stage4": {
+    "details": [],
+    "summary": {},
+    "count": 0
+   },
+   "validity": {
+    "nan": 0,
+    "denorm": 0,
+    "ok": true
+   },
+   "kinematics": {
+    "LeftHand": {
+     "velMax": 0.98829,
+     "accMax": 0.42286,
+     "flips": 0
+    },
+    "RightHand": {
+     "velMax": 0.74039,
+     "accMax": 0.41991,
+     "flips": 0
+    },
+    "LeftFoot": {
+     "velMax": 1.56772,
+     "accMax": 0.31734,
+     "flips": 0
+    },
+    "RightFoot": {
+     "velMax": 1.68669,
+     "accMax": 0.55536,
+     "flips": 0
+    }
+   },
+   "contactSource": "channels",
+   "skate": {
+    "baseline": {
+     "Left": {
+      "n": 89,
+      "mean": 0.01771,
+      "median": 0.01664,
+      "p95": 0.03265,
+      "max": 0.06744
+     },
+     "Right": {
+      "n": 89,
+      "mean": 0.01835,
+      "median": 0.01794,
+      "p95": 0.03229,
+      "max": 0.06609
+     }
+    },
+    "shipped": {
+     "Left": {
+      "n": 89,
+      "mean": 0.01771,
+      "median": 0.01664,
+      "p95": 0.03265,
+      "max": 0.06744
+     },
+     "Right": {
+      "n": 89,
+      "mean": 0.01835,
+      "median": 0.01794,
+      "p95": 0.03229,
+      "max": 0.06609
+     }
+    }
+   },
+   "determinism": {
+    "maxRotDeg": 0,
+    "maxPosM": 0
+   }
+  }
+ },
+ "failures": [
+  "e2e_lhand: stage4 LeftHand pos p95=0.13325 max=0.13325 exceeds 0.02/0.04m",
+  "e2e_lhand: stage4 LeftHand rot p95=88.71803 max=88.71803 exceeds 5/10°",
+  "e2e_rhand: stage4 RightHand pos p95=0.1528 max=0.1528 exceeds 0.02/0.04m",
+  "e2e_rhand: stage4 RightHand rot p95=69.25781 max=69.25781 exceeds 5/10°",
+  "e2e_hands: stage4 LeftHand pos p95=0.15451 max=0.15451 exceeds 0.02/0.04m",
+  "e2e_hands: stage4 LeftHand rot p95=86.5925 max=86.5925 exceeds 5/10°",
+  "e2e_hands: stage4 RightHand pos p95=0.16407 max=0.16407 exceeds 0.02/0.04m",
+  "e2e_hands: stage4 RightHand rot p95=67.00943 max=67.00943 exceeds 5/10°",
+  "e2e_hands_feet: stage4 LeftHand pos p95=0.15012 max=0.15012 exceeds 0.02/0.04m",
+  "e2e_hands_feet: stage4 LeftHand rot p95=97.46507 max=97.46507 exceeds 5/10°",
+  "e2e_hands_feet: stage4 RightHand pos p95=0.163 max=0.163 exceeds 0.02/0.04m",
+  "e2e_hands_feet: stage4 RightHand rot p95=71.18779 max=71.18779 exceeds 5/10°",
+  "e2e_hand_rot: stage4 LeftHand pos p95=0.15031 max=0.15031 exceeds 0.02/0.04m",
+  "e2e_hand_rot: stage4 LeftHand rot p95=92.32973 max=92.32973 exceeds 5/10°",
+  "e2e_mixed: stage4 RightHand pos p95=0.17005 max=0.17005 exceeds 0.02/0.04m",
+  "e2e_mixed: stage4 RightHand rot p95=82.76893 max=82.76893 exceeds 5/10°"
+ ]
+}

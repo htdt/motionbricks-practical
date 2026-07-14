@@ -9,7 +9,7 @@
 //        [--rootmotion rootmotion.json] [--ylift jump_gap=1.5,other=1.2]
 //
 // Per clip: constructs a Retargeter (inPlace: true — root X/Z zeroed, Y kept),
-// applies every frame sequentially (continuity guard stays armed), and records
+// applies every frame through the stateless retargeter and deterministic IK, and records
 // each joint's local rotation plus the hips' local translation into a new glTF
 // animation named after the move. Horizontal root motion is exported separately
 // to <rootmotion.json>: pelvis X/Z displacement from source rest in
@@ -22,6 +22,7 @@ import { NodeIO } from '@gltf-transform/core';
 import { loadGLBBones } from './glbskel.mjs';
 import { rigFromBones, resetBindPose } from './align.js';
 import { Retargeter, SOMA_SRC } from './retarget.js';
+import { ConstraintIK } from './ik.js';
 
 export async function prebake({ glb, manifest, out, rootmotion, ylift = {}, log = console.log }) {
   if (typeof glb !== 'string' || !glb || typeof manifest !== 'string' || !manifest)
@@ -89,6 +90,12 @@ export async function prebake({ glb, manifest, out, rootmotion, ylift = {}, log 
 
     resetBindPose(target);                     // pristine bind before each construction
     const rt = new Retargeter({ ...target, data, inPlace: true, srcMap: data.srcMap });
+    // clips with authored constraints bake through the same deterministic
+    // constraint IK the runtime uses — offline frames match playback exactly
+    const ik = Array.isArray(data.constraints) && data.constraints.length
+      ? new ConstraintIK(rt, data.constraints,
+          mv.reachPolicy === 'clamp' ? { reachPolicy: 'clamp' } : {})
+      : null;
     if (ylift[name] !== undefined) {
       if (!Number.isFinite(ylift[name]) || ylift[name] <= 0)
         throw new Error(`ylift for ${name} must be positive; got ${ylift[name]}`);
@@ -110,6 +117,7 @@ export async function prebake({ glb, manifest, out, rootmotion, ylift = {}, log 
     const rmXZ = new Array(N);
     for (let f = 0; f < N; f++) {
       rt.applyFrame(f);
+      if (ik) ik.apply(f);
       for (const b of target.orderedBones) {
         const q = quats.get(b);
         const raw = [b.quaternion.x, b.quaternion.y, b.quaternion.z, b.quaternion.w];

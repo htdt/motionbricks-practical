@@ -19,16 +19,26 @@ import { resolveRig } from './rigmap.js';
 //  - limb aims are REBASED on the transferred pelvis (legs) / chest (arms) frame, so the
 //    roll around each bone follows the body and setFromUnitVectors only contributes the
 //    residual swing — hands riding the forearm keep a natural palm facing;
+//  - forearms with quaternion sources take their roll from the source forearm's own
+//    world delta (true pronation/supination) — the ONLY quaternion path since the
+//    ablation showed the chest-rebase projection off by up to 179° (evidence/README.md);
 //  - feet take the source ankle's TRUE orientation (data.quat), transferred
 //    pelvis-relative, giving real heel-strike/toe-off instead of inheriting the shin;
-//  - HANDS take the source wrist's TRUE orientation, transferred chest-relative, then
-//    CLAMPED to anatomical limits relative to the forearm (twist/swing decomposition) —
-//    fixes the "hand spinning on the wrist" artifact;
+//  - HANDS ride the character's forearm and add the source's own wrist-vs-forearm
+//    delta mapped through world axes at rest/bind;
 //  - neck/head are damped toward the overall body heading instead of riding chest twist 1:1.
 //
-// Body-clip guard: a torso capsule (hips→chest axis, radius from the shoulder span)
-// pushes arm aim directions outward when the elbow/hand target would land inside the
-// torso — arms can graze the body but no longer pass through it.
+// The transfer is DETERMINISTIC and stateless per frame: applying frame f yields
+// the same pose under sequential playback, direct seek, any speed, or offline
+// baking. The historical guards (handClamp, torsoCapsule, continuity slew,
+// ground lift) were ablated on the regenerated move set across two certified
+// rigs and deleted: none had a reproducible benefit after the rest-anchor fix,
+// the clamp clipped valid authored wrists by up to 15.5°, the capsule displaced
+// valid near-face guard poses with zero measured torso penetration in the
+// baseline, and the temporal guards made results depend on playback history
+// (evidence/README.md). Torso clearance, ground penetration, branch flips, and
+// foot skate remain MEASURED QA metrics (qametrics.mjs) instead of silent
+// runtime corrections.
 
 export function buildBoneOrder(root) {
   const out = [];
@@ -117,8 +127,6 @@ const AIM_CHILD = {
   LeftUpLeg: 'LeftLeg', LeftLeg: 'LeftFoot', RightUpLeg: 'RightLeg', RightLeg: 'RightFoot',
   LeftArm: 'LeftForeArm', LeftForeArm: 'LeftHand', RightArm: 'RightForeArm', RightForeArm: 'RightHand',
 };
-// arm roles whose aim goes through the torso-capsule guard
-const CLIP_GUARD = new Set(['LeftArm', 'LeftForeArm', 'RightArm', 'RightForeArm']);
 // full-orientation transfer: target role -> source role. FEET only:
 // both rigs' rest feet are flat on the ground pointing forward, so the
 // pelvis-relative absolute transfer is anchored correctly.
@@ -137,17 +145,10 @@ const HAND_LOCAL = {
   LeftHand:  'LeftForeArm',
   RightHand: 'RightForeArm',
 };
-// bones under the temporal continuity guard (see applyFrame): hands + feet
-// (full-orientation) and forearms (aim can flip at the antipode)
-const CONT_ROLES = ['LeftHand', 'RightHand', 'LeftForeArm', 'RightForeArm', 'LeftFoot', 'RightFoot'];
-// anatomical clamps for full-orientation bones, relative to their parent's bind
-// relation (deg): twist = rotation about the bone axis, swing = the rest.
-const CLAMP = {
-  LeftHand:  { twist: 85, swing: 70 },
-  RightHand: { twist: 85, swing: 70 },
-};
 // head/neck: damped toward the overall body heading instead of riding chest twist 1:1
 const HEAD_DAMP = { Neck: 0.45, Head: 0.2 };
+// per-role anatomical twist axes are still derived at bind (twistAxis) for
+// QA's swing/twist metrics; there is no runtime clamp anymore
 
 const _v = (a) => new THREE.Vector3(a[0], a[1], a[2]);
 
@@ -164,26 +165,23 @@ function frameQ(origin, upPt, rA, rB) {
   return new THREE.Quaternion().setFromRotationMatrix(new THREE.Matrix4().makeBasis(right, up, fwd));
 }
 
-// swing-twist decomposition of q about axis (unit). returns {swing, twist}
-function swingTwist(q, axis) {
-  const r = new THREE.Vector3(q.x, q.y, q.z);
-  const proj = axis.clone().multiplyScalar(r.dot(axis));
-  const twist = new THREE.Quaternion(proj.x, proj.y, proj.z, q.w);
-  if (twist.lengthSq() < 1e-12) twist.identity(); else twist.normalize();
-  const swing = q.clone().multiply(twist.clone().invert());
-  return { swing, twist };
-}
-
-function clampAngle(q, maxDeg) {
-  const maxRad = THREE.MathUtils.degToRad(maxDeg);
-  const w = THREE.MathUtils.clamp(q.w, -1, 1);
-  const ang = 2 * Math.acos(Math.abs(w));
-  if (ang <= maxRad || ang === 0) return q;
-  return new THREE.Quaternion().slerp(q, maxRad / ang);   // identity→q, partial
+// The reference "raw transfer" configuration: corrected rest anchors,
+// world-axis wrist mapping, full source wrist transfer. Since the guard
+// cleanup (evidence/README.md) the only shipped modifier on top of this
+// baseline is the per-clip `handFollow` stylization gain, so the baseline is
+// simply handFollow = 1. Kept as a named helper so diagnostics stay explicit
+// about which configuration they measured.
+export function baselineOptions(data) {
+  void data;
+  return { handFollow: 1 };
 }
 
 export class Retargeter {
-  constructor({ bones, orderedBones, hips, hipsParent, data, inPlace, rig, guards, srcMap, handFollow }) {
+  constructor({ bones, orderedBones, hips, hipsParent, data, inPlace, rig, srcMap, handFollow, ...rest }) {
+    if ('guards' in rest || 'foreRollSrc' in rest)
+      throw new Error('retarget guards and the foreRollSrc switch were removed after the '
+        + 'guard ablation (evidence/README.md): the transfer is unguarded and source '
+        + 'forearm roll is automatic for quaternion clips');
     if (!data || !Array.isArray(data.names) || !Array.isArray(data.rest) || !Array.isArray(data.pos))
       throw new Error('motion data requires names, rest, and pos arrays');
     if (!Array.isArray(orderedBones) || !orderedBones.length)
@@ -273,21 +271,6 @@ export class Retargeter {
     }
     this.inPlace = inPlace ?? false;
     if (typeof this.inPlace !== 'boolean') throw new Error(`inPlace must be boolean; got ${this.inPlace}`);
-    if (guards !== undefined && (!guards || typeof guards !== 'object' || Array.isArray(guards)))
-      throw new Error('guards must be an object');
-    const guardDefaults = { handClamp: true, torsoCapsule: true, ground: false, continuity: true };
-    for (const [name, value] of Object.entries(guards ?? {})) {
-      if (!hasOwn(guardDefaults, name)) throw new Error(`unknown retarget guard "${name}"`);
-      if (typeof value !== 'boolean') throw new Error(`guard ${name} must be boolean`);
-    }
-    this.guards = { ...guardDefaults, ...(guards ?? {}) };
-    // temporal continuity guard: cap per-frame rotation of hands/forearms/feet
-    // during SEQUENTIAL playback (auto-bypassed on random frame access, so the
-    // probe battery measures the raw transfer). Catches the two flip sources:
-    // clamp branch changes and aim antipodes.
-    this.maxStepDeg = 40;
-    this._contPrev = {};
-    this._lastF = null;
     this.yLift = 1;                            // extra gain on upward root displacement (jumps)
     this.hasQuat = hasQuat;
     this.animWorld = {};
@@ -330,10 +313,11 @@ export class Retargeter {
       this.bindWorldQ[b.name] = b.getWorldQuaternion(new THREE.Quaternion());
     }
     this.hipsBindWorldPos = this.hips.getWorldPosition(new THREE.Vector3());
-    // twist axis for clamped bones, in the bone's bind-local space: the bone's own
-    // world direction at bind (to its first bone child, else along its parent segment)
-    this.clampAxis = {};
-    for (const role in CLAMP) {
+    // per-bone twist axis in bind-local space (the bone's own world direction
+    // at bind: to its first bone child, else along its parent segment) —
+    // consumed by the QA swing/twist metrics, not by any runtime clamp
+    this.twistAxis = {};
+    for (const role of ['LeftHand', 'RightHand']) {
       const name = this.R[role];
       if (!name || !bones[name]) continue;
       const b = bones[name];
@@ -342,7 +326,7 @@ export class Retargeter {
       const ref = child ? child.getWorldPosition(new THREE.Vector3())
         : p0.clone().add(p0.clone().sub(b.parent.getWorldPosition(new THREE.Vector3())));
       const dirWorld = ref.sub(p0).normalize();
-      this.clampAxis[name] = dirWorld.applyQuaternion(
+      this.twistAxis[name] = dirWorld.applyQuaternion(
         this.bindWorldQ[name].clone().invert()).normalize();
     }
     for (const name in this.aimByBone) {
@@ -391,16 +375,16 @@ export class Retargeter {
     if (!Number.isFinite(this.scaleRoot) || this.scaleRoot <= 0)
       throw new Error(`cannot derive a positive root scale; got ${this.scaleRoot}`);
 
-    // ground clamp: foot/toe bones with their bind-pose world heights — during
-    // animation none of them may sink below its bind height (proportion mismatch
-    // between the source's legs and the character's puts feet underground otherwise)
+    // foot/toe bones with their bind-pose world heights — consumed by the QA
+    // ground-penetration metric (the runtime ground-lift guard was deleted:
+    // it never engaged on the representative suite and its temporal settling
+    // was history-dependent; see evidence/README.md)
     this.groundBones = [];
     for (const role of ['LeftFoot', 'RightFoot', 'LeftToeBase', 'RightToeBase']) {
       const name = this.R[role];
       if (name && bones[name])
         this.groundBones.push([bones[name], bones[name].getWorldPosition(new THREE.Vector3()).y]);
     }
-    this.groundOffset = 0;
 
     // root displacement must be re-based from the source's rest heading onto the
     // character's bind heading (yaw only), like every direction already is —
@@ -418,11 +402,10 @@ export class Retargeter {
     this.handFollow = handFollow ?? data.handFollow ?? 1;
     if (!Number.isFinite(this.handFollow) || this.handFollow < 0 || this.handFollow > 1)
       throw new Error(`handFollow must be between 0 and 1; got ${this.handFollow}`);
-    this.foreRollSrc = data.foreRollSrc ?? false;
-    if (typeof this.foreRollSrc !== 'boolean')
-      throw new Error(`foreRollSrc must be boolean; got ${this.foreRollSrc}`);
-    if (this.foreRollSrc && !this.hasQuat)
-      throw new Error('foreRollSrc requires quat and restQuat motion channels');
+    // forearm roll comes from the source's own quaternions whenever the clip
+    // carries them — the single quaternion path (the chest-rebase projection
+    // measured up to 179° of roll error on real clips; evidence/README.md)
+    this.foreRollSrc = this.hasQuat;
     if (this.hasQuat) {
       this.restQInv = {};
       for (const name in this.fullqByBone) {
@@ -458,7 +441,43 @@ export class Retargeter {
       // value (clip JSON handFollow) and keep only a hint of wrist life.
       // Authored-wrist sources omit the key and default to full transfer.
     }
-    this.contBones = new Set(CONT_ROLES.map(r => this.R[r]).filter(n => n && bones[n]));
+  }
+
+  // The complete effective transfer configuration — what a diagnostic run
+  // must record so results are attributable to an exact setup, replacing the
+  // old ambiguous "--noguards" notion. After the guard cleanup the only
+  // modifier left beyond the raw transfer is handFollow.
+  configDump() {
+    return {
+      handFollow: this.handFollow,
+      foreRollSrc: this.foreRollSrc,             // derived: quaternion clips only
+      inPlace: this.inPlace,
+      yLift: this.yLift,
+      hasQuat: this.hasQuat,
+      scaleRoot: +this.scaleRoot.toFixed(4),
+      capsuleR: +this.capsuleR.toFixed(4),       // QA clearance metric radius
+      rootYawDeg: +THREE.MathUtils.radToDeg(
+        2 * Math.acos(THREE.MathUtils.clamp(Math.abs(this.rootYaw.w), -1, 1))).toFixed(2),
+      srcMap: { ...this.S },
+    };
+  }
+
+  // map a canonical source-space world POINT into character world space with
+  // the same root-yaw + root-scale + bind transform the root translation
+  // gets (constraint targets, QA expectations)
+  mapSrcPoint(p) {
+    const srcRestHips = _v(this.data.rest[this.idx[this.S.Hips]]);
+    return p.clone().sub(srcRestHips).applyQuaternion(this.rootYaw)
+      .multiplyScalar(this.scaleRoot).add(this.hipsBindWorldPos);
+  }
+
+  // map a canonical source-space world ROTATION of source joint sj onto
+  // character bone `name`: world-axis delta from source rest, yaw-rebased,
+  // applied to the character's bind orientation
+  mapSrcQuat(q, sj, name) {
+    const rest = this.hasQuat ? this._q(this.data.restQuat[this.idx[sj]]) : new THREE.Quaternion();
+    const delta = q.clone().multiply(rest.invert());
+    return this._yawRebase(delta).multiply(this.bindWorldQ[name]);
   }
 
   // express a world-axis body delta about the character's own heading
@@ -509,52 +528,10 @@ export class Retargeter {
     return this._scaleCache[b.uuid] ??= b.getWorldScale(new THREE.Vector3());
   }
 
-  // push an aim direction out of the torso capsule if the child joint would land
-  // inside it. axisA/axisB: capsule segment (hips/chest world pos this frame).
-  _capsuleGuard(fromPos, dir, len, axisA, axisB) {
-    const end = fromPos.clone().add(dir.clone().multiplyScalar(len));
-    const ab = axisB.clone().sub(axisA);
-    const t = THREE.MathUtils.clamp(end.clone().sub(axisA).dot(ab) / ab.lengthSq(), 0, 1.15);
-    const closest = axisA.clone().add(ab.multiplyScalar(t));
-    const radial = end.clone().sub(closest);
-    radial.y = 0;                                     // push out horizontally only
-    const d = radial.length();
-    if (d >= this.capsuleR || d < 1e-6) return dir;
-    // move the endpoint to the capsule surface, re-normalize the aim
-    const pushed = end.add(radial.multiplyScalar((this.capsuleR - d) / d));
-    return pushed.sub(fromPos).normalize();
-  }
-
-  // clamp a full-orientation target so the bone stays within anatomical limits
-  // relative to its parent (twist about the bone's bind direction, swing = rest)
-  _clampToParent(targetWorldQ, b, role, parentWorld) {
-    const lim = CLAMP[role];
-    if (!lim || !this.guards.handClamp) return targetWorldQ;
-    const bindLocal = this.bindLocalQ[b.name];
-    const local = parentWorld.clone().invert().multiply(targetWorldQ);
-    const rel = bindLocal.clone().invert().multiply(local);      // deviation from bind, in bind-local space
-    if (rel.w < 0) rel.set(-rel.x, -rel.y, -rel.z, -rel.w);
-    const axis = this.clampAxis[b.name] ?? new THREE.Vector3(0, 1, 0);
-    const { swing, twist } = swingTwist(rel, axis);
-    const cs = clampAngle(swing, lim.swing);
-    const ct = clampAngle(twist, lim.twist);
-    const relClamped = cs.multiply(ct);
-    return parentWorld.clone().multiply(bindLocal).multiply(relClamped);
-  }
-
-  resetContinuity() {
-    this._lastF = null;
-    this._contPrev = {};
-  }
-
   applyFrame(f) {
     f = Number.isFinite(f) ? (((Math.round(f) % this.numFrames) + this.numFrames) % this.numFrames) : 0;
     const P = this.data.pos[f];
     this.animWorldPos = {};
-    // continuity guard only makes sense across consecutive frames
-    const seq = this._lastF !== null && ((f - this._lastF + this.numFrames) % this.numFrames) <= 1;
-    if (!seq) this._contPrev = {};
-    this._lastF = f;
 
     // body-frame deltas are YAW-REBASED onto the character's bind heading (same
     // rebase the root translation gets): the source's world-axis delta must act
@@ -578,9 +555,9 @@ export class Retargeter {
     const hipsWorld = this._tmp.clone();
     const hp = this._tmp.clone(); this.hipsParent.worldToLocal(hp); this.hips.position.copy(hp);
 
-    // capsule axis for this frame is computed lazily (hips is known now; chest
-    // becomes known once the spine bones are processed — arms come after in DFS)
-    let capA = null, capB = null;
+    // per-frame transfer state, exposed for QA / constraint IK
+    this.frameState = { f, Fp, FpInv, Fc, pelvisDelta, chestDelta, hipsWorld };
+    this.rawTargets = {};                     // bone name -> pre-guard demand (world quat)
 
     for (const b of this.orderedBones) {
       const parentWorld = (b.parent && this.animWorld[b.parent.uuid]) ? this.animWorld[b.parent.uuid]
@@ -598,23 +575,19 @@ export class Retargeter {
         const [sj, scj, base, childName, aimRole] = this.aimByBone[b.name];
         const D = base === 'chest' ? chestDelta : pelvisDelta;
         const dLimb = this._gp(P, scj).sub(this._gp(P, sj)).normalize();
-        let dTarget = dLimb.applyQuaternion(FpInv).applyQuaternion(Fc).normalize();
-        if (this.guards.torsoCapsule && CLIP_GUARD.has(aimRole)) {
-          if (!capA) { capA = this._framePos(this.hips); capB = this._framePos(this.chestBone); }
-          dTarget = this._capsuleGuard(this._framePos(b), dTarget, this.bindLen[b.name], capA, capB);
-        }
+        const dTarget = dLimb.applyQuaternion(FpInv).applyQuaternion(Fc).normalize();
         const baseDir = this.bindDir[b.name].clone().applyQuaternion(D).normalize();
         const qAim = new THREE.Quaternion().setFromUnitVectors(baseDir, dTarget);
         target = qAim.multiply(D.clone()).multiply(this.bindWorldQ[b.name]);
-        // FOREARM ROLL from the source (clips with foreRollSrc, e.g. Kimodo):
-        // the body-rebase roll above projects chest pitch onto the forearm
+        // FOREARM ROLL from the source (every quaternion clip): the
+        // body-rebase roll above projects chest pitch onto the forearm
         // axis — during a deep jump crouch the forearm SPINS up to 45°/frame
         // while pointing the same way, and the fist (riding it) spins too.
         // Rebuild the forearm from the source forearm's full world delta
         // (carries the true mocap pronation/supination — stable), then
         // rotate minimally onto the aimed direction. The residual minrot is
         // small (source dir ≈ aimed dir), so it adds no twist artifact.
-        if (this.foreRollSrc && this.hasQuat &&
+        if (this.foreRollSrc &&
             (aimRole === 'LeftForeArm' || aimRole === 'RightForeArm')) {
           const dSrc = this._yawRebase(this._q(this.data.quat[f][this.idx[sj]])
             .multiply(this._q(this.data.restQuat[this.idx[sj]]).invert()));
@@ -624,64 +597,36 @@ export class Retargeter {
         }
       } else if (this.hasQuat && this.handByBone[b.name]) {
         // hands: FOREARM-RELATIVE — ride the character's forearm and add the
-        // source's own wrist-vs-forearm delta (identity at source rest), then
-        // clamp as a safety net. See HAND_LOCAL above for why not chest-anchored.
-        const [sw, sf, foreName, hRole] = this.handByBone[b.name];
+        // source's own wrist-vs-forearm delta (identity at source rest).
+        // See HAND_LOCAL above for why not chest-anchored.
+        const [sw, sf, foreName] = this.handByBone[b.name];
         const foreNow = this.animWorld[this.bones[foreName].uuid] ?? this.bindWorldQ[foreName];
         target = foreNow.clone()
           .multiply(this.handM[b.name])
           .multiply(this._q(this.data.quat[f][this.idx[sf]]).invert())
           .multiply(this._q(this.data.quat[f][this.idx[sw]]))
           .multiply(this.handT[b.name]);
+        this.rawTargets[b.name] = target.clone();   // full source wrist demand
         if (this.handFollow < 1) {
           const ride = foreNow.clone().multiply(this.handRide[b.name]);
           target = ride.slerp(target, this.handFollow);
         }
-        target = this._clampToParent(target, b, hRole, parentWorld);
       } else if (this.hasQuat && this.fullqByBone[b.name] && this.restQInv[this.fullqByBone[b.name]]) {
         // feet: true source ankle orientation, transferred pelvis-relative
         const sq = this.fullqByBone[b.name];
         const qNow = this._q(this.data.quat[f][this.idx[sq]]);
         target = Fc.clone().multiply(FpInv).multiply(qNow).multiply(this.restQInv[sq])
           .multiply(this.FpRest).multiply(this.FcBindInv).multiply(this.bindWorldQ[b.name]);
+        this.rawTargets[b.name] = target.clone();
       } else if (this.headDamp[b.name] !== undefined) {
         const D = pelvisDelta.clone().slerp(chestDelta, this.headDamp[b.name]);
         target = D.multiply(this.bindWorldQ[b.name]);
       } else {
         target = parentWorld.clone().multiply(this.bindLocalQ[b.name]);   // shoulders/fingers/toes ride parent
       }
-      let localQ = parentWorld.clone().invert().multiply(target);
-      if (this.contBones.has(b.name)) {
-        if (this.guards.continuity && seq) {
-          const prev = this._contPrev[b.name];
-          if (prev) {
-            const ang = prev.angleTo(localQ);
-            const maxStep = THREE.MathUtils.degToRad(this.maxStepDeg);
-            if (ang > maxStep) {
-              localQ = prev.clone().slerp(localQ, maxStep / ang);
-              target = parentWorld.clone().multiply(localQ);   // children must see the guarded pose
-            }
-          }
-        }
-        this._contPrev[b.name] = localQ.clone();
-      }
+      const localQ = parentWorld.clone().invert().multiply(target);
       b.quaternion.copy(localQ);
       this.animWorld[b.uuid] = target;
-    }
-
-    if (this.guards.ground && this.groundBones.length) {
-      // deepest penetration below each foot bone's bind height, pre-offset
-      let pen = 0;
-      for (const [b, bindY] of this.groundBones) {
-        const d = bindY - this._framePos(b).y;
-        if (d > pen) pen = d;
-      }
-      // rise quickly to cover a strike-through, settle slowly when airborne/clear
-      this.groundOffset += (pen - this.groundOffset) * (pen > this.groundOffset ? 0.5 : 0.06);
-      if (this.groundOffset > 1e-4) {
-        const hw = hipsWorld.clone(); hw.y += this.groundOffset;
-        this.hipsParent.worldToLocal(hw); this.hips.position.copy(hw);
-      }
     }
   }
 }

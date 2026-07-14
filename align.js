@@ -50,8 +50,9 @@ export const DEFAULT_GATES = {
 };
 
 // anatomical twist limits (deg) about each bone's own axis, vs its bind relation.
-// ForeArm is large on purpose: pronation/supination IS forearm twist. Hands are
-// clamped to 85° by the retargeter, so 92° means the clamp itself broke. Feet are
+// ForeArm is large on purpose: pronation/supination IS forearm twist. These are
+// DETECTORS (certification gates), not runtime clamps — the retargeter ships
+// unguarded and a violation here means the transfer itself is broken. Feet are
 // gated by footFlat when grounded and legitimately free when airborne.
 export const TWIST_LIMITS = {
   UpLeg: 100, Leg: 95, Arm: 130, ForeArm: 165, Hand: 92,
@@ -155,14 +156,13 @@ export function mineProbeFrames(clips, srcMap) {
   if (!Array.isArray(first.names) || !Array.isArray(first.rest) || !Array.isArray(first.pos))
     throw new Error('probe clips require names, rest, and pos arrays');
   const handFollow = first.handFollow ?? 1;
-  const foreRollSrc = first.foreRollSrc ?? false;
   for (const clip of clips) {
     if (!Array.isArray(clip.names) || !Array.isArray(clip.rest) || !Array.isArray(clip.pos) ||
         clip.names.length !== first.names.length ||
         clip.names.some((name, i) => name !== first.names[i]))
       throw new Error('probe clips must use the same source joint order');
-    if ((clip.handFollow ?? 1) !== handFollow || (clip.foreRollSrc ?? false) !== foreRollSrc)
-      throw new Error('probe clips must use the same handFollow and foreRollSrc transfer settings');
+    if ((clip.handFollow ?? 1) !== handFollow)
+      throw new Error('probe clips must use the same handFollow transfer setting');
     const frames = clip.numFrames ?? clip.pos.length;
     if (!Number.isInteger(frames) || frames < 1 || clip.pos.length !== frames)
       throw new Error('probe clip numFrames must match its pos length');
@@ -211,7 +211,7 @@ export function mineProbeFrames(clips, srcMap) {
     rest: first.rest, restQuat: first.restQuat,
     pos: rows.map(r => r.pos),
     quat: hasQuat ? rows.map(r => r.quat) : undefined,
-    srcMap: S, handFollow, foreRollSrc,
+    srcMap: S, handFollow,
     probeTags: rows.map(r => r.tag), probeGrounded: rows.map(r => r.grounded),
   };
 }
@@ -317,11 +317,11 @@ export function measureGates(rt, f, grounded) {
   // twist vs bind, about each bone's own bind axis, as a fraction of the
   // role's anatomical limit
   for (const role of LIMB_ROLES) {
-    // Kimodo clips explicitly opt into source-authored forearm roll. In that
-    // mode the target copies human mocap pronation/supination; measuring it
-    // against a target-bind heuristic can report ~180° for an ordinary guard
-    // pose and false-reject the reference character. Other limb roles, and
-    // forearms driven by the generic body-frame aim path, remain gated.
+    // quaternion clips carry source-authored forearm roll (the single
+    // quaternion path). The target copies human mocap pronation/supination;
+    // measuring it against a target-bind heuristic can report ~180° for an
+    // ordinary guard pose and false-reject the reference character. Other
+    // limb roles, and forearms of position-only sources, remain gated.
     if (rt.foreRollSrc && role.endsWith('ForeArm')) continue;
     const name = R[role];
     if (!name || !rt.bones[name]) continue;
@@ -332,7 +332,7 @@ export function measureGates(rt, f, grounded) {
     const local = parentQ.clone().invert().multiply(rt.animWorld[b.uuid]);
     const rel = rt.bindLocalQ[name].clone().invert().multiply(local);
     if (rel.w < 0) rel.set(-rel.x, -rel.y, -rel.z, -rel.w);
-    let axis = rt.clampAxis?.[name];
+    let axis = rt.twistAxis?.[name];
     if (!axis) {
       const child = rt.aimByBone[name]?.[3];
       const p0 = rt._framePos(b);
@@ -437,7 +437,7 @@ export function checkSideConsistency(target) {
 // Run the full battery for one target rig against a source probe set.
 //  target: { rig, bones, orderedBones, hips, hipsParent } from rigFromBones()
 //  probes: mineProbeFrames() output
-//  opts:   { srcMap, gates, guards }
+//  opts:   { srcMap, gates }
 export function certifyRig(target, probes, opts = {}) {
   if (opts.gates !== undefined && (!opts.gates || typeof opts.gates !== 'object' || Array.isArray(opts.gates)))
     throw new Error('certification gates must be an object');
@@ -448,13 +448,12 @@ export function certifyRig(target, probes, opts = {}) {
   }
   const gates = { ...DEFAULT_GATES, ...(opts.gates ?? {}) };
   resetBindPose(target);                 // Retargeter reads bind from current state
+  // the transfer is unguarded and stateless (evidence/README.md), so probe
+  // poses at consecutive indices are measured exactly as raw transfers
   const rt = new Retargeter({
     bones: target.bones, orderedBones: target.orderedBones,
     hips: target.hips, hipsParent: target.hipsParent,
     rig: target.rig, data: probes, srcMap: opts.srcMap,
-    // probes are UNRELATED poses at consecutive indices — the temporal
-    // continuity guard must not smooth across them; gates measure raw transfer
-    guards: { continuity: false, ...(opts.guards ?? {}) },
   });
   const side = checkSideConsistency(target);
 

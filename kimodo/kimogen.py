@@ -1,10 +1,16 @@
-"""kimogen — MK move-set generation on NVIDIA Kimodo (SOMA skeleton).
+"""kimogen — move-set generation on NVIDIA Kimodo (SOMA skeleton).
 
-The Stage 2 generation step (BAKE.md §3-4): each move is
-text-prompted (combat is in Kimodo's training distribution), optionally
-bookended with a fighting-stance fullbody keyframe constraint at both ends
-(so clips chain/crossfade in-game), generated as a best-of-N batch, and
-pushed through numeric QA gates. Winner NPZ + gate/frame-data JSON per move.
+The Stage 2 generation step (BAKE.md §3-4): each move is authored as any
+compatible combination of a text prompt, arbitrary full-body keyframes,
+hand/foot end-effector targets, and sparse/dense root-path constraints
+(inline `constraints` or a Kimodo `constraints_file`, schema:
+kimoconstraints.py), optionally bookended with the shared-stance fullbody
+keyframe at both ends (so clips chain/crossfade in-game). Constraint-only
+moves (no text) are supported by the installed API: an empty prompt is
+explicitly zeroed in the text conditioning, not replaced by wording.
+Each move is generated as a best-of-N batch and pushed through numeric QA
+gates, including per-constraint adherence. Winner NPZ + gate/frame-data JSON
++ resolved canonical constraint records per move.
 
 Usage (venv: kimenv; start `TEXT_ENCODER_DEVICE=cpu kimodo_textencoder` first
 or let it fall back to an in-process CPU encoder):
@@ -15,9 +21,11 @@ or let it fall back to an in-process CPU encoder):
 
 Axis conventions (Kimodo): Y-up, XZ ground, heading angle t about Y with
 facing dir (sin t, cos t) — i.e. heading 0 faces +Z. Verified by
-validate_axes.py on a generated walk. Gates evaluate in a canonical frame
-(frame-0 root at origin, frame-0 facing rotated to +X = the baked-clip/game
-convention).
+validate_axes.py on a generated walk. Constraints are authored in this
+native frame; gates evaluate in a canonical frame (frame-0 root at origin,
+frame-0 facing rotated to +X = the baked-clip/game convention), and accepted
+constraint records are re-expressed in that same canonical frame
+(kimoconstraints.transform_records) so QA and runtimes never repeat FK.
 """
 import argparse
 import json
@@ -26,6 +34,11 @@ import re
 import sys
 
 import numpy as np
+
+try:
+    from . import kimoconstraints as kc
+except ImportError:                      # direct script execution
+    import kimoconstraints as kc
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(HERE, "out")
@@ -196,22 +209,131 @@ def frame_data(j, r, idx, mv, fps):
             "height": mv.get("height")}
 
 
-def best_loop(j, r, min_len, max_len):
-    """Find (i0, i1) trimming to the best pose-space cycle for loop moves."""
+def best_loop(j, r, min_len, max_len, must_span=None):
+    """Find (i0, i1) trimming to the best pose-space cycle for loop moves.
+
+    must_span=(lo, hi): only consider windows with i0 <= lo and i1 >= hi —
+    used to keep required constrained frames inside the retained loop. Raises
+    ValueError when no window can satisfy the span.
+    """
     T = len(j)
     root_rel = j - r[:, None, :] * np.array([1.0, 0.0, 1.0])
     if T < 2:
         raise ValueError("a loop needs at least two frames")
     min_len = max(1, min(int(min_len), T - 1))
     max_len = max(min_len, min(int(max_len), T - 1))
-    best, pair = float("inf"), (0, T - 1)
+    lo, hi = must_span if must_span else (None, None)
+    best, pair = float("inf"), None
     for i in range(0, T - min_len):
+        if lo is not None and i > lo:
+            break
         jmax = min(T - 1, i + max_len)
-        for k in range(i + min_len, jmax + 1):
+        kmin = i + min_len if hi is None else max(i + min_len, hi)
+        for k in range(kmin, jmax + 1):
             d = float(np.linalg.norm(root_rel[i] - root_rel[k], axis=-1).mean())
             if d < best:
                 best, pair = d, (i, k)
+    if pair is None:
+        raise ValueError(
+            f"no loop window of {min_len}..{max_len} frames can retain required "
+            f"constrained frames {lo}..{hi}; disable loop or re-author the constraints")
     return pair, best
+
+
+# ------------------------------------------------------------- constraints --
+# Hard adherence gates on the winning sample, in the native/canonical frame
+# (rigid-invariant). EE and root2d numbers are the accuracy contract
+# (task: authored target -> final SOMA output); fullbody is gated on its
+# hand/foot/head end-effector set as well as the root. This makes arbitrary
+# authored key poses fail loudly if MotionCorrection does not land the pose.
+CONSTRAINT_GATES = {
+    "ee_pos_max": 0.005,        # m, constrained hand/foot position
+    "ee_rot_max_deg": 2.0,      # deg, constrained hand/foot rotation
+    "root_xz_max": 0.02,        # m, constrained root waypoint/path samples
+    "fullbody_ee_pos_max": 0.005,  # m, fullbody keyframe EE positions
+    "fullbody_ee_rot_max_deg": 2.0,  # deg, fullbody keyframe EE rotations
+    "heading_max_deg": 25.0,    # deg, authored heading pins
+}
+
+
+def _rot_angle_deg(Ra, Rb):
+    """Geodesic angle between two rotation matrices, degrees."""
+    tr = float(np.trace(Ra.T @ Rb))
+    return float(np.degrees(np.arccos(np.clip((tr - 1.0) / 2.0, -1.0, 1.0))))
+
+
+def _quat_to_mat(q):
+    from scipy.spatial.transform import Rotation as Rot
+    return Rot.from_quat(q).as_matrix()
+
+
+def measure_constraints(records, pj, rp, grm, heading, idx):
+    """Per-record adherence of ONE sample (native frame, post-processing
+    already applied): position/rotation error at every constrained frame.
+    Returns (per_record, summary); raises if a metric cannot be computed.
+    """
+    per = []
+    agg = {"ee_pos_max": 0.0, "ee_rot_max_deg": 0.0, "root_xz_max": 0.0,
+           "fullbody_ee_pos_max": 0.0, "fullbody_ee_rot_max_deg": 0.0,
+           "fullbody_root_max": 0.0,
+           "heading_max_deg": 0.0}
+    have = set()
+    for rec in records:
+        f = rec["frame"]
+        if f >= len(pj):
+            raise ValueError(f"constraint frame {f} outside generated motion ({len(pj)} frames)")
+        row = {"type": rec["type"], "frame": f, "source": rec["source"]}
+        if rec["family"] == "root2d":
+            e = float(np.linalg.norm(rp[f, [0, 2]] - np.asarray(rec["rootXZ"])))
+            row["root_xz_err"] = round(e, 4)
+            agg["root_xz_max"] = max(agg["root_xz_max"], e)
+            have.add("root2d")
+        elif rec["family"] == "end-effector":
+            j = idx[rec["role"]]
+            e = float(np.linalg.norm(pj[f, j] - np.asarray(rec["pos"])))
+            a = _rot_angle_deg(grm[f, j], _quat_to_mat(rec["quat"]))
+            row.update(role=rec["role"], pos_err=round(e, 4), rot_err_deg=round(a, 2))
+            agg["ee_pos_max"] = max(agg["ee_pos_max"], e)
+            agg["ee_rot_max_deg"] = max(agg["ee_rot_max_deg"], a)
+            have.add("end-effector")
+        else:  # fullbody
+            re_ = float(np.linalg.norm(pj[f, idx["Hips"]] - np.asarray(rec["rootPos"])))
+            ee_errs = {n: float(np.linalg.norm(pj[f, idx[n]] - np.asarray(v["pos"])))
+                       for n, v in rec["ee"].items()}
+            ee_rot_errs = {n: _rot_angle_deg(grm[f, idx[n]], _quat_to_mat(v["quat"]))
+                           for n, v in rec["ee"].items()}
+            row.update(root_err=round(re_, 4),
+                       ee_pos_err={n: round(e, 4) for n, e in ee_errs.items()},
+                       ee_rot_err_deg={n: round(e, 2) for n, e in ee_rot_errs.items()})
+            agg["fullbody_root_max"] = max(agg["fullbody_root_max"], re_)
+            agg["fullbody_ee_pos_max"] = max(agg["fullbody_ee_pos_max"], *ee_errs.values())
+            agg["fullbody_ee_rot_max_deg"] = max(
+                agg["fullbody_ee_rot_max_deg"], *ee_rot_errs.values())
+            have.add("fullbody")
+        if rec.get("facing") is not None and heading is not None:
+            hv = heading[f] / (np.linalg.norm(heading[f]) + 1e-12)   # [cos t, sin t]
+            fv = np.asarray(rec["facing"])                            # [sin t, cos t]
+            cosang = float(np.clip(hv[1] * fv[0] + hv[0] * fv[1], -1.0, 1.0))
+            a = float(np.degrees(np.arccos(cosang)))
+            row["heading_err_deg"] = round(a, 2)
+            agg["heading_max_deg"] = max(agg["heading_max_deg"], a)
+        per.append(row)
+
+    ok = True
+    if "end-effector" in have:
+        ok &= (agg["ee_pos_max"] <= CONSTRAINT_GATES["ee_pos_max"]
+               and agg["ee_rot_max_deg"] <= CONSTRAINT_GATES["ee_rot_max_deg"])
+    if "root2d" in have:
+        ok &= agg["root_xz_max"] <= CONSTRAINT_GATES["root_xz_max"]
+    if "fullbody" in have:
+        ok &= (agg["fullbody_ee_pos_max"] <= CONSTRAINT_GATES["fullbody_ee_pos_max"]
+               and agg["fullbody_ee_rot_max_deg"]
+               <= CONSTRAINT_GATES["fullbody_ee_rot_max_deg"])
+    if records:
+        ok &= agg["heading_max_deg"] <= CONSTRAINT_GATES["heading_max_deg"]
+    summary = {k: round(v, 4) for k, v in agg.items()}
+    summary["constraint_ok"] = bool(ok)
+    return per, summary
 
 
 # --------------------------------------------------------------- generation --
@@ -223,49 +345,50 @@ def load_kimodo(modelname):
     return model
 
 
-def build_bookend_constraints(stance, nF):
-    """Fullbody stance keyframes at the first and last frames (somaskel30)."""
-    rot = stance["local_joints_rot30"]
-    rp = stance["root_pos"]
-    return [{
-        "type": "fullbody",
-        "frame_indices": [0, nF - 1],
-        "local_joints_rot": [rot, rot],
-        "root_positions": [[0.0, rp[1], 0.0], [0.0, rp[1], 0.0]],
-    }]
-
-
-def gen_move(model, mv, stance, samples, seed, steps):
+def gen_move(model, mv, stance, prepared, samples, seed, steps, root_margin=0.01):
     from kimodo.constraints import load_constraints_lst
     from kimodo.tools import seed_everything
 
     npz_path = os.path.join(MOVES_OUT, f"{mv['name']}.npz")
     report_path = os.path.join(MOVES_OUT, f"{mv['name']}.json")
     constraint_path = os.path.join(MOVES_OUT, f"{mv['name']}.constraints.json")
+    resolved_path = os.path.join(MOVES_OUT, f"{mv['name']}.resolved_constraints.json")
     # A regeneration attempt owns these outputs. Clear prior accepted files up
     # front so an exception or interrupted run cannot silently leave stale
     # motion available to the bake step.
-    for stale in (npz_path, report_path, constraint_path):
+    for stale in (npz_path, report_path, constraint_path, resolved_path):
         if os.path.exists(stale):
             os.remove(stale)
 
     fps = model.fps
     nF = int(mv["duration"] * fps)
+    constraints, records = prepared["constraints"], prepared["records"]
     constraint_lst = []
     cfg_kwargs = {}
-    if stance is not None and mv.get("stance_bookend"):
+    if constraints:
+        # the exact upstream-schema constraint file conditioning this move —
+        # reloadable by Kimodo's own demo tools
         with open(constraint_path, "w") as fp:
-            json.dump(build_bookend_constraints(stance, nF), fp)
+            json.dump(constraints, fp)
         constraint_lst = load_constraints_lst(constraint_path, model.skeleton)
         cfg_kwargs = {"cfg_type": "separated", "cfg_weight": [2.0, 2.0]}
 
+    # absence of text is represented as the empty prompt: the installed API
+    # explicitly zeroes empty-string text features (constraint-only mode),
+    # so no motion-changing placeholder wording is ever substituted
+    prompt = mv.get("prompt") or ""
     seed_everything(seed)
-    out = model([mv["prompt"]], [nF],
+    # root_margin: MotionCorrection's allowed root slack. The upstream default
+    # (0.04 m) leaves corrected roots exactly 4 cm off authored waypoints —
+    # measured, and outside the 2 cm adherence gate. 0.01 keeps a little
+    # optimizer freedom for foot cleanup while hitting the gate; 0.0 is exact.
+    out = model([prompt], [nF],
                 constraint_lst=constraint_lst,
                 num_denoising_steps=steps,
                 num_samples=samples,
                 multi_prompt=True,
                 post_processing=True,
+                root_margin=root_margin,
                 return_numpy=True,
                 **cfg_kwargs)
 
@@ -292,6 +415,12 @@ def gen_move(model, mv, stance, samples, seed, steps):
     idx = {n: i for i, n in enumerate(skel77.bone_order_names)}
     root_i = skel77.root_idx
 
+    headings = np.asarray(out["global_root_heading"]) if "global_root_heading" in out else None
+    needs_heading = any(r.get("facing") is not None for r in records)
+    if needs_heading and (headings is None or headings.shape[:2] != posed.shape[:2]):
+        raise RuntimeError("Kimodo output lacks global_root_heading but the move "
+                           "authors heading constraints — cannot measure adherence")
+
     results = []
     for s in range(posed.shape[0]):
         pj, rp, fc = posed[s], roots[s], contacts[s]
@@ -300,12 +429,34 @@ def gen_move(model, mv, stance, samples, seed, steps):
                 raise ValueError("rotation channels contain non-finite values")
             jc, rc, R = canonicalize(pj, rp, idx)
             g = gate_sample(jc, rc, fc, idx, mv, stance, fps)
+            # constraint adherence: measured on the RAW (native-frame) sample,
+            # post-processing already applied — stage "authored -> final SOMA"
+            if records:
+                per_rec, summary = measure_constraints(
+                    records, pj, rp, global_rots[s],
+                    headings[s] if headings is not None else None, idx)
+                g["constraints"] = summary
+                g["constraint_ok"] = summary["constraint_ok"]
+                g["pass"] = bool(g["pass"] and g["constraint_ok"])
+                g["score"] += (summary["ee_pos_max"] * 20.0
+                               + summary["ee_rot_max_deg"] * 0.02
+                               + summary["root_xz_max"] * 10.0
+                               + summary["fullbody_ee_pos_max"] * 20.0
+                               + summary["fullbody_ee_rot_max_deg"] * 0.02)
+                g["_per_record"] = per_rec
+            else:
+                g["constraint_ok"] = True
         except (ValueError, IndexError) as error:
             jc = rc = R = None
             g = failed_gates(f"canonicalization failed: {error}")
+            g["constraint_ok"] = False
         results.append((g, s, jc, rc, R))
     if not results:
         raise RuntimeError(f"Kimodo returned no samples for {mv['name']}")
+
+    def clean_gates(g):
+        return {k: (round(v, 4) if isinstance(v, float) else v)
+                for k, v in g.items() if k != "_per_record"}
 
     passing = [t for t in results if t[0]["pass"]]
     if not passing:
@@ -313,10 +464,11 @@ def gen_move(model, mv, stance, samples, seed, steps):
         report = {"name": mv["name"], "picked_sample": int(s),
                   "num_samples": len(results), "num_passing": 0,
                   "accepted": False, "loop": bool(mv.get("loop")),
-                  "gates": {k: (round(v, 4) if isinstance(v, float) else v)
-                            for k, v in g.items()},
-                  "all_gates": [{k: (round(v, 4) if isinstance(v, float) else v)
-                                 for k, v in t[0].items()} for t in results],
+                  "prompt": mv.get("prompt") or None,
+                  "gates": clean_gates(g),
+                  "all_gates": [clean_gates(t[0]) for t in results],
+                  "constraints": ({"records": g.get("_per_record"),
+                                   "gates": CONSTRAINT_GATES} if records else None),
                   "frame_data": None,
                   "frames": int(posed[s].shape[0]), "fps": int(fps)}
         with open(report_path, "w") as fp:
@@ -324,10 +476,17 @@ def gen_move(model, mv, stance, samples, seed, steps):
         return report
     g, s, jc, rc, R = min(passing, key=lambda t: t[0]["score"])
 
-    # loop trim on the canonical winner
+    # loop trim on the canonical winner; required constrained frames must
+    # survive the trim (best_loop refuses windows that would drop them)
     trim = None
     if mv.get("loop"):
-        (i0, i1), loop_err = best_loop(jc, rc, int(1.0 * fps), int(3.2 * fps))
+        required = [r["frame"] for r in records if r["required"]]
+        must_span = (min(required), max(required)) if required else None
+        try:
+            (i0, i1), loop_err = best_loop(jc, rc, int(1.0 * fps), int(3.2 * fps),
+                                           must_span=must_span)
+        except ValueError as error:
+            raise RuntimeError(f"{mv['name']}: {error}") from None
         trim = (i0, i1)
         g["loop_err"] = round(loop_err, 4)
         g["loop_trim"] = [i0, i1]
@@ -349,14 +508,31 @@ def gen_move(model, mv, stance, samples, seed, steps):
         canonical_rotation=total_R.astype(np.float32),
         fps=fps)
 
+    # resolved constraint provenance, re-expressed with the SAME rigid
+    # transform + trim the accepted motion got: canonical frame indices and
+    # world targets, directly usable by bake/QA/runtime without repeating FK
+    if records:
+        p01 = roots[s][0] * np.array([1.0, 0.0, 1.0])
+        recs = kc.transform_records(records, *kc.compose_canonical(R, p01))
+        if trim:
+            recs = kc.shift_records(mv["name"], recs, trim[0], trim[1])
+            p02 = rc[sl][0] * np.array([1.0, 0.0, 1.0])
+            recs = kc.transform_records(recs, *kc.compose_canonical(trim_R, p02))
+        resolved = {"name": mv["name"], "space": "canonical",
+                    "frames": int(jc_clip.shape[0]), "fps": int(fps),
+                    "records": recs}
+        with open(resolved_path, "w") as fp:
+            json.dump(resolved, fp, indent=1, allow_nan=False)
+
     fd = frame_data(jc_clip, rc_clip, idx, mv, fps)
     report = {"name": mv["name"], "picked_sample": int(s),
               "num_samples": len(results), "num_passing": len(passing),
               "accepted": True, "loop": bool(mv.get("loop")),
-              "gates": {k: (round(v, 4) if isinstance(v, float) else v)
-                        for k, v in g.items()},
-              "all_gates": [{k: (round(v, 4) if isinstance(v, float) else v)
-                             for k, v in t[0].items()} for t in results],
+              "prompt": mv.get("prompt") or None,
+              "gates": clean_gates(g),
+              "all_gates": [clean_gates(t[0]) for t in results],
+              "constraints": ({"records": g.get("_per_record"),
+                               "gates": CONSTRAINT_GATES} if records else None),
               "frame_data": fd, "frames": int(jc_clip.shape[0]), "fps": int(fps)}
     with open(report_path, "w") as fp:
         json.dump(report, fp, indent=1, allow_nan=False)
@@ -419,6 +595,9 @@ def main():
     ap.add_argument("--samples", type=int, default=8)
     ap.add_argument("--seed", type=int, default=42)
     ap.add_argument("--steps", type=int, default=100)
+    ap.add_argument("--root-margin", type=float, default=0.01,
+                    help="MotionCorrection root slack in meters (0 = exact root "
+                         "constraint adherence; upstream default was 0.04)")
     ap.add_argument("--model", default="Kimodo-SOMA-RP-v1.1")
     a = ap.parse_args()
     os.makedirs(MOVES_OUT, exist_ok=True)
@@ -441,6 +620,14 @@ def main():
 
     with open(a.spec) as fp:
         spec = json.load(fp)
+    if not isinstance(spec, dict):
+        ap.error("spec must be a JSON object")
+    fps_spec = spec.get("fps")
+    if (fps_spec is not None
+            and (isinstance(fps_spec, bool) or not isinstance(fps_spec, (int, float))
+                 or not np.isfinite(fps_spec) or fps_spec <= 0
+                 or abs(fps_spec - round(fps_spec)) > 1e-9)):
+        ap.error("spec fps must be a positive integer")
     moves = spec.get("moves")
     if not isinstance(moves, list) or not moves:
         ap.error("spec must contain a non-empty 'moves' array")
@@ -449,11 +636,30 @@ def main():
         ap.error("move names must contain only letters, numbers, '_' and '-'")
     if len(set(names)) != len(names):
         ap.error("move names must be unique")
-    if any(not isinstance(mv.get("prompt"), str) or not mv["prompt"].strip()
-           or isinstance(mv.get("duration"), bool)
-           or not isinstance(mv.get("duration"), (int, float))
-           or not 0 < mv["duration"] <= 10 for mv in moves):
-        ap.error("every move needs a non-empty prompt and a duration in (0, 10] seconds")
+    for mv in moves:
+        if (isinstance(mv.get("duration"), bool)
+                or not isinstance(mv.get("duration"), (int, float))
+                or not 0 < mv["duration"] <= 10):
+            ap.error(f"{mv['name']}: duration must be in (0, 10] seconds")
+        prompt = mv.get("prompt")
+        if prompt is not None and not isinstance(prompt, str):
+            ap.error(f"{mv['name']}: prompt must be a string (or omitted/null for "
+                     "constraint-only generation)")
+        if isinstance(prompt, str) and not prompt.strip():
+            ap.error(f"{mv['name']}: an empty/whitespace prompt is ambiguous; omit "
+                     "prompt or set it to null for constraint-only generation")
+        if "constraints" in mv and not isinstance(mv["constraints"], list):
+            ap.error(f"{mv['name']}: constraints must be a JSON array")
+        if "constraints_file" in mv and (not isinstance(mv["constraints_file"], str)
+                                         or not mv["constraints_file"]):
+            ap.error(f"{mv['name']}: constraints_file must be a non-empty path")
+        has_text = isinstance(prompt, str) and bool(prompt.strip())
+        has_constraints = (mv.get("constraints") is not None
+                           or mv.get("constraints_file") is not None
+                           or mv.get("stance_bookend"))
+        if not has_text and not has_constraints:
+            ap.error(f"{mv['name']}: a move needs a text prompt, constraints, or both "
+                     "(constraint-only moves omit the prompt explicitly)")
     valid_travel = {None, "in_place", "fwd", "back"}
     valid_apex = {"root_rise": "min", "root_dip": "min",
                   "root_floor": "max", "ankle_height": "min"}
@@ -476,8 +682,15 @@ def main():
                 ap.error(f"{mv['name']}: invalid apex definition")
         if "height" in mv and mv["height"] not in ("low", "mid", "high"):
             ap.error(f"{mv['name']}: height must be low, mid, or high")
+        if mv.get("reach_policy") not in (None, "clamp"):
+            ap.error(f"{mv['name']}: reach_policy must be \"clamp\" or omitted "
+                     "(strict: unreachable mapped targets fail character QA)")
     if a.samples < 1 or a.steps < 1:
         ap.error("--samples and --steps must be positive")
+    if not np.isfinite(a.root_margin) or a.root_margin < 0:
+        ap.error("--root-margin must be a finite non-negative number")
+    if not isinstance(a.model, str) or not a.model.strip():
+        ap.error("--model must be non-empty")
     only = set(a.only.split(",")) if a.only else None
     unknown = only - set(names) if only else set()
     if unknown:
@@ -511,6 +724,32 @@ def main():
     if stance is None and any(mv.get("stance_bookend") for mv in selected):
         ap.error("bookended moves require out/stance_pose.json; generate idle_stance, then run 'stance' first")
 
+    # ---- prepare + validate every constraint BEFORE the model is loaded:
+    # schema, frames, shapes, conflicts, bookend merge, and FK resolution of
+    # authored world targets (needs only the skeleton classes, not weights)
+    constrained = [mv for mv in selected
+                   if mv.get("constraints") is not None
+                   or mv.get("constraints_file") is not None
+                   or mv.get("stance_bookend")]
+    if constrained and fps_spec is None:
+        ap.error("the spec must declare fps to author constraints "
+                 "(frame indices depend on it): " +
+                 ", ".join(mv["name"] for mv in constrained))
+    prepared = {mv["name"]: {"constraints": [], "meta": [], "records": []}
+                for mv in selected}
+    if constrained:
+        from kimodo.skeleton.definitions import SOMASkeleton30
+        skel30 = SOMASkeleton30()
+        spec_dir = os.path.dirname(os.path.abspath(a.spec))
+        for mv in constrained:
+            nF = int(mv["duration"] * fps_spec)
+            try:
+                cons, meta = kc.prepare_move_constraints(mv, nF, fps_spec, stance, spec_dir)
+                records = kc.resolve_records(mv["name"], cons, meta, skel30) if cons else []
+            except kc.ConstraintSpecError as e:
+                ap.error(str(e))
+            prepared[mv["name"]] = {"constraints": cons, "meta": meta, "records": records}
+
     model = load_kimodo(a.model)
     if "fps" in spec and int(spec["fps"]) != int(model.fps):
         ap.error(f"spec fps={spec['fps']} does not match model fps={model.fps}")
@@ -523,9 +762,12 @@ def main():
             os.remove(STANCE_PATH)
             stance = None
             print("[stance] removed stale stance_pose.json; run 'stance' after idle generation")
-        print(f"[gen] {mv['name']}: '{mv['prompt'][:60]}...' "
-              f"({mv['duration']}s x{a.samples})")
-        rep = gen_move(model, mv, stance, a.samples, a.seed, a.steps)
+        label = (mv.get("prompt") or "<constraint-only>")[:60]
+        ncons = len(prepared[mv["name"]]["constraints"])
+        print(f"[gen] {mv['name']}: '{label}...' "
+              f"({mv['duration']}s x{a.samples}, {ncons} constraints)")
+        rep = gen_move(model, mv, stance, prepared[mv["name"]], a.samples, a.seed, a.steps,
+                       root_margin=a.root_margin)
         g = rep["gates"]
         print(f"      -> accepted={rep['accepted']} ({rep['num_passing']}/{rep['num_samples']} passing) "
               f"skate={g['foot_skate_mean']} travel_x={g['travel_x']}")

@@ -1,0 +1,279 @@
+{
+  "ok": true,
+  "character": "/home/alex/Downloads/ani_test/web/fighter.glb",
+  "generatedAt": "2026-07-14T06:58:36.696Z",
+  "probeClips": [
+    "e2e_text.json",
+    "e2e_waypoints.json"
+  ],
+  "rig": {
+    "ok": true,
+    "missing": [],
+    "rolesResolved": 20,
+    "spineChain": [
+      "Waist",
+      "Spine01",
+      "Spine02"
+    ],
+    "roles": {
+      "Hips": "Hip",
+      "LeftUpLeg": "L_Thigh",
+      "LeftLeg": "L_Calf",
+      "LeftFoot": "L_Foot",
+      "LeftToeBase": "L_ToeBase",
+      "RightUpLeg": "R_Thigh",
+      "RightLeg": "R_Calf",
+      "RightFoot": "R_Foot",
+      "RightToeBase": "R_ToeBase",
+      "Neck": "NeckTwist01",
+      "Head": "Head",
+      "LeftShoulder": "L_Clavicle",
+      "LeftArm": "L_Upperarm",
+      "LeftForeArm": "L_Forearm",
+      "LeftHand": "L_Hand",
+      "RightShoulder": "R_Clavicle",
+      "RightArm": "R_Upperarm",
+      "RightForeArm": "R_Forearm",
+      "RightHand": "R_Hand",
+      "Chest": "Spine02"
+    }
+  },
+  "scale": {
+    "srcHipY": 0.989,
+    "charHipY": 0.918,
+    "scaleRoot": 0.974
+  },
+  "probes": [
+    {
+      "tag": "rest",
+      "grounded": {
+        "Left": true,
+        "Right": true
+      },
+      "roundTripMean": 0,
+      "roundTripMax": 0,
+      "boneStretchPct": 0,
+      "twistFrac": 0.01,
+      "twistDeg": 0.6,
+      "twistWorstRole": "LeftLeg",
+      "footFlatDeg": 0,
+      "footGroundFrac": 0.027,
+      "capsuleClearance": null
+    },
+    {
+      "tag": "e2e_text:kickL@2",
+      "grounded": {
+        "Left": true,
+        "Right": true
+      },
+      "roundTripMean": 0.0166,
+      "roundTripMax": 0.0334,
+      "boneStretchPct": 0,
+      "twistFrac": 0.04,
+      "twistDeg": 3.9,
+      "twistWorstRole": "RightHand",
+      "footFlatDeg": 0.1,
+      "footGroundFrac": 0.004,
+      "capsuleClearance": 1.88
+    },
+    {
+      "tag": "e2e_text:kickR@8",
+      "grounded": {
+        "Left": true,
+        "Right": true
+      },
+      "roundTripMean": 0.0154,
+      "roundTripMax": 0.0338,
+      "boneStretchPct": 0,
+      "twistFrac": 0.05,
+      "twistDeg": 4.9,
+      "twistWorstRole": "RightHand",
+      "footFlatDeg": 0.1,
+      "footGroundFrac": 0.003,
+      "capsuleClearance": 1.86
+    },
+    {
+      "tag": "e2e_text:crouch@41",
+      "grounded": {
+        "Left": true,
+        "Right": true
+      },
+      "roundTripMean": 0.0128,
+      "roundTripMax": 0.0371,
+      "boneStretchPct": 0,
+      "twistFrac": 0.1,
+      "twistDeg": 9.4,
+      "twistWorstRole": "RightHand",
+      "footFlatDeg": 0.2,
+      "footGroundFrac": 0.005,
+      "capsuleClearance": 1.82
+    },
+    {
+      "tag": "e2e_text:jumpTop@2",
+      "grounded": {
+        "Left": true,
+        "Right": true
+      },
+      "roundTripMean": 0.0166,
+      "roundTripMax": 0.0334,
+      "boneStretchPct": 0,
+      "twistFrac": 0.04,
+      "twistDeg": 3.9,
+      "twistWorstRole": "RightHand",
+      "footFlatDeg": 0.1,
+      "footGroundFrac": 0.004,
+      "capsuleClearance": 1.88
+    },
+    {
+      "tag": "e2e_text:reach@29",
+      "grounded": {
+        "Left": true,
+        "Right": true
+      },
+      "roundTripMean": 0.0127,
+      "roundTripMax": 0.0373,
+      "boneStretchPct": 0,
+      "twistFrac": 0.09,
+      "twistDeg": 7.9,
+      "twistWorstRole": "RightHand",
+      "footFlatDeg": 0.3,
+      "footGroundFrac": 0.005,
+      "capsuleClearance": 1.83
+    },
+    {
+      "tag": "e2e_text:twist@22",
+      "grounded": {
+        "Left": true,
+        "Right": true
+      },
+      "roundTripMean": 0.0125,
+      "roundTripMax": 0.0363,
+      "boneStretchPct": 0,
+      "twistFrac": 0.08,
+      "twistDeg": 7.2,
+      "twistWorstRole": "RightHand",
+      "footFlatDeg": 0.2,
+      "footGroundFrac": 0.005,
+      "capsuleClearance": 1.81
+    },
+    {
+      "tag": "e2e_waypoints:kickL@16",
+      "grounded": {
+        "Left": false,
+        "Right": true
+      },
+      "roundTripMean": 0.0097,
+      "roundTripMax": 0.0295,
+      "boneStretchPct": 0,
+      "twistFrac": 0.07,
+      "twistDeg": 6.5,
+      "twistWorstRole": "LeftLeg",
+      "footFlatDeg": 0.6,
+      "footGroundFrac": 0.003,
+      "capsuleClearance": 1.82
+    },
+    {
+      "tag": "e2e_waypoints:kickR@36",
+      "grounded": {
+        "Left": true,
+        "Right": false
+      },
+      "roundTripMean": 0.0115,
+      "roundTripMax": 0.0288,
+      "boneStretchPct": 0,
+      "twistFrac": 0.05,
+      "twistDeg": 4.5,
+      "twistWorstRole": "LeftLeg",
+      "footFlatDeg": 0.1,
+      "footGroundFrac": 0.005,
+      "capsuleClearance": 1.86
+    },
+    {
+      "tag": "e2e_waypoints:crouch@119",
+      "grounded": {
+        "Left": true,
+        "Right": false
+      },
+      "roundTripMean": 0.0113,
+      "roundTripMax": 0.0216,
+      "boneStretchPct": 0,
+      "twistFrac": 0.04,
+      "twistDeg": 4,
+      "twistWorstRole": "LeftLeg",
+      "footFlatDeg": 0.1,
+      "footGroundFrac": 0.016,
+      "capsuleClearance": 1.9
+    },
+    {
+      "tag": "e2e_waypoints:jumpTop@117",
+      "grounded": {
+        "Left": false,
+        "Right": false
+      },
+      "roundTripMean": 0.0093,
+      "roundTripMax": 0.0244,
+      "boneStretchPct": 0,
+      "twistFrac": 0.04,
+      "twistDeg": 3.4,
+      "twistWorstRole": "LeftHand",
+      "footFlatDeg": null,
+      "footGroundFrac": null,
+      "capsuleClearance": 1.82
+    },
+    {
+      "tag": "e2e_waypoints:reach@55",
+      "grounded": {
+        "Left": false,
+        "Right": true
+      },
+      "roundTripMean": 0.0151,
+      "roundTripMax": 0.0391,
+      "boneStretchPct": 0,
+      "twistFrac": 0.06,
+      "twistDeg": 5.3,
+      "twistWorstRole": "LeftLeg",
+      "footFlatDeg": 0.7,
+      "footGroundFrac": 0.005,
+      "capsuleClearance": 1.82
+    },
+    {
+      "tag": "e2e_waypoints:twist@119",
+      "grounded": {
+        "Left": true,
+        "Right": false
+      },
+      "roundTripMean": 0.0113,
+      "roundTripMax": 0.0216,
+      "boneStretchPct": 0,
+      "twistFrac": 0.04,
+      "twistDeg": 4,
+      "twistWorstRole": "LeftLeg",
+      "footFlatDeg": 0.1,
+      "footGroundFrac": 0.016,
+      "capsuleClearance": 1.9
+    }
+  ],
+  "gates": {
+    "sideConsistency": true,
+    "boneStretchPct": 0,
+    "footFlatDeg": 0.7,
+    "footGroundFrac": 0.027,
+    "twistFrac": 0.1,
+    "twistDeg": 9.4,
+    "twistWorstRole": "RightHand",
+    "capsuleClearance": 1.81,
+    "roundTripMean": 0.0119,
+    "roundTripP95": 0.0363
+  },
+  "thresholds": {
+    "boneStretchPct": 1,
+    "footFlatDeg": 6,
+    "footGroundFrac": 0.1,
+    "twistFrac": 1,
+    "capsuleClearance": 0.85,
+    "roundTripMean": 0.05,
+    "roundTripP95": 0.1
+  },
+  "pass": true,
+  "failures": []
+}

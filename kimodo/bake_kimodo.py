@@ -6,6 +6,15 @@ three.js axes, no basis change). Each JSON carries `srcMap` (SOMA-77 joint
 names → canonical source roles) so align/retarget.js drives any certified
 rig from it without knowing the source family.
 
+Besides the motion channels, each baked clip preserves:
+- `contacts` + `contactJoints`: Kimodo's per-frame foot-contact PREDICTIONS
+  with their explicit joint mapping (QA/cleanup evidence, never authored
+  targets);
+- `constraints`: the resolved, canonical-frame constraint records written by
+  kimogen (<move>.resolved_constraints.json) — authored world targets with
+  family/source/provenance, directly usable by runtime IK and constraint QA
+  without reloading the authoring skeleton or repeating FK.
+
 Usage: kimenv/bin/python bake_kimodo.py [--in out/moves] [--web ../web/moves_kimodo]
 No GPU needed.
 """
@@ -30,6 +39,16 @@ SOMA_SRC = {
     "RightUpLeg": "RightLeg", "RightLeg": "RightShin", "RightFoot": "RightFoot",
     "LeftArm": "LeftArm", "LeftForeArm": "LeftForeArm", "LeftHand": "LeftHand",
     "RightArm": "RightArm", "RightForeArm": "RightForeArm", "RightHand": "RightHand",
+}
+
+# Kimodo foot-contact channel layouts (verified against the installed
+# package: 4-channel = SOMA-30 [L heel, L toe, R heel, R toe]; the 6-channel
+# layout is the SOMA-77 expansion, toe-end copying toe-base). Contacts are
+# model PREDICTIONS about the generated motion, not authored constraints.
+CONTACT_JOINTS_BY_WIDTH = {
+    4: ["LeftFoot", "LeftToeBase", "RightFoot", "RightToeBase"],
+    6: ["LeftFoot", "LeftToeBase", "LeftToeEnd",
+        "RightFoot", "RightToeBase", "RightToeEnd"],
 }
 
 
@@ -58,10 +77,10 @@ def mats_to_xyzw(m):
     return q.reshape(*shape, 4)
 
 
-def manifest_entry(name, frames, fps, meta, spec_move):
+def manifest_entry(name, frames, fps, meta, spec_move, constraints=None):
     """Build the runtime contract for one already-validated clip."""
     loop = spec_move.get("loop", meta.get("loop", False))
-    return {
+    entry = {
         "name": name,
         "file": f"{name}.json",
         "frames": int(frames),
@@ -69,8 +88,38 @@ def manifest_entry(name, frames, fps, meta, spec_move):
         "loop": bool(loop),
         "frame_data": meta.get("frame_data"),
         "gates": {k: v for k, v in meta.get("gates", {}).items()
-                  if not isinstance(v, list)},
+                  if not isinstance(v, (list, dict))},
     }
+    if constraints:
+        counts = {}
+        for r in constraints:
+            counts[r["type"]] = counts.get(r["type"], 0) + 1
+        entry["constraints"] = {
+            "counts": counts,
+            "adherence": meta.get("gates", {}).get("constraints"),
+        }
+        # documented per-move reach policy: "clamp" lets character QA accept
+        # explicitly clamped (reported) unreachable targets; default strict
+        if spec_move.get("reach_policy") == "clamp":
+            entry["reachPolicy"] = "clamp"
+    return entry
+
+
+def has_authored_hand_rotation(constraints):
+    """Whether baked stylization must yield to an exact authored wrist.
+
+    End-effector records name one role directly; fullbody records carry their
+    constrained roles in the resolved `ee` map.
+    """
+    for rec in constraints or []:
+        if rec.get("rotConstrained") is False:
+            continue
+        if rec.get("role") in ("LeftHand", "RightHand"):
+            return True
+        if rec.get("family") == "fullbody" and any(
+                role in rec.get("ee", {}) for role in ("LeftHand", "RightHand")):
+            return True
+    return False
 
 
 def main():
@@ -184,12 +233,20 @@ def main():
         src = os.path.join(a.in_dir, f"{name}.npz")
         meta_path = os.path.join(a.in_dir, f"{name}.json")
         if not os.path.exists(src):
+            rejected = False
             if os.path.exists(meta_path):
                 with open(meta_path) as fp:
                     failed_meta = json.load(fp)
-                if failed_meta.get("accepted", failed_meta.get("gates", {}).get("pass")) is not True:
-                    raise SystemExit(f"[reject] {name}: generation gates did not pass")
-            if a.all or a.allow_missing:
+                rejected = failed_meta.get(
+                    "accepted", failed_meta.get("gates", {}).get("pass")) is not True
+            if a.allow_missing:
+                # a deliberate partial bake may skip explicitly rejected moves
+                # (e.g. an expected-fail case in a test spec) — loudly
+                print(f"[skip] {name} ({'generation rejected' if rejected else 'no npz'})")
+                continue
+            if rejected:
+                raise SystemExit(f"[reject] {name}: generation gates did not pass")
+            if a.all:
                 print(f"[skip] {name} (no npz)")
                 continue
             raise SystemExit(f"[reject] {name}: expected NPZ is missing (use --allow-missing for a partial bake)")
@@ -265,7 +322,39 @@ def main():
         if ("loop" in meta and "loop" in spec_move
                 and meta["loop"] != spec_move["loop"]):
             raise SystemExit(f"[reject] {name}: report/spec loop flags disagree; regenerate the clip")
+        contacts = None
+        if "foot_contacts" in z.files:
+            contacts = np.asarray(z["foot_contacts"], dtype=float)
+            if (contacts.ndim != 2 or contacts.shape[0] != F
+                    or contacts.shape[1] not in CONTACT_JOINTS_BY_WIDTH
+                    or not np.isfinite(contacts).all()):
+                raise SystemExit(f"[reject] {name}: foot_contacts must be a finite "
+                                 f"[{F},4|6] array; got {contacts.shape}")
         z.close()
+
+        # resolved constraint provenance (canonical frame, written by kimogen)
+        resolved_path = os.path.join(a.in_dir, f"{name}.resolved_constraints.json")
+        constraints = None
+        if os.path.exists(resolved_path):
+            with open(resolved_path) as fp:
+                resolved = json.load(fp)
+            if (not isinstance(resolved, dict) or resolved.get("name") != name
+                    or resolved.get("space") != "canonical"
+                    or not isinstance(resolved.get("records"), list)):
+                raise SystemExit(f"[reject] {name}: malformed resolved_constraints file")
+            if resolved.get("frames") != F or resolved.get("fps") != fps:
+                raise SystemExit(
+                    f"[reject] {name}: resolved constraints were written for "
+                    f"{resolved.get('frames')} frames @ {resolved.get('fps')} fps but the NPZ "
+                    f"has {F} @ {fps} — regenerate the move")
+            if any(not isinstance(r, dict) or not isinstance(r.get("frame"), int)
+                   or not 0 <= r["frame"] < F for r in resolved["records"]):
+                raise SystemExit(f"[reject] {name}: resolved constraint records must "
+                                 "carry in-range integer canonical frames")
+            constraints = resolved["records"]
+        elif meta.get("constraints"):
+            raise SystemExit(f"[reject] {name}: the generation report shows constraints "
+                             "but resolved_constraints.json is missing; regenerate the move")
         if J not in packs:
             packs[J] = skel_pack(J)
         names, parents, rest, rest_quat = packs[J]
@@ -281,6 +370,11 @@ def main():
                 f"facing={facing.tolist()}); regenerate it with the current kimogen.py")
         quat = mats_to_xyzw(grm)
 
+        # a clip with authored hand-rotation constraints must transfer the
+        # full authored wrist: a global stylization gain would silently damp
+        # an exact target (handFollow stays a stylization knob for
+        # prediction-only clips; see the ablation evidence in KIMODO.md)
+        hand_constrained = has_authored_hand_rotation(constraints)
         out = {
             "fps": fps, "numFrames": F, "mode": name,
             "names": names, "parents": parents,
@@ -293,18 +387,20 @@ def main():
             # wrist articulation gain for the retargeter: mocap wrist
             # channels read as "broken fists" on fingerless fist meshes —
             # keep 30% of the source wrist, ride the forearm for the rest
-            "handFollow": 0.3,
-            # forearm roll from the source's own twist (true pronation)
-            # instead of the chest-rebase projection, which spins the fist
-            # during big torso pitches (jump crouch)
-            "foreRollSrc": True,
+            "handFollow": 1.0 if hand_constrained else 0.3,
         }
+        if contacts is not None:
+            out["contacts"] = np.round(contacts, 3).tolist()
+            out["contactJoints"] = CONTACT_JOINTS_BY_WIDTH[contacts.shape[1]]
+        if constraints is not None:
+            out["constraints"] = constraints
         with open(os.path.join(a.web_dir, f"{name}.json"), "w") as fp:
             json.dump(out, fp, allow_nan=False)
 
         manifest.append(manifest_entry(
-            name, F, fps, meta, spec_move))
-        print(f"[bake] {name}: {F} frames")
+            name, F, fps, meta, spec_move, constraints))
+        print(f"[bake] {name}: {F} frames"
+              + (f", {len(constraints)} constraint records" if constraints else ""))
 
     if not manifest:
         raise SystemExit("[reject] no clips were found to bake")

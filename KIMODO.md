@@ -121,15 +121,17 @@ visibly skewed fists and toes-up feet. Two facts to bake by:
 All three mistakes are caught mechanically by `qa_endeffectors.mjs` (§4) —
 run it after any bake or retargeter change.
 
-**Forearm roll (`foreRollSrc`).** The aim-based limb transfer takes each
-bone's roll from the body-frame rebase (chest delta for arms). With big
-torso pitches — a deep jump crouch — the chest delta projects onto the
-forearm axis and the forearm *spins in place* (measured: up to 45°/frame of
-twist with <5°/frame of direction change), taking the fist with it. Clips
-with `foreRollSrc: true` (Kimodo bakes it) rebuild the forearm from the
-source forearm's full world delta — true mocap pronation/supination, stable
-by nature — then rotate minimally onto the aimed direction. Measured after:
-character forearm twist matches the source exactly (mean ~2°/frame).
+**Forearm roll.** The aim-based limb transfer takes each bone's roll from
+the body-frame rebase (chest delta for arms). With big torso pitches — a
+deep jump crouch — the chest delta projects onto the forearm axis and the
+forearm *spins in place* (measured: up to 45°/frame of twist with <5°/frame
+of direction change; disabling the source path costs up to **179°** of roll
+on the regenerated move set), taking the fist with it. Any clip carrying
+quaternions therefore rebuilds the forearm from the source forearm's full
+world delta — true mocap pronation/supination, stable by nature — then
+rotates minimally onto the aimed direction. This is automatic and is the
+ONLY quaternion path; the old per-clip `foreRollSrc` switch was removed
+(evidence/README.md).
 
 **Wrist articulation gain (`handFollow`).** Even with correct anchors and
 axes, raw mocap wrist channels read poorly on game hands: every twitch,
@@ -137,9 +139,26 @@ roll, and stylistic flex of the performer shows on a fingerless fist mesh as
 a "broken" wrist (the balancing hand during a side kick was the reported
 case). The clip JSON carries `handFollow` — the retargeter slerps between
 the hand rigidly riding the forearm (0) and the full source wrist (1).
-`bake_kimodo.py` bakes **0.3**: hands stay aligned with the forearm, keeping
-a hint of wrist life. Authored-wrist sources omit the key and default to
-full transfer.
+`bake_kimodo.py` bakes **0.3** for prediction-only clips: hands stay aligned
+with the forearm, keeping a hint of wrist life. This is an intentional
+STYLIZATION, not a correctness guard — measured, it discards 22.8° mean /
+60.8° p95 of real wrist articulation, so QA reports raw transfer fidelity at
+`handFollow = 1` and the stylization delta separately, and clips with
+**authored hand constraints are baked at 1.0** (an exact target must never
+be damped; the constraint IK applies the authored orientation exactly at
+constrained frames).
+
+**Deleted guards.** The retargeter used to carry an anatomical hand clamp
+(85°/70°), a torso-capsule arm displacement, a 40°/frame temporal continuity
+slew, and an optional ground lift. All four were ablated per-intervention on
+the regenerated move set across both certified reference rigs and deleted:
+the temporal guards never engaged (Δ = 0°) while making poses depend on
+playback history; the clamp clipped VALID authored wrists by up to 15.5°;
+the capsule displaced valid near-face guard poses with zero measured torso
+penetration in the unguarded baseline. The transfer is now unguarded and
+deterministic; torso clearance, ground penetration, branch flips, and
+contact-frame skate are measured by QA instead of silently corrected.
+Numbers and reproduction commands: `evidence/README.md`.
 
 ## 3. The tooling in `kimodo/` (this repo)
 
@@ -147,11 +166,21 @@ The Stage 2 implementation (contract and workflow: BAKE.md):
 
 | file | role |
 |---|---|
-| `kimogen.py` | move-set generation: prompt + optional stance-bookend fullbody constraints → best-of-8 → QA gates → NPZ + gate/frame-data JSON per move |
+| `kimogen.py` | move-set generation: text + any compatible constraint combination → best-of-8 → QA gates incl. per-constraint adherence → NPZ + gate/frame-data JSON + resolved canonical constraint records per move |
+| `kimoconstraints.py` | the constraint layer: upstream-schema validation, end-effector normalization, conflict detection, stance-bookend merging, FK resolution of authored targets, canonical-transform + loop-trim handling |
 | `moveset_mk.json` | the validated 17-move Mortal Kombat spec (prompts, travel intents, apex gates, bookend flags) |
-| `bake_kimodo.py` | canonicalized NPZ → browser motion JSON (+`srcMap`) + manifest |
+| `moveset_e2e.json` / `make_e2e_spec.py` | the deterministic GPU end-to-end constraint suite: one move per authoring mode, poses lifted from the upstream demo files |
+| `run_e2e.sh` / `e2e_check.mjs` | reproducible e2e driver + expected pass/fail matrix (incl. the deliberate failures) |
+| `bake_kimodo.py` | canonicalized NPZ → browser motion JSON (+`srcMap`, foot-contact predictions, resolved constraint records) + manifest |
+| `test_constraints.py` / `test_tools.py` | fast model-free tests: every constraint family, invalid cases, conflicts, transforms, trims, adherence math, the agent-guide vocabulary |
 | `validate_axes.py` | validates the axis & heading conventions on a forward-walk NPZ |
 | `setup_text_encoder.py` | builds the local mirror `TEXT_ENCODERS_DIR` (§1a) |
+
+Constraint authoring — which control to use when: **ANIMATION_AGENT.md**;
+schema, validation and conflict rules: **BAKE.md §3**. `kimogen.py` passes
+`root_margin=0.01` to Kimodo's post-processing: the upstream default (0.04 m)
+leaves corrected roots exactly 4 cm off authored waypoints, outside the 2 cm
+adherence gate (`--root-margin 0` = exact).
 
 ```bash
 # 1. generate the idle first, unconstrained
@@ -171,11 +200,20 @@ The bookend constraint (BAKE.md §2) pins frames `[0, T-1]` to the stance
 pose as a fullbody keyframe constraint — somaskel30 axis-angle + root
 height, authored in Kimodo's **native +Z frame** (constraints are applied
 before canonicalization, so a stance extracted from a canonicalized clip
-must be de-rotated back). CFG `separated (2.0, 2.0)`. Prompts that end
-"...then returns to the fighting stance" plus the constraint give end poses
-within 0.05–0.2 m of the reference — inside a 5-frame crossfade's coverage.
-Built-in post-processing (`MotionCorrection`) is what turns near-miss
-constraints into hits; measured foot skate after it: 0.003–0.03 m/s.
+must be de-rotated back). CFG `separated (2.0, 2.0)`.
+
+**Prediction vs conditioning vs correction, measured.** An unconstrained
+hand/foot (and every foot-contact label) is a model PREDICTION. An authored
+constraint CONDITIONS the prediction through the diffusion guidance, and
+built-in post-processing (`MotionCorrection`) then CORRECTS the result onto
+the target: measured on the regenerated sets, fullbody keyframes and
+end-effector targets land at **0.0000 m / 0.00°** and root waypoints at
+exactly the configured `root_margin` (kimogen: 0.01 m; foot skate after
+correction: 0.003–0.03 m/s). The four shorthand EE types, fullbody, and
+root2d all get correction masks; a generic `end-effector` constraint would
+condition but NOT be corrected, which is why the wrapper normalizes it into
+shorthands. Each baked record carries this provenance
+(`conditioned+corrected`).
 
 ## 4. Retargeting Kimodo output (Stage 1 / Stage 3 hookup)
 
@@ -188,19 +226,39 @@ T-pose joint positions, ground-lifted and yawed to face +X like every
 canonicalized clip. Everything in ALIGN.md (certification) and INTEGRATE.md
 (runtime) applies unchanged.
 
-**End-effector fidelity gates** — `qa_endeffectors.mjs <char.glb> <movesDir>
---gate` retargets every baked clip headless and measures, on the character:
-median foot pitch vs bind on frames where the *source* foot is grounded and
-still (flat by definition; gate ≤ 10° per clip, ≥15 contact frames), and
-median |character wrist bend − source wrist bend| (knuckle direction vs
-forearm axis, gate ≤ 35° per clip cap / ≤ 15° aggregate). This is the gate
-that catches rest-anchor mistakes — a wrong rest convention reads as 15–90°
-medians on *every* clip, unmistakably. Wire it into the project test suite
-next to the game QA; run it for every new character × move-set pair.
+**Constraint accuracy gates** — `qa_constraints.mjs <char.glb> <movesDir>
+--gate` measures every stage separately so a later stage cannot hide an
+earlier failure: (1) authored target → final SOMA output (pos ≤ 5 mm, rot ≤
+2°, root XZ ≤ 2 cm, from the baked records), (2) SOMA → UNGUARDED character
+transfer (full-quaternion + swing/twist fidelity at `handFollow = 1`, plus
+round-trip recovery), (3) the delta each retained style modifier introduces
+(and whether it touches an authored constrained frame — reported, never
+silent), (4) final character vs the mapped authored target through the
+constraint IK (pos p95 ≤ 2 cm / max ≤ 4 cm, rot p95 ≤ 5° / max ≤ 10°;
+geometrically unreachable targets are clamped explicitly, reported, and fail
+unless the move declares `reach_policy: "clamp"`). Plus: no NaN, no invalid
+quaternion, no one-frame branch flip, no new contact-frame foot skate (using
+the stored predicted contact channels), and sequential == direct-seek
+determinism. Emits machine-readable JSON (`--json`) and a table; a metric
+that cannot be computed is a failure, never a skip.
+
+**Perceptual end-effector gates** — `qa_endeffectors.mjs <char.glb>
+<movesDir> --gate` measures, on the character: median foot pitch vs bind on
+frames where the *source* foot is grounded and still (flat by definition;
+gate ≤ 10° per clip, ≥15 contact frames), and median |character wrist bend −
+source wrist bend| at RAW transfer (knuckle direction vs forearm axis, gate
+≤ 40° per clip cap / ≤ 15° aggregate), with the `handFollow` stylization
+delta reported separately. This catches rest-anchor mistakes — a wrong rest
+convention reads as 15–90° medians on *every* clip, unmistakably. Run both
+tools for every new character × move-set pair.
 
 ## 5. Known limits
 
-- ≤ 10 s per prompt; ≤ 20 constrained frames per constraint type.
+- ≤ 10 s per prompt; < 20 constrained frames per constraint type (dense
+  root2d paths exempt) — the wrapper enforces both before loading the model.
+- Constraint-only generation (no text) is supported by the installed API —
+  an empty prompt's text features are explicitly zeroed — and exposed by
+  omitting `prompt` in the move spec.
 - The training distribution covers locomotion, gestures, everyday actions,
   object interaction, **videogame combat**, dance, and stylized walks. Prompts
   far outside those categories degrade fast; plain "A person ..." phrasing
@@ -208,5 +266,5 @@ next to the game QA; run it for every new character × move-set pair.
 - The model won't reliably invent multi-phase choreography from one prompt —
   chain prompts (multi-prompt generation) or split into separate moves.
 - Post-processing (foot-skate cleanup + constraint optimization) is on by
-  default and should stay on; it is what turns near-miss constraints into
-  hits.
+  default and should stay on; it is what turns conditioned near-misses into
+  exact hits (see §3's measured provenance).

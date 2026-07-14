@@ -32,7 +32,14 @@ motion diffusion model over the SOMA human skeleton (77 joints), trained on
 700 hours of studio mocap that explicitly covers videogame combat. It is used
 entirely offline; the model never ships with the game. KIMODO.md covers
 download, install, conventions, and running the generation tools in `kimodo/`
-end to end.
+end to end. The wrapper exposes Kimodo's **full authoring surface**: text
+prompts, arbitrary full-body keyframes, hand/foot end-effector targets, sparse
+root waypoints and dense paths, any compatible combination, and
+constraint-only generation (no text) — each authored constraint is validated
+before the model loads, gated for adherence after generation (hand/foot
+targets to 5 mm/2° on the source skeleton), carried through canonicalization
+and baking as resolved provenance records, and landed exactly on the final
+character by a deterministic constraint IK (p95 gates: 2 cm/5° end to end).
 
 Two principles carry the whole design:
 
@@ -50,18 +57,24 @@ Two principles carry the whole design:
 | File | What it is |
 |---|---|
 | `ALIGN.md` | Stage 1 manual: rig resolution, retargeting, certification battery |
-| `BAKE.md` | Stage 2 manual: move specs, prompts + constraints, generation gates, baking |
+| `BAKE.md` | Stage 2 manual: move specs, prompts + the full constraint schema, generation gates, baking |
 | `KIMODO.md` | Stage 2 setup: download/install/run the Kimodo generator, its conventions and traps |
 | `INTEGRATE.md` | Stage 3 manual: runtime layers, root motion, combat timing, QA |
+| `ANIMATION_AGENT.md` | one-page decision guide for authoring agents: which control (text / pose / end-effector / waypoints / path / combinations) to use when |
 | `rigmap.js` | bone → canonical-role resolution for arbitrary humanoid rigs |
-| `retarget.js` | the two-skeleton position-based retargeter |
+| `retarget.js` | the two-skeleton position-based retargeter (unguarded, deterministic; the guard ablation and removals: `evidence/README.md`) |
+| `ik.js` | target-space constraint IK: analytic two-bone solve that lands authored hand/foot targets exactly on any certified rig, deterministic under seek/speed/bake |
 | `align.js` | probe mining, inverse recovery, gates, `certifyRig` |
 | `glbskel.mjs` | GLB → bone hierarchy + animation sampler in node (no browser) |
 | `certify.mjs` | certification CLI, writes `<char.glb>.retarget_certificate.json` |
 | `prebake.mjs` | Stage 3 pre-bake for non-three.js engines: character GLB + baked manifest → new GLB with one glTF animation per clip + `rootmotion.json` (INTEGRATE.md §9) |
-| `qa_endeffectors.mjs` | end-effector fidelity gates: foot flatness + wrist-bend tracking per baked clip on the character — catches rest-anchor skew ("skewed fists/feet") mechanically |
-| `selftest.mjs` | zero-asset self-test (synthetic rigs, procedural motion, sabotage cases) |
-| `kimodo/` | Stage 2 generation tools (run against a Kimodo install): `kimogen.py` (text-prompted moves + stance bookends + gates), `bake_kimodo.py`, the validated MK move spec, axis validator, text-encoder setup |
+| `qametrics.mjs` | shared measurement machinery: captures, fidelity/accuracy/kinematics/clearance/skate metrics |
+| `qa_constraints.mjs` | stage-separated constraint accuracy gates: authored target → final SOMA → unguarded rig → shipped rig, with determinism, branch-flip, and contact-skate gates; JSON + table output |
+| `qa_endeffectors.mjs` | perceptual end-effector gates: foot flatness + wrist-bend tracking (raw transfer, with the stylization delta reported separately) |
+| `ablate.mjs` | transfer-modifier ablation runner — the evidence generator behind keep/delete decisions |
+| `selftest.mjs` / `selftest_constraints.mjs` | zero-asset self-tests (synthetic rigs, procedural motion, IK, determinism, sabotage cases) |
+| `evidence/` | recorded ablation/QA evidence + reproduction commands for every guard decision |
+| `kimodo/` | Stage 2 generation tools (run against a Kimodo install): `kimogen.py` (text + full constraint authoring + adherence gates), `kimoconstraints.py` (schema validation, conflict detection, FK resolution, canonicalization), `bake_kimodo.py`, the validated MK move spec, the deterministic e2e constraint suite (`make_e2e_spec.py`, `run_e2e.sh`), axis validator, text-encoder setup |
 
 The JS scripts are the complete Stage 1 implementation and the runtime
 retarget layer used in Stage 3; the Python tools in `kimodo/` are the complete
@@ -76,7 +89,7 @@ in BAKE.md.
 
 ```bash
 npm install        # three + @gltf-transform/core, nothing else
-npm test           # selftest: full synthetic certification, no assets needed
+npm test           # selftests: synthetic certification + constraint IK/determinism, no assets
 ```
 
 Certify a character against motion clips (format in ALIGN.md):

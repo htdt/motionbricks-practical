@@ -133,11 +133,20 @@ and cannot invert:
 - **Root translation** scales by the functional **leg-length ratio**
   (hip→ankle drop), keeping planted feet planted across different leg-to-hip
   proportions.
-- **Guards** (all optional, on by default): anatomical hand twist/swing clamps;
-  a torso-capsule that arms can graze but not pass through; a **temporal
-  continuity guard** (40°/frame cap on hands/forearms/feet, sequential playback
-  only, auto-bypassed on random frame access) that suppresses aim-antipode
-  flips; an optional ground clamp (`guards.ground`).
+- **No runtime guards.** The transfer is unguarded, stateless, and
+  deterministic: applying frame `f` yields the same pose under sequential
+  playback, direct seek, any speed, or offline baking. The historical guards
+  (hand twist/swing clamp, torso-capsule displacement, 40°/frame continuity
+  slew, ground lift) were ablated on the regenerated move set across two
+  certified rigs and deleted — none had a reproducible benefit after the
+  rest-anchor fix, and the temporal ones made poses depend on playback
+  history (measurements: `evidence/README.md`). What used to be silently
+  corrected is now *measured*: torso clearance, ground penetration, branch
+  flips, and contact-frame skate are QA metrics (`qametrics.mjs`,
+  `qa_constraints.mjs`) and certification gates.
+- The only remaining transfer modifier is the per-clip **`handFollow`**
+  stylization gain (see KIMODO.md); source forearm roll is automatic for any
+  clip with quaternions.
 
 ## Certification battery
 
@@ -153,7 +162,7 @@ measures:
 | `boneStretchPct` | ≤ 1 % | scale/FK corruption (aim transfer preserves lengths by construction) |
 | `footFlatDeg` | ≤ 6° | grounded feet tilting differently than the source's own sole tilt |
 | `footGroundFrac` | ≤ 0.10 | planted feet sinking/floating: wrong root scale, leg-proportion errors (also cycle-invisible) |
-| `twistFrac` | ≤ 1.0 | per-bone twist beyond anatomical limits (`TWIST_LIMITS`: UpLeg 100°, Leg 95°, Arm 130°, ForeArm 165°, Hand 92°) — candy-wrapper artifacts. Forearms are excluded when a clip explicitly copies source-authored human roll (`foreRollSrc`). |
+| `twistFrac` | ≤ 1.0 | per-bone twist beyond anatomical limits (`TWIST_LIMITS`: UpLeg 100°, Leg 95°, Arm 130°, ForeArm 165°, Hand 92°) — candy-wrapper artifacts. These are detectors, not runtime clamps. Forearms are excluded for quaternion clips, which copy source-authored human roll. |
 | `capsuleClearance` | ≥ 0.85 | limbs passing through the torso |
 | `roundTripMean` / `P95` | ≤ 0.05 / 0.10 m | transfer losses measurable by inverting the map: posed target → recovered source-skeleton joint positions vs the actual source frame |
 
@@ -203,8 +212,6 @@ Failures map to three repair tiers, cheapest first:
 - The `Retargeter` reads the target's **bind pose at construction** — construct
   it on a freshly loaded (or `resetBindPose`-restored) skeleton. `certifyRig`
   handles this itself via the `bindPose` snapshot in `rigFromBones`.
-- The continuity guard needs *sequential* `applyFrame` calls; any jump larger
-  than one frame resets it (by design, so pose batteries measure raw transfer).
 - The inverse recovers joint *positions*, not orientations — orientation
   correctness is covered by the foot-flat/twist gates instead.
 

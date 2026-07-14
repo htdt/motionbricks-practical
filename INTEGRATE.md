@@ -27,7 +27,20 @@ neural code, zero hand-tuned motion constants.**
 - **Clip layer** — one `Retargeter` instance per (character, clip).
   Constructed **once at load, all before the first `applyFrame`**:
   construction captures the bind pose from the current bone transforms, so
-  posing the skeleton first makes the "bind" garbage.
+  posing the skeleton first makes the "bind" garbage. Clips that carry
+  authored constraint records (`clip.constraints`) additionally get one
+  `ConstraintIK` (`ik.js`) built from the same retargeter; call
+  `ik.apply(f)` right after `rt.applyFrame(f)` — it lands authored hand/foot
+  targets exactly at their key frames (deterministic blend windows derived
+  from the constraint data, so seeking and speed changes stay exact):
+
+  ```js
+  import { ConstraintIK } from './ik.js';
+  const ik = clip.constraints?.length ? new ConstraintIK(rt, clip.constraints) : null;
+  // per tick:
+  rt.applyFrame(f);
+  ik?.apply(f);
+  ```
 - **Entity layer** — the character's world position + facing. The clip's root
   motion is *integrated* into the entity position; the clip itself plays in
   place. This layer owns collision, arena bounds, separation constraints.
@@ -83,27 +96,20 @@ height, *not* a lowered stance height; computing k from the stance gives
 that should be amplified (a victory pose also sits above rest height and
 must not be).
 
-## 4. Playback speed & the continuity-guard trap
+## 4. Playback speed
 
 Generators have a minimum natural clip length; games want snappier timing.
 Play clips faster instead of regenerating: attacks ~1.4–1.6×, reactions
 ~1.2–1.4×, cycles ~1.25×, via a float cursor (`cursor += speed` per tick).
 
-**The one real bug this causes:** at speed > 1 the integer frame index skips,
-and the retargeter's temporal continuity guard (the 40°/frame slew limiter
-that suppresses hand/forearm/foot flips) silently disengages — it only arms
-on a *sequential* frame stream. Symptom: one-frame 90–180° hand flips that
-never appeared at 1×. Fix: apply every skipped frame; the last write wins
-visually and the guard sees a continuous stream:
-
-```js
-let steps = f - lastAppliedF; if (steps < 0) steps += N;
-for (let k = steps - 1; k >= 1; k--) rt.applyFrame((f - k + N) % N);
-rt.applyFrame(f);
-```
-
-Also reset the guard on every clip switch (`rt.resetContinuity()`) so it never
-bridges two different clips.
+The retargeter is stateless per frame: `applyFrame(f)` produces the same pose
+whether frames run sequentially, skip at any speed, seek directly, or bake
+offline — so speed changes need no special handling and clip switches need no
+reset. (The old temporal continuity guard and its intermediate-frame
+workaround are gone; the guard never engaged on the representative move set
+and made poses history-dependent — `evidence/README.md`.) Clips with authored
+constraints keep this property through the constraint IK: solve weights come
+from constraint frame data, never from playback history.
 
 ## 5. State machine over the clip set
 
@@ -183,11 +189,12 @@ Drive every move through real inputs and assert:
 | locomotion travel | exceeds a floor over a fixed tick count, correct sign |
 | jump rise / crouch dip / knockdown floor | hip-height deltas vs idle |
 | one-shot integrity | cursor monotonic while busy (no spurious interruption) |
-| per-tick worst bone world-rotation step | ≤ ~2× the guard cap outside crossfades |
+| per-tick worst bone world-rotation step | ≤ ~80° outside crossfades |
 
-On the rotation metric: the guard caps 40° per *applied* frame and sped-up
-clips apply ~2 frames per tick, so ≤ ~80°/tick is guard-limited slew (smooth
-by eye); genuine flips show as 90–180° single-tick spikes.
+On the rotation metric: sped-up clips legitimately step ~2 source frames per
+tick (~80°/tick for the fastest real limb swings); genuine flips show as
+90–180° single-tick spikes on ONE bone — `qa_constraints.mjs` counts them per
+clip (`flips`) before the game ever plays a clip.
 
 **Visual rubric** (contact sheets per move, consecutive-tick close-ups for
 anything the metrics flag): apex pose visible? feet planted in stance? no
@@ -196,15 +203,14 @@ distance they register? root travel matches intent?
 
 ## 8. Gotchas index (each cost a real debug cycle)
 
-1. **Continuity guard disengages at speed > 1** → apply intermediate frames (§4).
-2. **Vertical amplification scales above source *rest* height, not stance** (§3).
-3. **Point-blank moves need a reach floor** above minimum separation (§6).
-4. **Construct all retargeters before any `applyFrame`** — bind capture (§1).
-5. **Best-of-N can select away the move's point** (a "jump" that never leaves
+1. **Vertical amplification scales above source *rest* height, not stance** (§3).
+2. **Point-blank moves need a reach floor** above minimum separation (§6).
+3. **Construct all retargeters before any `applyFrame`** — bind capture (§1).
+4. **Best-of-N can select away the move's point** (a "jump" that never leaves
    the ground) → gate defining physical properties in world space (BAKE.md §4).
-6. **Weak generated poses are pose-library edits**, not runtime patches
+5. **Weak generated poses are pose-library edits**, not runtime patches
    (BAKE.md §7).
-7. **QA scenarios must actually exercise the interaction** — spawn entities in
+6. **QA scenarios must actually exercise the interaction** — spawn entities in
    reach or every hit test silently passes as a whiff.
 
 ## 9. Porting to other engines (Godot / Bevy / Babylon / …)
@@ -227,7 +233,8 @@ node prebake.mjs character.glb --manifest baked/manifest.json --out character_an
 ```
 
 It runs the certified retargeter offline over every clip in the manifest
-(`inPlace: true`, continuity guard armed, sequential frames) and writes a
+(`inPlace: true`; the transfer is deterministic, so baked frames match
+runtime playback exactly) and writes a
 new GLB whose animations are one glTF animation per move
 (per-joint local rotations + hips local translation), plus a `rootmotion.json`
 with each clip's pelvis X/Z displacement from source rest in character-scaled

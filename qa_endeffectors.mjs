@@ -12,13 +12,21 @@
 //                 the SOURCE foot is grounded & still (flat by definition).
 //   hand skew   — angle between the character's hand direction and the
 //                 direction the source demands (source hand-vs-forearm
-//                 deviation applied to the character's forearm), i.e. pure
-//                 transfer error, valid for any wrist posture.
+//                 deviation applied to the character's forearm). Measured on
+//                 a RAW transfer run (handFollow = 1): the expected value is
+//                 NEVER scaled by the clip's stylization gain, so damping
+//                 cannot masquerade as perfect transfer. The gain's own
+//                 effect is reported separately as `styleDelta` (the wrist
+//                 articulation the shipped handFollow discards) and is not
+//                 part of the transfer gate.
+//
+// These are PERCEPTUAL diagnostics; exact constraint-adherence gates live in
+// qa_constraints.mjs and must be run alongside.
 //
 // Usage: node qa_endeffectors.mjs <char.glb> <movesDir> [--gate]
 //        e.g. node qa_endeffectors.mjs ../web/fighter.glb ../web/moves_kimodo --gate
 // Gates: median |foot pitch| <= 10 deg on contact frames,
-//        median hand skew   <= 35 deg over all frames (per side, per clip),
+//        median hand skew   <= 40 deg over all frames (per side, per clip),
 //        with aggregate medians <= 4 / 15 deg.
 import fs from 'node:fs';
 import path from 'node:path';
@@ -39,11 +47,11 @@ if (!charPath || !movesDir) {
 // EVERY clip (that shipped once). Per-clip caps flag it loudly; aggregate
 // medians keep typical fidelity honest. Thresholds are calibrated across
 // two certified rigs (Tripo fighter: agg 1.1/9.1; Mixamo: agg 1.0/13.5) so
-// transient fast-swing outliers (a hand mid jump-swing) pass without
-// per-clip exceptions while the defect class cannot.
+// transient fast-swing and exact authored-wrist clips pass without per-clip
+// exceptions while the old-anchor defect (65-90° on nearly every clip) cannot.
 const FOOT_PITCH_MAX = 10;      // deg, per-clip median over contact frames
 const FOOT_MIN_FRAMES = 15;     // fewer contact frames -> unreliable, skip clip
-const HAND_SKEW_MAX = 35;       // deg, per-clip median cap
+const HAND_SKEW_MAX = 40;       // deg, per-clip median cap
 const AGG_FOOT_MAX = 4;         // deg, median of per-clip medians
 const AGG_HAND_MAX = 15;        // deg, median of per-clip medians
 
@@ -75,12 +83,12 @@ for (const mv of manifest.moves) {
   const idx = Object.create(null); motion.names.forEach((n, i) => idx[n] = i);
 
   // fresh skeleton state per clip: reset to bind, then construct (constructor
-  // snapshots bind from current transforms)
+  // snapshots bind from current transforms). RAW transfer run: handFollow = 1
+  // so the transfer gates measure fidelity, not the stylization gain.
   resetBindPose(target);
-  const NOGUARDS = process.argv.includes('--noguards');   // diagnostic mode
-  const rt = new Retargeter({ ...target, data: motion,
-    guards: NOGUARDS ? { handClamp: false, torsoCapsule: false, continuity: false } : {} });
+  const rt = new Retargeter({ ...target, data: motion, handFollow: 1 });
   const R = rt.R;
+  const shippedFollow = motion.handFollow ?? 1;
 
   // character measurement fixtures (captured at bind)
   const fix = {};
@@ -121,6 +129,7 @@ for (const mv of manifest.moves) {
 
   const footPitch = { Left: [], Right: [] };
   const handSkew = { Left: [], Right: [] };
+  const styleDelta = { Left: [], Right: [] };
 
   // source contact detection: toe near clip-min height and slow
   const srcToeMin = {};
@@ -151,18 +160,17 @@ for (const mv of manifest.moves) {
         }
       }
 
-      // ---- hand skew: |char wrist bend - handFollow×(source wrist bend)|,
-      // raw angles between the knuckle direction and the forearm axis. The
-      // bake anchors hands for ABSOLUTE bend tracking (straight source wrist
-      // ↔ straight character hand) scaled by the clip's wrist articulation
-      // gain (handFollow; 1 = full transfer) — a scalar comparison, free of
-      // rotation-axis/twist ambiguity.
+      // ---- hand skew: |char wrist bend - source wrist bend|, raw angles
+      // between the knuckle direction and the forearm axis. The bake anchors
+      // hands for ABSOLUTE bend tracking (straight source wrist ↔ straight
+      // character hand); this run transfers the FULL source wrist
+      // (handFollow=1), so the expected value is the unscaled source bend —
+      // intentional damping can never masquerade as perfect transfer here.
       const { handBindQ, handRefDir } = fix[side];
       if (hand && handBindQ && sMid !== undefined) {
         const srcFore = v3(motion.pos[f][sWrist]).sub(v3(motion.pos[f][sFore])).normalize();
         const srcHand = v3(motion.pos[f][sMid]).sub(v3(motion.pos[f][sWrist])).normalize();
-        const devSrc = (motion.handFollow ?? 1) *
-          deg(Math.acos(THREE.MathUtils.clamp(srcHand.dot(srcFore), -1, 1)));
+        const devSrc = deg(Math.acos(THREE.MathUtils.clamp(srcHand.dot(srcFore), -1, 1)));
         const charFore = wpos(hand).sub(wpos(fore)).normalize();
         const got = handChild
           ? wpos(handChild).sub(wpos(hand)).normalize()
@@ -171,7 +179,9 @@ for (const mv of manifest.moves) {
         const devChar = deg(Math.acos(THREE.MathUtils.clamp(got.dot(charFore), -1, 1)))
           - fix[side].bindHandDev;
         handSkew[side].push(Math.abs(devChar - devSrc));
-
+        // the shipped stylization gain discards (1-handFollow) of the source
+        // wrist deviation — reported separately, never folded into the gate
+        styleDelta[side].push((1 - shippedFollow) * devSrc);
       }
     }
   }
@@ -179,12 +189,14 @@ for (const mv of manifest.moves) {
   for (const side of ['Left', 'Right']) {
     const fp = median(footPitch[side].map(Math.abs));
     const hs = median(handSkew[side]);
+    const sd = median(styleDelta[side]);
     const fpOk = footPitch[side].length < FOOT_MIN_FRAMES || !(fp > FOOT_PITCH_MAX);
     const hsOk = Number.isFinite(hs) && hs <= HAND_SKEW_MAX;
     if (!fpOk || !hsOk) failures++;
     rows.push({ clip: mv.name, side, footPitchMed: +fp.toFixed(1),
                 contactFrames: footPitch[side].length,
                 handSkewMed: +hs.toFixed(1),
+                styleDeltaMed: Number.isFinite(sd) ? +sd.toFixed(1) : null,
                 ok: fpOk && hsOk });
   }
 }
@@ -200,7 +212,8 @@ console.log(`gates: per-clip |foot pitch| med <= ${FOOT_PITCH_MAX} deg (>=${FOOT
 for (const r of rows)
   console.log(`${r.ok ? 'ok  ' : 'FAIL'} ${r.clip.padEnd(13)} ${r.side.padEnd(5)}` +
     ` footPitch=${String(r.footPitchMed).padStart(5)} (${r.contactFrames}f)` +
-    ` handSkew=${String(r.handSkewMed).padStart(5)}`);
+    ` handSkew=${String(r.handSkewMed).padStart(5)}` +
+    ` styleΔ=${String(r.styleDeltaMed ?? '-').padStart(5)}`);
 console.log(`aggregate: foot ${aggFoot?.toFixed(1)} deg, hand ${aggHand?.toFixed(1)} deg`);
 console.log(failures ? `\n${failures} FAILING gates` : '\nALL END-EFFECTOR GATES PASS');
 if (GATE && failures) process.exit(1);
