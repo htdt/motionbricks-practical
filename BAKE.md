@@ -120,7 +120,10 @@ reference). Per move:
   `"fwd"`/`"back"` on sign, `"in_place"` on magnitude, `null` = don't gate.
 - `apex` — the move's defining physical moment, gated absolutely:
   `ankle_height` (kicks), `root_rise` (jumps), `root_dip` (crouches, sweeps),
-  `root_floor` (knockdowns) with a `min`/`max` in meters.
+  `root_floor` (knockdowns), bounds in meters. One bound is required per kind
+  (`max` for `root_floor`, `min` for the rest); the other is optional and caps
+  the gate from the far side — e.g. `{"kind": "ankle_height", "min": 0.4,
+  "max": 0.9}` rejects both statues and karate-kick winners.
 - `strike` (`"hand"`/`"foot"`) + `height` — enables frame-data extraction
   (§5) and tags the move for gameplay rules.
 

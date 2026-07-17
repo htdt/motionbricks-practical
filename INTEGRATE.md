@@ -244,3 +244,13 @@ entity layer needs to integrate root motion exactly as in §3. `--ylift`
 applies §3's per-clip vertical amplification at bake time.
 Field-validated with Babylon's glTF loader and `AnimationGroup` weight
 blending, used unchanged.
+
+**Mirrored-import warning (Babylon, and any engine whose glTF importer flips
+handedness).** Babylon's default left-handed scene imports glTF under a
+negative-scale root (world scale `(1,−1,1)`). Baked clip *playback* is
+unaffected — local rotations pass through — but any runtime world-space
+skeleton math (IK, look-at, world-quaternion pinning) done on the imported
+skeleton silently mirrors rotations: `decompose()` of a mirrored world matrix
+does not return the rotation you think it does. Do world-space rotation
+surgery with matrices, or set `scene.useRightHandedSystem = true` before
+import; never compose quaternions recovered from mirrored matrices.

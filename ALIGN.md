@@ -51,7 +51,9 @@ Pick probe clips that cover range of motion — a walk, a kick, a jump, a reach.
 The battery mines its probe poses from whatever clips you give it, so clips
 that never bend a knee can't certify knees. The source role map comes from
 `--srcmap map.json`, or a `srcMap` field on the first clip, or defaults to the
-SOMA skeleton.
+SOMA skeleton. All probe clips in one run must share the same `handFollow`
+value (certify rejects a mix) — certify bookended clips (`1.0`) and
+prediction-only clips (`0.3`) in separate runs.
 
 Retarget in the browser (any humanoid GLB, any motion source):
 

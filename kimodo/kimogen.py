@@ -137,18 +137,15 @@ def gate_sample(j, r, fc, idx, mv, stance, fps):
         y0 = r[0, 1]
         if apex["kind"] == "root_rise":
             g["apex_val"] = float(r[:, 1].max() - y0)
-            g["apex_ok"] = g["apex_val"] >= apex["min"]
         elif apex["kind"] == "root_dip":
             g["apex_val"] = float(y0 - r[:, 1].min())
-            g["apex_ok"] = g["apex_val"] >= apex["min"]
         elif apex["kind"] == "root_floor":
             g["apex_val"] = float(r[:, 1].min())
-            g["apex_ok"] = g["apex_val"] <= apex["max"]
         elif apex["kind"] == "ankle_height":
-            ank = max(float(j[:, idx["LeftFoot"], 1].max()),
-                      float(j[:, idx["RightFoot"], 1].max()))
-            g["apex_val"] = ank
-            g["apex_ok"] = ank >= apex["min"]
+            g["apex_val"] = max(float(j[:, idx["LeftFoot"], 1].max()),
+                                float(j[:, idx["RightFoot"], 1].max()))
+        g["apex_ok"] = ((apex.get("min") is None or g["apex_val"] >= apex["min"])
+                        and (apex.get("max") is None or g["apex_val"] <= apex["max"]))
     else:
         g["apex_ok"] = True
 
@@ -663,6 +660,10 @@ def main():
     valid_travel = {None, "in_place", "fwd", "back"}
     valid_apex = {"root_rise": "min", "root_dip": "min",
                   "root_floor": "max", "ankle_height": "min"}
+
+    def valid_bound(v):
+        return (not isinstance(v, bool) and isinstance(v, (int, float))
+                and np.isfinite(v) and v >= 0)
     for mv in moves:
         if mv.get("travel") not in valid_travel:
             ap.error(f"{mv['name']}: travel must be in_place, fwd, back, or null")
@@ -675,11 +676,12 @@ def main():
         apex = mv.get("apex")
         if apex is not None:
             key = valid_apex.get(apex.get("kind")) if isinstance(apex, dict) else None
-            value = apex.get(key) if key else None
-            if (key is None or isinstance(value, bool)
-                    or not isinstance(value, (int, float))
-                    or not np.isfinite(value) or value < 0):
+            if key is None or not valid_bound(apex.get(key)):
                 ap.error(f"{mv['name']}: invalid apex definition")
+            other = "max" if key == "min" else "min"
+            if apex.get(other) is not None:
+                if not valid_bound(apex[other]) or apex["min"] > apex["max"]:
+                    ap.error(f"{mv['name']}: invalid apex bounds (need min <= max)")
         if "height" in mv and mv["height"] not in ("low", "mid", "high"):
             ap.error(f"{mv['name']}: height must be low, mid, or high")
         if mv.get("reach_policy") not in (None, "clamp"):
